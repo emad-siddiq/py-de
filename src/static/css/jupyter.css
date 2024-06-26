@@ -74,15 +74,16 @@ body {
     display: block;
   }
 
-
   .editor {
     grid-row: 2/3;
   }
 
   .cells {
-    background-color: green;
-    display:flex;
+    background-color: black;
+    height: auto;
+    display: flex;
     flex-direction: column;
+
   }
   
   .code-cell {
@@ -92,6 +93,22 @@ body {
 
   .code-cell > textarea {
     width: 100%;
-    height: 35px;
-    resize: none;
+    height:100%;
+    resize:none;
+    background-color: white;
+    
   }
+
+
+  .separator  {
+    background: #444857;
+    height: 35px;
+    width: 100%;
+    cursor: row-resize;
+    user-select: none;
+ }
+
+ .separator::before {
+
+ }
+
