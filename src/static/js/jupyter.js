@@ -2,7 +2,7 @@ import { AddCodeCell } from "./node/cells/code.js";
 
 var button = document.getElementById("add_cell");
 button.addEventListener("click", function(event){
-    AddCodeCell()
+    AddCodeCell(socket)
  });
 
 var socket;
@@ -23,6 +23,8 @@ window.onbeforeunload = function(event)
     socket.close();
     return confirm("Confirm refresh");
 };
+
+
 
 
 async function connectToWS() {
