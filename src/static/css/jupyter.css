@@ -1,85 +1,12 @@
+/* https://developer.mozilla.org/en-US/docs/Web/HTML/Element/body */
+/* 
+   The body element is the root node at (0,0) and covers 100% visible height and width.
+   All subsequent elements' x,y (top, left) coordinates and width/height are derived relative
+   to their respective parent nodes.
+*/
 
 body {
-    margin: 0 0 0 0;
-    display: grid;
-    grid-template-rows: 4vh 96vh;
-    grid-template-columns: 100vw;
+    width: 100%; /* https://developer.mozilla.org/en-US/docs/Web/CSS/width */
+    box-sizing: border-box;  /* https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_box_model/Introduction_to_the_CSS_box_model#border_area */
 
 }
-
-/* Navbar container */
-.navbar {
-    grid-row: 1/2;
-    grid-column: 1/2;
-    overflow: hidden;
-    background-color: gray;
-    padding: 0 0 0 0;
-  }
-  
-  /* Links inside the navbar */
-  .navbar a {
-    font-size: 16px;
-    color: white;
-    text-align: center;
-    text-decoration: none;
-  }
-  
-  /* The dropdown container */
-  .dropdown {
-    overflow: hidden;
-  }
-  
-  /* Dropdown button */
-  .dropdown .dropbtn {
-    font-size: 16px;
-    border: none;
-    outline: none;
-    color: white;
-    background-color: inherit;
-    font-family: inherit; /* Important for vertical align on mobile phones */
-    margin: 0; /* Important for vertical align on mobile phones */
-  }
-  
-  /* Add a red background color to navbar links on hover */
-  .navbar a:hover, .dropdown:hover .dropbtn {
-    background-color: red;
-  }
-  
-  /* Dropdown content (hidden by default) */
-  .dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: #f9f9f9;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
-  }
-  
-  /* Links inside the dropdown */
-  .dropdown-content a {
-    float: none;
-    color: black;
-    text-decoration: none;
-    display: block;
-    text-align: left;
-  }
-  
-  /* Add a grey background color to dropdown links on hover */
-  .dropdown-content a:hover {
-    background-color: #ddd;
-  }
-  
-  /* Show the dropdown menu on hover */
-  .dropdown:hover .dropdown-content {
-    display: block;
-  }
-
-  .editor {
-    grid-row: 2/3;
-  }
-
-  .cells {
-    background-color: black;
-    height: 100%;
-  }
-  
