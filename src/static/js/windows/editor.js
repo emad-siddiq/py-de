@@ -22,6 +22,7 @@ class Editor {
         div.setAttribute("class", "editor");
     
         div.style.position = "absolute";
+
         div.style.top = "0%";
         div.style.left = "0%";
         div.style.backgroundColor = "white";

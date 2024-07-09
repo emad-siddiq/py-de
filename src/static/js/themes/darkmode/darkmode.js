@@ -39,7 +39,7 @@ class DarkMode {
         let nodes = document.querySelectorAll('[contenteditable="true"]');
         for (let node of nodes) {
            node.style.backgroundColor = "black";
-           node.style.color = "green";
+           node.style.color = "white";
            node.style.boxShadow = "0px 5px 15px 5px rgba(20, 255, 60, .2)";
         }
         

@@ -9,6 +9,8 @@ var socket;
 /*
    Connect to WS for sending Python code to backend.
 */
+
+
 connectToWS().then(server => {
     socket = server;
     let _editor = new Editor();
