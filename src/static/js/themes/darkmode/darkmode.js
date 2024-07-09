@@ -31,7 +31,7 @@ class DarkMode {
         document.body.style.backgroundColor = "rgb(30,30,30)";
         let editor = document.getElementById("editor");
         editor.style.backgroundColor = "rgb(10,15,22)";
-        editor.style.color = "white";
+        editor.style.color = "pink";
         editor.style.backgroundImage = "black";
         editor.style.borderColor = "black";
 

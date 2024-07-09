@@ -4,45 +4,7 @@ class InputAreaEditor {
                        Code Cell Textual Processing
     *******************************************************************/ 
 
-    static handleInput(e) {
-        e.preventDefault();
-        // this = InputArea class, e.target = <div id="code-cell-1-input-area">
-        // Do textprocessing with line number and figure out new height
-    
 
-        if (e.shiftKey && e.key === 'Enter') {
-            this.blur()
-            this.socket.send(this.value)
-            return;
-        }
-                    
-        else if (e.code === "Enter") {
-            this.caretY += 1;
-            e.preventDefault();
-            e.stopPropagation();
-            InputAreaEditor.increaseCodeCellSize(this.div);
-            this.addLine();
-            this.div.focus();
-            document.execCommand('selectAll', false, null);
-            document.getSelection().collapseToEnd();
-        }
-         
-        else if (e.code==="Backspace") { // for backspace 
-            this.caretY -= 1;
-           let str = document.getElementById(this.id).innerText; // TODO: Backspace is buggy. change to innerHTML and handle
-
-           InputAreaEditor.decreaseCodeCellSize(this.div);
-            
-        }
-
-        else {
-            this.caretX += 1;
-            console.log(this.caretX, this.caretY);
-        }
-
-
-                
-    }
 
     static decreaseCodeCellSize(div) {
         let currHeight = div.getBoundingClientRect().height;
@@ -77,15 +39,17 @@ class InputAreaEditor {
 
 
         let span2 = document.createElement("span");
-    
-        span2.style.paddingLeft = "5px";
-        span2.innerText = " ";
+        span2.setAttribute("id", line_id + "-code-area");
+        span2.setAttribute("class", line_id + "-code-area");
+
+        span2.innerText = "";
 
         div.appendChild(span);
         div.appendChild(span2);
 
         return div;
     }
+
 
 
 }
