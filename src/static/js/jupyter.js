@@ -4,6 +4,7 @@ import { Explorer } from "./windows/explorer.js";
 import { Terminal } from "./windows/terminal.js";
 import { Editor } from "./windows/editor.js";
 import {DarkMode} from "./themes/darkmode/darkmode.js";
+import { InputArea } from "./components/code_cell/input_area.js";
 
 var socket;
 /*
@@ -15,6 +16,11 @@ connectToWS().then(server => {
     socket = server;
     let _editor = new Editor();
     _editor.addCodeCell();
+
+    let code_area = document.getElementById("code-cell-1-input-area-line-number-1-code-area");
+    InputArea.moveCaretToEndOfNode(code_area);
+    //code_area.focus();
+
     socket.onmessage = (event) => {
         console.log(event.data);
     };

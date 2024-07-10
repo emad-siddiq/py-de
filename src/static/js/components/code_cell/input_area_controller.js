@@ -4,8 +4,6 @@ class InputAreaEditor {
                        Code Cell Textual Processing
     *******************************************************************/ 
 
-
-
     static decreaseCodeCellSize(div) {
         let currHeight = div.getBoundingClientRect().height;
         console.log("currHeight", currHeight);
@@ -25,14 +23,48 @@ class InputAreaEditor {
         div.parentNode.style.height = div.parentNode.getBoundingClientRect().height + 19 + "px";
     }
 
+    //Returns the line if for a line # inside input_area_id
+    static generateLineContainerId(input_area_id, line_number) {
+        let line_container_id = input_area_id + "-line-number-" + line_number.toString();
+        return line_container_id;
+    }
 
+    static generateLineNumberDivId(line_container_id) {
+        let line_number_div_id = line_container_id + "-number"
+        return line_number_div_id;
+    }
+
+     //Returns the line if for a line # inside input_area_id
+     static generateCodeAreaDivId(line_container_id) {
+        let line_number_div_id = line_container_id + "-code-area";
+        return line_number_div_id;
+    }
+
+    //Returns the id for the div that contains the line number e.g 2. or 3.
+    static getLineNumberDivId(input_area_id, line_number) {
+        let line_container_id = InputAreaEditor.generateLineContainerId(input_area_id, line_number);
+        return InputAreaEditor.generateLineNumberDivId(line_container_id);
+    }
+
+    // Return id of line# code area
+    static getCodeAreaId(input_area_id, line_number) {
+        let line_container_id = InputAreaEditor.generateLineContainerId(input_area_id, line_number);
+        return InputAreaEditor.generateCodeAreaDivId(line_container_id);
+    }
+
+
+    // Creates a line for the input area, adding a line number and editable text area
     static createLine(input_area_id, line_number, text) {
-        let line_id = input_area_id + "-line-number-" + line_number.toString();
-        let div = document.createElement("div");
+        let line_container_id = InputAreaEditor.generateLineContainerId(input_area_id, line_number);
+        let line_number_id = InputAreaEditor.generateLineNumberDivId(line_container_id, line_number);
+        let code_area_id = InputAreaEditor.generateCodeAreaDivId(line_container_id, line_container_id);
+
+        let line_container = document.createElement("div");
+        line_container.setAttribute("id", line_container_id)
         
         let line_number_div = document.createElement("div");
-        line_number_div.setAttribute("id", line_id);
-        line_number_div.setAttribute("class", line_id);
+        line_number_div.setAttribute("id", line_number_id);
+        line_number_div.setAttribute("class", line_number_id);
         line_number_div.setAttribute("contenteditable", "false");
         line_number_div.innerText = line_number.toString() + ".";
         line_number_div.style.fontSize = "15px";
@@ -41,23 +73,20 @@ class InputAreaEditor {
 
         line_number_div.style.display = "inline";
 
-        let text_div = document.createElement("div");
-        text_div.setAttribute("id", line_id + "-text");
-        text_div.setAttribute("class", line_id + "-text");
-        text_div.setAttribute("contenteditable", "true");
-        text_div.setAttribute("tab-index", "1");
+        let code_area_div = document.createElement("div");
+        code_area_div.setAttribute("id", code_area_id);
+        code_area_div.setAttribute("class", code_area_id);
+        code_area_div.setAttribute("contenteditable", "true");
+        code_area_div.setAttribute("tab-index", "1");
 
-        text_div.style.display = "inline";
-        text_div.style.fontSize = "16px";
+        code_area_div.style.display = "inline";
+        code_area_div.style.fontSize = "16px";
+        code_area_div.innerText = text ? text : " ";
 
+        line_container.appendChild(line_number_div);
+        line_container.appendChild(code_area_div);
 
-
-        text_div.innerText = text ? text : "";
-
-        div.appendChild(line_number_div);
-        div.appendChild(text_div);
-
-        return div;
+        return line_container;
     }
 
 
