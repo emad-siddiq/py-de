@@ -36,7 +36,6 @@ let _terminal = new Terminal();
 
 
 document.addEventListener("keydown", function(e) {
-    console.log(e.code, e.key);
     if (e.shiftKey && e.key === "Tab") {
         console.log("darkmode")
         e.stopPropagation();
