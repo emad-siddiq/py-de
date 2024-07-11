@@ -1,5 +1,9 @@
 
 class CodeCellNumber {
+    id: string;
+    divId: string;
+    div: HTMLElement;
+
     constructor(id){ 
         this.id = id;
         this.divId = "code-cell-number-" + id;

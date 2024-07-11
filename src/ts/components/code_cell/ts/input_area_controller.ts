@@ -4,7 +4,7 @@ class InputAreaEditor {
                        Code Cell Textual Processing
     *******************************************************************/ 
 
-    static decreaseCodeCellSize(div) {
+    static decreaseCodeCellSize(div: any) {
         let currHeight = div.getBoundingClientRect().height;
         console.log("currHeight", currHeight);
         if (currHeight < 45) {
@@ -16,7 +16,7 @@ class InputAreaEditor {
     }
 
 
-    static increaseCodeCellSize(div) {
+    static increaseCodeCellSize(div: any) {
         let currHeight = div.getBoundingClientRect().height;
         let newHeight = currHeight + 19;
         div.style.height = newHeight + "px";
@@ -24,40 +24,40 @@ class InputAreaEditor {
     }
 
     //Returns the line if for a line # inside input_area_id
-    static generateLineContainerId(input_area_id, line_number) {
+    static generateLineContainerId(input_area_id: string, line_number: number | string) {
         let line_container_id = input_area_id + "-line-number-" + line_number.toString();
         return line_container_id;
     }
 
-    static generateLineNumberDivId(line_container_id) {
+    static generateLineNumberDivId(line_container_id: string) {
         let line_number_div_id = line_container_id + "-number"
         return line_number_div_id;
     }
 
      //Returns the line if for a line # inside input_area_id
-     static generateCodeAreaDivId(line_container_id) {
+     static generateCodeAreaDivId(line_container_id: string) {
         let line_number_div_id = line_container_id + "-code-area";
         return line_number_div_id;
     }
 
     //Returns the id for the div that contains the line number e.g 2. or 3.
-    static getLineNumberDivId(input_area_id, line_number) {
+    static getLineNumberDivId(input_area_id: string, line_number: number | string) {
         let line_container_id = InputAreaEditor.generateLineContainerId(input_area_id, line_number);
         return InputAreaEditor.generateLineNumberDivId(line_container_id);
     }
 
     // Return id of line# code area
-    static getCodeAreaId(input_area_id, line_number) {
+    static getCodeAreaId(input_area_id: string, line_number: number | string) {
         let line_container_id = InputAreaEditor.generateLineContainerId(input_area_id, line_number);
         return InputAreaEditor.generateCodeAreaDivId(line_container_id);
     }
 
 
     // Creates a line for the input area, adding a line number and editable text area
-    static createLine(input_area_id, line_number, text) {
+    static createLine(input_area_id: string, line_number: number | string, text) {
         let line_container_id = InputAreaEditor.generateLineContainerId(input_area_id, line_number);
-        let line_number_id = InputAreaEditor.generateLineNumberDivId(line_container_id, line_number);
-        let code_area_id = InputAreaEditor.generateCodeAreaDivId(line_container_id, line_container_id);
+        let line_number_id = InputAreaEditor.generateLineNumberDivId(line_container_id);
+        let code_area_id = InputAreaEditor.generateCodeAreaDivId(line_container_id);
 
         let line_container = document.createElement("div");
         line_container.setAttribute("id", line_container_id)
@@ -88,6 +88,34 @@ class InputAreaEditor {
 
         return line_container;
     }
+
+
+    static moveCaretToEndOfCodeArea(codeArea: HTMLElement) {
+        let textNode = codeArea.childNodes[0];
+
+        let startNode = textNode;
+        let startOffset = 0;
+        let endNode = textNode;
+        let endOffset = textNode?.textContent?.length ? textNode?.textContent?.length: startOffset;
+        InputAreaEditor.moveSelection(startNode, startOffset, endNode, endOffset, false);
+    }
+
+
+    static moveSelection(startNode: Node, startOffset: number, endNode: Node, endOffset: number, toStart?: boolean) {
+
+        let range = document.createRange();//Create a range (a range is a like the selection but invisible)
+        range.setStart(startNode, startOffset);
+        range.setEnd(endNode, endOffset);
+
+        if (toStart !== null) {
+            range.collapse(toStart); //collapse range to beginning (true) or end (false)
+        }
+
+        let selection = window.getSelection();//get the selection object (allows you to change selection)
+        selection?.removeAllRanges();//remove any selections already made
+        selection?.addRange(range);//make the range you have just created the visible selection
+    }
+
 
 
 

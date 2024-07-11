@@ -2,40 +2,42 @@ import {InputAreaEditor} from "./input_area_controller.js";
 
 class InputArea {
 
+    id: string;
+    caretX: number;
+    caretY: number;
+    curr_caret_line: number;
+    total_lines: number;
+    div: HTMLElement;
+    grid: object;
+    line_number: string;
+
     constructor(parentId) {
         this.id = parentId + "-input-area";
         this.div = this.createInputArea();
         this.addEventListeners();
         this.curr_caret_line = 1;
         this.total_lines = 0;
-       
         this.grid = {};
-        
         //Out of grid starting area
-        this.caretX = 0;   /* |      -------------> X   InputArea[i, j] = this.grid[caretY, caretX] */
-        this.caretY = -1;   /* |                                                                     */
-        this.addLine(this.caretY);    /* ▼ Y is the line-number                                                */
-                           /* grid[i, 0] is reserved for line_number */
+        this.caretX = 0;                    /* |      -------------> X   InputArea[i, j] = this.grid[caretY, caretX] */
+        this.caretY = -1;                   /* |                                                                     */
+        this.addLine(this.caretY);          /* ▼ Y is the line-number                                                */
+                                            /* grid[i, 0] is reserved for line_number */
     }
 
     getDiv() {
         return this.div;
     }
-
-    getCurrLineNumber() {
-        return this.line_number;
-    }
-
     /* 
-    Creates div for input area 
+      Creates and returns div for input area 
     */
-    createInputArea(id) {
+    createInputArea(id?: string): HTMLElement {
         let input_area = document.createElement("div");
 
-        input_area.setAttribute("contenteditable", true);
+        input_area.setAttribute("contenteditable", "true");
         input_area.setAttribute("id", this.id);
         input_area.setAttribute("class", this.id);
-        input_area.setAttribute("spellcheck", false);
+        input_area.setAttribute("spellcheck", "false");
 
         //let randColor = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
         input_area.style.backgroundColor = "white"; //TODO extract to theme
@@ -55,7 +57,7 @@ class InputArea {
     } 
     
     //Add <div><line-number-caretY> <text area></div> to input area
-    addLine(caretY, text) {
+    addLine(caretY: number, text?: string): void {
         let line_number = caretY + 2; //Since we initialize caretY at -1 so when we add the first line caretY = 0 = firstArr = firstRow
         let line = InputAreaEditor.createLine(this.id, line_number, text);
        
@@ -63,16 +65,15 @@ class InputArea {
         this.total_lines += 1;
         this.caretX = 1;
         this.caretY += 1;
-     
     }
 
-    getCodeAreaByLine(line_number) {
+    getCodeAreaByLine(line_number: number): HTMLElement | null {
         let code_area_id = InputAreaEditor.getCodeAreaId(this.id, line_number);
         return document.getElementById(code_area_id);
     }
 
 
-    removeLine(caretY) {
+    removeLine(caretY: number) {
         let line_number  = caretY + 1;
         delete this.grid[line_number];
         let line_number_id = this.id + "-line-number-" + line_number.toString();
@@ -86,44 +87,12 @@ class InputArea {
         this.caretX = this.grid[this.caretY].length - 1;
 
         let prev_code_area = this.getCodeAreaByLine(caretY + 1);
-        
-        this.moveCaretToEndOfCodeArea(prev_code_area);
-        this.line_number -= 1;
-
-    }
-
-    static moveCaretToEndOfNode(node) {
-        //node.focus();
-        console.log("NODE", node);
-        let range = document.createRange();//Create a range (a range is a like the selection but invisible)
-        range.setStart(node, 0);
-        range.setEnd(node, node.length);
-        console.log( range);
-        range.collapse(false);       //collapse the range to the end point. false means collapse to end rather than the start
-        let selection = window.getSelection();//get the selection object (allows you to change selection)
-        selection.removeAllRanges();//remove any selections already made
-        selection.addRange(range);//make the range you have just created the visible selection
-        console.log(selection);
+        InputAreaEditor.moveCaretToEndOfCodeArea(prev_code_area);
 
     }
 
 
-    static moveCaretToBeginningOfNode(node) {
-        //node.focus();
-        console.log("NODE", node);
-        let range = document.createRange();//Create a range (a range is a like the selection but invisible)
-        range.setStart(node, 0);
-        range.setEnd(node, node.length);
-        console.log( range);
-        range.collapse(true);       //collapse the range to the end point. false means collapse to end rather than the start
-        let selection = window.getSelection();//get the selection object (allows you to change selection)
-        selection.removeAllRanges();//remove any selections already made
-        selection.addRange(range);//make the range you have just created the visible selection
-        console.log(selection);
-
-    }
-
-    addEventListeners() {
+    addEventListeners():void {
         this.div.addEventListener("keydown", this.handleInput.bind(this));
         this.div.addEventListener("click", this.initialClick.bind(this));
     }
@@ -131,12 +100,14 @@ class InputArea {
     initialClick() {
         //Move caret to start of input area.
         this.div.focus();
-        document.execCommand('selectAll', false, null);
-        document.getSelection().collapseToEnd();   
-        this.initialClick = false;
+        let first_line_code_area_id = InputAreaEditor.getCodeAreaId(this.id, this.caretY+1);
+        let first_line_code_area = document.getElementById(first_line_code_area_id);
+        if (first_line_code_area) {
+            this.moveCaretToBeginningOfCodeArea(first_line_code_area);
+        }
     }
 
-    handleInput(e) {
+    handleInput(e: KeyboardEvent):void {
         // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code 
 
 
@@ -146,14 +117,8 @@ class InputArea {
         //document.getSelection().collapseToEnd();
         e.preventDefault();
         e.stopPropagation();
-
-        if (e.shiftKey && e.key === 'Enter') {
-            this.blur()
-            this.socket.send(this.value)
-            return;
-        }
                     
-        else if (e.code === "Enter") {
+        if (e.code === "Enter") {
 
             this.addToGrid("\n");
            
@@ -163,7 +128,9 @@ class InputArea {
             this.addLine(this.caretY);
             let new_line_code_area_id = InputAreaEditor.getCodeAreaId(this.id, this.caretY+1); //since line number = caretY + 1
             let new_line_code_area = document.getElementById(new_line_code_area_id);
-            this.moveCaretToBeginningOfCodeArea(new_line_code_area);
+            if (new_line_code_area) {
+                this.moveCaretToBeginningOfCodeArea(new_line_code_area);
+            }
         }
          
         else if (e.code === "Backspace" || e.code === "Delete") { // for backspace 
@@ -196,14 +163,14 @@ class InputArea {
             console.log("target", e.currentTarget);
             let curr_code_area = this.getCodeAreaByLine(this.caretY+1);
             console.log(curr_code_area);
-            this.moveCaretToEndOfCodeArea(curr_code_area);
+            if (curr_code_area) {
+                InputAreaEditor.moveCaretToEndOfCodeArea(curr_code_area);
+            }
         }
-
-
                 
     }
 
-    addToGrid(char) {
+    addToGrid(char: string) {
         if (this.grid[this.caretY]) {
             console.log(this.caretX, this.caretY, char);
             this.grid[this.caretY][this.caretX] = char;
@@ -211,43 +178,43 @@ class InputArea {
             this.grid[this.caretY] = []
             this.grid[this.caretY][this.caretX] = char;
         }
-        this.renderEditableContentArea(this.caretY, true);
+        this.renderEditableContentArea(this.caretY);
 
     }
 
-    removeFromGrid() {
+    removeFromGrid():void {
         let line = this.grid[this.caretY];
         let before_char = line.slice(0, this.caretX);
         let after_char = line.slice(this.caretX+1, line.length);
         this.grid[this.caretY] = before_char.concat(after_char);
-        this.renderEditableContentArea(this.caretY, true);
+        this.renderEditableContentArea(this.caretY);
     }
 
-    renderEditableContentArea(caretY) {
+    renderEditableContentArea(caretY: number) {
         let line_number = caretY + 1;
-        let code_area_id = InputAreaEditor.getCodeAreaId(this.id, line_number);     
-        console.log(code_area_id);
-        let code_area = document.getElementById(code_area_id);
-        if (this.grid[caretY]) {
-            code_area.innerText = this.grid[caretY].join('');
+        let code_area = document.getElementById(InputAreaEditor.getCodeAreaId(this.id, line_number));
+        if(code_area) {
+            code_area.innerText = this.grid[caretY]?.join('');
         }
     }
 
-    moveCaretToEndOfCodeArea(code_area) {
-        let text_node = code_area.childNodes[0];
-        InputArea.moveCaretToEndOfNode(text_node);
+    moveCaretToBeginningOfCodeArea(code_area: HTMLElement){
+        let textNode = code_area.childNodes[0];
+        
+        let startNode = textNode;
+        let startOffset = 0;
+        let endNode = textNode;
+        let endOffset = textNode?.textContent?.length ? textNode?.textContent?.length: startOffset;
+        InputAreaEditor.moveSelection(startNode, startOffset, endNode, endOffset, true);
     }
 
-    moveCaretToBeginningOfCodeArea(code_area){
-        let text_node = code_area.childNodes[0];
-        InputArea.moveCaretToBeginningOfNode(text_node);
-    }
-
+    
 
     removeDefaultBr() {
         let br = document.querySelector('br');
-        br.remove();
+        br?.remove();
     }
+
 
    
 
@@ -255,9 +222,9 @@ class InputArea {
 
 }
 
-function removeElement(id) {
+function removeElement(id: string) {
     var elem = document.getElementById(id);
-    return elem.parentNode.removeChild(elem);
+    return elem?.parentNode?.removeChild(elem);
 }
 
 export {InputArea};

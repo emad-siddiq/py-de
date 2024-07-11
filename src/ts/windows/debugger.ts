@@ -3,9 +3,11 @@ class Debugger {
         this.div = this.createDebuggerDiv();
         document.body.addEventListener("keydown", this.toggleBinding.bind(this));
     }
+
     getDiv() {
         return this.div;
     }
+
     createDebuggerDiv() {
         let div = document.createElement("div");
         div.setAttribute("id", "debugger");
@@ -19,26 +21,30 @@ class Debugger {
         div.style.zIndex = 10;
         return div;
     }
+
     toggle() {
         let editor = document.getElementById("editor");
         let terminal = document.getElementById("terminal");
+
         if (document.getElementById("debugger")) {
             editor.style.width = editor.getBoundingClientRect().width + this.div.getBoundingClientRect().width;
+
             if (terminal) {
-                terminal.style.width = terminal.getBoundingClientRect().width + this.div.getBoundingClientRect().width;
+                terminal.style.width =  terminal.getBoundingClientRect().width + this.div.getBoundingClientRect().width;
             }
-            document.body.removeChild(this.div);
-        }
-        else {
+            document.body.removeChild(this.div)
+        } else {
             document.body.appendChild(this.div);
             console.log("this.div", this.div);
-            console.log(editor.getBoundingClientRect().width - this.div.getBoundingClientRect().width);
+            console.log( editor.getBoundingClientRect().width - this.div.getBoundingClientRect().width);
             editor.style.width = editor.getBoundingClientRect().width - this.div.getBoundingClientRect().width;
             if (terminal) {
                 terminal.style.width = terminal.getBoundingClientRect().width - this.div.getBoundingClientRect().width;
             }
         }
+     
     }
+
     toggleBinding(e) {
         let ctrl_cmd = e.metaKey || e.ctrlKey; // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
         if (ctrl_cmd && e.key === 'd') {
@@ -48,5 +54,8 @@ class Debugger {
             return;
         }
     }
+
+
 }
-export { Debugger };
+
+export {Debugger};
