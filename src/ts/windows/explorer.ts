@@ -1,6 +1,9 @@
 class Explorer {
 
     //TODO: Make windows resizeable on broswer resize
+    div: HTMLElement;
+
+
     constructor() {
         this.div = this.createExplorerDiv();
         document.body.addEventListener("keydown", this.toggleBinding.bind(this));
@@ -32,19 +35,20 @@ class Explorer {
 
         if (document.getElementById("explorer")) {
             document.body.removeChild(this.div);
-            editor.style.left = 0;
+            editor.style.left = "0";
             if (terminal) {
-                terminal.style.left = 0;
+                terminal.style.left = "0";
             }
 
         } else {
             document.body.appendChild(this.div);
-            editor.style.left = this.div.getBoundingClientRect().right;
+            editor.style.left = this.div.getBoundingClientRect().right.toString();
             if (terminal) {
-                terminal.style.left = this.div.getBoundingClientRect().right;
+                terminal.style.left = this.div.getBoundingClientRect().right.toString();
             }
         }
     }
+    
 
     toggleBinding(e) {
         let ctrl_cmd = e.metaKey || e.ctrlKey; // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent

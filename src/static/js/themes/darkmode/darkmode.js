@@ -14,7 +14,7 @@ class DarkMode {
         let editor = document.getElementById("editor");
         editor.style.backgroundColor = "white";
         editor.style.color = "black";
-        let nodes = document.querySelectorAll('[contenteditable="true"]');
+        let nodes = Array.from(document.querySelectorAll('[contenteditable="true"]'));
         for (let node of nodes) {
             node.style.backgroundColor = "white";
             node.style.color = "black";
@@ -28,7 +28,7 @@ class DarkMode {
         editor.style.color = "pink";
         editor.style.backgroundImage = "black";
         editor.style.borderColor = "black";
-        let nodes = document.querySelectorAll('[contenteditable="true"]');
+        let nodes = Array.from(document.querySelectorAll('[contenteditable="true"]'));
         for (let node of nodes) {
             node.style.backgroundColor = "black";
             node.style.color = "white";

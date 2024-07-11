@@ -65,19 +65,44 @@ class InputAreaEditor {
         code_area_div.setAttribute("tab-index", "1");
         code_area_div.style.display = "inline";
         code_area_div.style.fontSize = "16px";
-        code_area_div.innerText = text ? text : " ";
+        code_area_div.innerText = text ? text : "";
         line_container.appendChild(line_number_div);
         line_container.appendChild(code_area_div);
         return line_container;
     }
-    static moveCaretToEndOfCodeArea(codeArea) {
+    static moveCaretToEndOfCodeArea(code_area) {
         var _a, _b;
-        let textNode = codeArea.childNodes[0];
+        let empty_code_area = false;
+        if (code_area.childNodes.length === 0) {
+            code_area.innerText = " ";
+            empty_code_area = true;
+        }
+        let textNode = code_area.childNodes[0];
         let startNode = textNode;
         let startOffset = 0;
         let endNode = textNode;
         let endOffset = ((_a = textNode === null || textNode === void 0 ? void 0 : textNode.textContent) === null || _a === void 0 ? void 0 : _a.length) ? (_b = textNode === null || textNode === void 0 ? void 0 : textNode.textContent) === null || _b === void 0 ? void 0 : _b.length : startOffset;
         InputAreaEditor.moveSelection(startNode, startOffset, endNode, endOffset, false);
+        if (empty_code_area) {
+            code_area.innerText = "";
+        }
+    }
+    static moveCaretToBeginningOfCodeArea(code_area) {
+        var _a, _b;
+        let empty_code_area = false;
+        if (code_area.childNodes.length === 0) {
+            code_area.innerText = " ";
+            empty_code_area = true;
+        }
+        let textNode = code_area.childNodes[0];
+        let startNode = textNode;
+        let startOffset = 0;
+        let endNode = textNode;
+        let endOffset = ((_a = textNode === null || textNode === void 0 ? void 0 : textNode.textContent) === null || _a === void 0 ? void 0 : _a.length) ? (_b = textNode === null || textNode === void 0 ? void 0 : textNode.textContent) === null || _b === void 0 ? void 0 : _b.length : startOffset;
+        InputAreaEditor.moveSelection(startNode, startOffset, endNode, endOffset, true);
+        if (empty_code_area) {
+            code_area.innerText = "";
+        }
     }
     static moveSelection(startNode, startOffset, endNode, endOffset, toStart) {
         let range = document.createRange(); //Create a range (a range is a like the selection but invisible)

@@ -7,7 +7,7 @@ class Editor {
     id: string;
     socket: WebSocket;
 
-    constructor(socket) {
+    constructor(socket: WebSocket) {
         this.div = this.createEditorDiv();
         this.cc_id = 1;
         this.id = "editor";

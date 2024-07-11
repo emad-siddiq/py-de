@@ -1,4 +1,6 @@
 class Terminal {
+    div: HTMLElement;
+
     constructor() {
         this.div = this.createTerminalDiv();
         document.body.addEventListener("keydown", this.toggleBinding.bind(this));
@@ -14,12 +16,12 @@ class Terminal {
         div.setAttribute("class", "terminal");
     
         div.style.position = "absolute";
-        div.style.top = window.innerHeight - 0.3 * window.innerHeight;
+        div.style.top = (window.innerHeight - 0.3 * window.innerHeight).toString();
         div.style.left = "0";
         div.style.backgroundColor = "green";
         div.style.width = "100%";
         div.style.height = "100%";
-        div.style.zIndex = 10;
+        div.style.zIndex = "10";
 
         return div;
     }

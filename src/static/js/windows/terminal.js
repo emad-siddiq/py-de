@@ -11,12 +11,12 @@ class Terminal {
         div.setAttribute("id", "terminal");
         div.setAttribute("class", "terminal");
         div.style.position = "absolute";
-        div.style.top = window.innerHeight - 0.3 * window.innerHeight;
+        div.style.top = (window.innerHeight - 0.3 * window.innerHeight).toString();
         div.style.left = "0";
         div.style.backgroundColor = "green";
         div.style.width = "100%";
         div.style.height = "100%";
-        div.style.zIndex = 10;
+        div.style.zIndex = "10";
         return div;
     }
     toggle() {

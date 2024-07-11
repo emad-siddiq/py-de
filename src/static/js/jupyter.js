@@ -19,7 +19,7 @@ var socket;
 */
 connectToWS().then(server => {
     socket = server;
-    let _editor = new Editor();
+    let _editor = new Editor(socket);
     _editor.addCodeCell();
     let code_area = document.getElementById("code-cell-1-input-area-line-number-1-code-area");
     InputAreaEditor.moveCaretToEndOfCodeArea(code_area);

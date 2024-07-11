@@ -52,7 +52,6 @@ class InputAreaEditor {
         return InputAreaEditor.generateCodeAreaDivId(line_container_id);
     }
 
-
     // Creates a line for the input area, adding a line number and editable text area
     static createLine(input_area_id: string, line_number: number | string, text) {
         let line_container_id = InputAreaEditor.generateLineContainerId(input_area_id, line_number);
@@ -81,7 +80,7 @@ class InputAreaEditor {
 
         code_area_div.style.display = "inline";
         code_area_div.style.fontSize = "16px";
-        code_area_div.innerText = text ? text : " ";
+        code_area_div.innerText = text ? text : "";
 
         line_container.appendChild(line_number_div);
         line_container.appendChild(code_area_div);
@@ -90,14 +89,43 @@ class InputAreaEditor {
     }
 
 
-    static moveCaretToEndOfCodeArea(codeArea: HTMLElement) {
-        let textNode = codeArea.childNodes[0];
+    static moveCaretToEndOfCodeArea(code_area: HTMLElement) {
+        let empty_code_area = false;
+        if (code_area.childNodes.length === 0) {
+            code_area.innerText = " ";
+            empty_code_area = true;
+        }
+        let textNode = code_area.childNodes[0];
 
         let startNode = textNode;
         let startOffset = 0;
         let endNode = textNode;
         let endOffset = textNode?.textContent?.length ? textNode?.textContent?.length: startOffset;
         InputAreaEditor.moveSelection(startNode, startOffset, endNode, endOffset, false);
+        if (empty_code_area) {
+            code_area.innerText = "";
+        }
+
+    }
+
+    static moveCaretToBeginningOfCodeArea(code_area: HTMLElement){
+        let empty_code_area = false;
+        if (code_area.childNodes.length === 0) {
+            code_area.innerText = " ";
+            empty_code_area = true;
+        }
+        let textNode = code_area.childNodes[0];
+        let startNode = textNode;
+        let startOffset = 0;
+        let endNode = textNode;
+        let endOffset = textNode?.textContent?.length ? textNode?.textContent?.length: startOffset;
+        InputAreaEditor.moveSelection(startNode, startOffset, endNode, endOffset, true);
+
+        if (empty_code_area) {
+            code_area.innerText = "";
+        }
+
+
     }
 
 

@@ -1,5 +1,4 @@
 class Explorer {
-    //TODO: Make windows resizeable on broswer resize
     constructor() {
         this.div = this.createExplorerDiv();
         document.body.addEventListener("keydown", this.toggleBinding.bind(this));
@@ -24,16 +23,16 @@ class Explorer {
         let terminal = document.getElementById("terminal");
         if (document.getElementById("explorer")) {
             document.body.removeChild(this.div);
-            editor.style.left = 0;
+            editor.style.left = "0";
             if (terminal) {
-                terminal.style.left = 0;
+                terminal.style.left = "0";
             }
         }
         else {
             document.body.appendChild(this.div);
-            editor.style.left = this.div.getBoundingClientRect().right;
+            editor.style.left = this.div.getBoundingClientRect().right.toString();
             if (terminal) {
-                terminal.style.left = this.div.getBoundingClientRect().right;
+                terminal.style.left = this.div.getBoundingClientRect().right.toString();
             }
         }
     }
