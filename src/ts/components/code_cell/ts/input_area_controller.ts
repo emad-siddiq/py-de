@@ -53,24 +53,40 @@ class InputAreaEditor {
     }
 
     // Creates a line for the input area, adding a line number and editable text area
-    static createLine(input_area_id: string, line_number: number | string, text) {
+    static createLine(input_area_id: string, line_number: number, text) {
         let line_container_id = InputAreaEditor.generateLineContainerId(input_area_id, line_number);
         let line_number_id = InputAreaEditor.generateLineNumberDivId(line_container_id);
         let code_area_id = InputAreaEditor.generateCodeAreaDivId(line_container_id);
 
         let line_container = document.createElement("div");
         line_container.setAttribute("id", line_container_id)
-        
+        line_container.style.display = "flex";
+
         let line_number_div = document.createElement("div");
         line_number_div.setAttribute("id", line_number_id);
         line_number_div.setAttribute("class", line_number_id);
         line_number_div.setAttribute("contenteditable", "false");
         line_number_div.textContent = line_number.toString() + ".";
-        line_number_div.style.fontSize = "15px";
+        line_number_div.style.fontSize = "16px";
         line_number_div.style.color = "gray";
+        
+
+
+        //TODO: handle sidebar indent
+        line_number_div.style.width = "10px";
+        line_number_div.style.textAlign = "center";
+        line_number_div.style.alignContent = "end";
+
+        // if (line_number >= 10) {
+        //     line_number_div.style.marginLeft = "-10px";
+        // } else {
+        //     line_number_div.style.paddingRight = "0px";
+        // }
+
+        line_number_div.style.marginRight = "5px";
         line_number_div.style.paddingLeft = "5px";
 
-        line_number_div.style.display = "inline";
+
 
         let code_area_div = document.createElement("div");
         code_area_div.setAttribute("id", code_area_id);
@@ -78,10 +94,12 @@ class InputAreaEditor {
         code_area_div.setAttribute("contenteditable", "true");
         code_area_div.setAttribute("tab-index", "1");
 
-        code_area_div.style.display = "inline";
         code_area_div.style.fontSize = "16px";
-        code_area_div.style.backgroundColor = "red";
+        code_area_div.style.backgroundColor = "";
         code_area_div.style.whiteSpace = "pre";
+        code_area_div.style.width = "100%";
+        code_area_div.style.height = "100%";
+
 
         code_area_div.textContent = text ? text : "";
 
@@ -134,13 +152,21 @@ class InputAreaEditor {
     }
 
     static moveCaretToIndexOfCodeArea(code_area: HTMLElement, index: number) {
-        
+        let empty_code_area = false;
+        if (code_area.childNodes.length === 0) {
+            code_area.textContent = " ";
+            empty_code_area = true;
+        }
+
         let textNode = code_area.childNodes[0];
         let startNode = textNode;
         let startOffset = index;
         let endNode = textNode;
         let endOffset = index;
         InputAreaEditor.moveSelection(startNode, startOffset, endNode, endOffset);
+        if (empty_code_area) {
+            code_area.textContent = "";
+        }
 
     }
 

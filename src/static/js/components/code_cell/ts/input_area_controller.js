@@ -49,24 +49,43 @@ class InputAreaEditor {
         let code_area_id = InputAreaEditor.generateCodeAreaDivId(line_container_id);
         let line_container = document.createElement("div");
         line_container.setAttribute("id", line_container_id);
+        line_container.style.display = "flex";
         let line_number_div = document.createElement("div");
         line_number_div.setAttribute("id", line_number_id);
         line_number_div.setAttribute("class", line_number_id);
         line_number_div.setAttribute("contenteditable", "false");
         line_number_div.textContent = line_number.toString() + ".";
-        line_number_div.style.fontSize = "15px";
+        line_number_div.style.fontSize = "14px";
         line_number_div.style.color = "gray";
+        //TODO: handle sidebar indent
+        line_number_div.style.width = "15px";
+        line_number_div.style.textAlign = "center";
+        line_number_div.style.alignContent = "center";
+        line_number_div.style.height = "16px";
+        line_number_div.style.paddingTop = "2px";
+
+
+
+
+        // if (line_number >= 10) {
+        //     line_number_div.style.marginLeft = "-10px";
+        // } else {
+        //     line_number_div.style.paddingRight = "0px";
+        // }
+
+
+        line_number_div.style.marginRight = "5px";
         line_number_div.style.paddingLeft = "5px";
-        line_number_div.style.display = "inline";
         let code_area_div = document.createElement("div");
         code_area_div.setAttribute("id", code_area_id);
         code_area_div.setAttribute("class", code_area_id);
         code_area_div.setAttribute("contenteditable", "true");
         code_area_div.setAttribute("tab-index", "1");
-        code_area_div.style.display = "inline";
         code_area_div.style.fontSize = "16px";
-        code_area_div.style.backgroundColor = "red";
+        code_area_div.style.backgroundColor = "";
         code_area_div.style.whiteSpace = "pre";
+        code_area_div.style.height = "16px";
+
         code_area_div.textContent = text ? text : "";
         line_container.appendChild(line_number_div);
         line_container.appendChild(code_area_div);
@@ -107,12 +126,20 @@ class InputAreaEditor {
         }
     }
     static moveCaretToIndexOfCodeArea(code_area, index) {
+        let empty_code_area = false;
+        if (code_area.childNodes.length === 0) {
+            code_area.textContent = " ";
+            empty_code_area = true;
+        }
         let textNode = code_area.childNodes[0];
         let startNode = textNode;
         let startOffset = index;
         let endNode = textNode;
         let endOffset = index;
         InputAreaEditor.moveSelection(startNode, startOffset, endNode, endOffset);
+        if (empty_code_area) {
+            code_area.textContent = "";
+        }
     }
     static moveSelection(startNode, startOffset, endNode, endOffset, toStart) {
         let range = document.createRange(); //Create a range (a range is a like the selection but invisible)

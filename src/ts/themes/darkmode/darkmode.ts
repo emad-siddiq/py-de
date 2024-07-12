@@ -1,6 +1,6 @@
 class DarkMode {
 
-    static enabled = false;
+    static enabled = true;
 
     static toggle() {
         if (DarkMode.enabled) {

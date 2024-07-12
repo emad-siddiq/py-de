@@ -56,15 +56,15 @@ class InputArea {
     removeLine(caretY) {
         let line_number = caretY + 1;
         delete this.grid[line_number];
-        let line_number_id = this.id + "-line-number-" + line_number.toString();
-        let code_area_id = line_number_id + "-text";
         let line_container_id = InputAreaEditor.generateLineContainerId(this.id, line_number);
         removeElement(line_container_id);
         InputAreaEditor.decreaseCodeCellSize(this.div);
-        let prev_code_area = this.getCodeAreaByLine(caretY);
-        InputAreaEditor.moveCaretToEndOfCodeArea(prev_code_area);
-        this.caretY -= 1;
-        this.caretX = this.grid[this.caretY].length - 1;
+        if (this.caretY !== 0) {
+            let prev_code_area = this.getCodeAreaByLine(line_number - 1);
+            InputAreaEditor.moveCaretToIndexOfCodeArea(prev_code_area, prev_code_area.textContent.length);
+            this.caretY -= 1;
+            this.caretX = this.grid[this.caretY] ? this.grid[this.caretY].length - 1 : 0;
+        }
     }
     addEventListeners() {
         this.div.addEventListener("keydown", this.handleInput.bind(this));
@@ -78,8 +78,11 @@ class InputArea {
         }
         console.log(e.clientX, e.clientY, first_line_code_area.getBoundingClientRect());
         if (first_line_code_area) {
-            InputAreaEditor.moveCaretToBeginningOfCodeArea(first_line_code_area);
+            InputAreaEditor.moveCaretToEndOfCodeArea(first_line_code_area);
             // first_line_code_area.textContent = "";
+        }
+        else {
+            // TODO implement logic to handle click on earlier line in code area
         }
     }
     handleInput(e) {
@@ -91,7 +94,6 @@ class InputArea {
         e.stopPropagation();
         if (e.code === "Enter") {
             this.removeDefaultBr(); //contenteditable adds <br> on pressing entering
-            this.addToGrid("\n");
             InputAreaEditor.increaseCodeCellSize(this.div);
             this.addLineAfter(this.caretY);
             let new_code_area = this.getCodeAreaByLine(this.caretY + 1);

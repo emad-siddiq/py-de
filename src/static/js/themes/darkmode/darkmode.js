@@ -36,5 +36,5 @@ class DarkMode {
         }
     }
 }
-DarkMode.enabled = false;
+DarkMode.enabled = true;
 export { DarkMode };

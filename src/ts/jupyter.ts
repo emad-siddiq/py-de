@@ -12,11 +12,20 @@ var socket;
    Connect to WS for sending Python code to backend.
 */
 
+let _debugger = new Debugger();
+let _explorer = new Explorer();
+let _terminal = new Terminal();
+
+
+// TODO: Reveal menu on hover against top
+// TODO: File --> Open, select local .ipynb and render correctly 
+// TODO: File --> Open, select local .md and render correctly
 
 connectToWS().then(server => {
     socket = server;
     let _editor = new Editor(socket);
     _editor.addCodeCell();
+    //DarkMode.enable();
 
     let code_area = document.getElementById("code-cell-1-input-area-line-number-1-code-area");
     InputAreaEditor.moveCaretToEndOfCodeArea(code_area);
@@ -34,12 +43,7 @@ window.onbeforeunload = function(event)
     return confirm("Confirm refresh");
 };
 
-let _debugger = new Debugger();
-let _explorer = new Explorer();
-let _terminal = new Terminal();
-// TODO: Reveal menu on hover against top
-// TODO: File --> Open, select local .ipynb and render correctly 
-// TODO: File --> Open, select local .md and render correctly
+
 
 
 document.addEventListener("keydown", function(e) {
