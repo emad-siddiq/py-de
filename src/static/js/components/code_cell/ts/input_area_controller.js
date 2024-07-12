@@ -53,7 +53,7 @@ class InputAreaEditor {
         line_number_div.setAttribute("id", line_number_id);
         line_number_div.setAttribute("class", line_number_id);
         line_number_div.setAttribute("contenteditable", "false");
-        line_number_div.innerText = line_number.toString() + ".";
+        line_number_div.textContent = line_number.toString() + ".";
         line_number_div.style.fontSize = "15px";
         line_number_div.style.color = "gray";
         line_number_div.style.paddingLeft = "5px";
@@ -65,7 +65,9 @@ class InputAreaEditor {
         code_area_div.setAttribute("tab-index", "1");
         code_area_div.style.display = "inline";
         code_area_div.style.fontSize = "16px";
-        code_area_div.innerText = text ? text : "";
+        code_area_div.style.backgroundColor = "red";
+        code_area_div.style.whiteSpace = "pre";
+        code_area_div.textContent = text ? text : "";
         line_container.appendChild(line_number_div);
         line_container.appendChild(code_area_div);
         return line_container;
@@ -74,7 +76,7 @@ class InputAreaEditor {
         var _a, _b;
         let empty_code_area = false;
         if (code_area.childNodes.length === 0) {
-            code_area.innerText = " ";
+            code_area.textContent = " ";
             empty_code_area = true;
         }
         let textNode = code_area.childNodes[0];
@@ -84,14 +86,14 @@ class InputAreaEditor {
         let endOffset = ((_a = textNode === null || textNode === void 0 ? void 0 : textNode.textContent) === null || _a === void 0 ? void 0 : _a.length) ? (_b = textNode === null || textNode === void 0 ? void 0 : textNode.textContent) === null || _b === void 0 ? void 0 : _b.length : startOffset;
         InputAreaEditor.moveSelection(startNode, startOffset, endNode, endOffset, false);
         if (empty_code_area) {
-            code_area.innerText = "";
+            code_area.textContent = "";
         }
     }
     static moveCaretToBeginningOfCodeArea(code_area) {
         var _a, _b;
         let empty_code_area = false;
         if (code_area.childNodes.length === 0) {
-            code_area.innerText = " ";
+            code_area.textContent = " ";
             empty_code_area = true;
         }
         let textNode = code_area.childNodes[0];
@@ -101,14 +103,22 @@ class InputAreaEditor {
         let endOffset = ((_a = textNode === null || textNode === void 0 ? void 0 : textNode.textContent) === null || _a === void 0 ? void 0 : _a.length) ? (_b = textNode === null || textNode === void 0 ? void 0 : textNode.textContent) === null || _b === void 0 ? void 0 : _b.length : startOffset;
         InputAreaEditor.moveSelection(startNode, startOffset, endNode, endOffset, true);
         if (empty_code_area) {
-            code_area.innerText = "";
+            code_area.textContent = "";
         }
+    }
+    static moveCaretToIndexOfCodeArea(code_area, index) {
+        let textNode = code_area.childNodes[0];
+        let startNode = textNode;
+        let startOffset = index;
+        let endNode = textNode;
+        let endOffset = index;
+        InputAreaEditor.moveSelection(startNode, startOffset, endNode, endOffset);
     }
     static moveSelection(startNode, startOffset, endNode, endOffset, toStart) {
         let range = document.createRange(); //Create a range (a range is a like the selection but invisible)
         range.setStart(startNode, startOffset);
         range.setEnd(endNode, endOffset);
-        if (toStart !== null) {
+        if (toStart !== undefined) {
             range.collapse(toStart); //collapse range to beginning (true) or end (false)
         }
         let selection = window.getSelection(); //get the selection object (allows you to change selection)

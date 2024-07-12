@@ -65,7 +65,7 @@ class InputAreaEditor {
         line_number_div.setAttribute("id", line_number_id);
         line_number_div.setAttribute("class", line_number_id);
         line_number_div.setAttribute("contenteditable", "false");
-        line_number_div.innerText = line_number.toString() + ".";
+        line_number_div.textContent = line_number.toString() + ".";
         line_number_div.style.fontSize = "15px";
         line_number_div.style.color = "gray";
         line_number_div.style.paddingLeft = "5px";
@@ -80,7 +80,10 @@ class InputAreaEditor {
 
         code_area_div.style.display = "inline";
         code_area_div.style.fontSize = "16px";
-        code_area_div.innerText = text ? text : "";
+        code_area_div.style.backgroundColor = "red";
+        code_area_div.style.whiteSpace = "pre";
+
+        code_area_div.textContent = text ? text : "";
 
         line_container.appendChild(line_number_div);
         line_container.appendChild(code_area_div);
@@ -92,7 +95,7 @@ class InputAreaEditor {
     static moveCaretToEndOfCodeArea(code_area: HTMLElement) {
         let empty_code_area = false;
         if (code_area.childNodes.length === 0) {
-            code_area.innerText = " ";
+            code_area.textContent = " ";
             empty_code_area = true;
         }
         let textNode = code_area.childNodes[0];
@@ -103,15 +106,17 @@ class InputAreaEditor {
         let endOffset = textNode?.textContent?.length ? textNode?.textContent?.length: startOffset;
         InputAreaEditor.moveSelection(startNode, startOffset, endNode, endOffset, false);
         if (empty_code_area) {
-            code_area.innerText = "";
+            code_area.textContent = "";
         }
 
     }
 
+
+
     static moveCaretToBeginningOfCodeArea(code_area: HTMLElement){
         let empty_code_area = false;
         if (code_area.childNodes.length === 0) {
-            code_area.innerText = " ";
+            code_area.textContent = " ";
             empty_code_area = true;
         }
         let textNode = code_area.childNodes[0];
@@ -122,9 +127,20 @@ class InputAreaEditor {
         InputAreaEditor.moveSelection(startNode, startOffset, endNode, endOffset, true);
 
         if (empty_code_area) {
-            code_area.innerText = "";
+            code_area.textContent = "";
         }
 
+
+    }
+
+    static moveCaretToIndexOfCodeArea(code_area: HTMLElement, index: number) {
+        
+        let textNode = code_area.childNodes[0];
+        let startNode = textNode;
+        let startOffset = index;
+        let endNode = textNode;
+        let endOffset = index;
+        InputAreaEditor.moveSelection(startNode, startOffset, endNode, endOffset);
 
     }
 
@@ -135,7 +151,7 @@ class InputAreaEditor {
         range.setStart(startNode, startOffset);
         range.setEnd(endNode, endOffset);
 
-        if (toStart !== null) {
+        if (toStart !== undefined) {
             range.collapse(toStart); //collapse range to beginning (true) or end (false)
         }
 

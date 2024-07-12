@@ -39,7 +39,7 @@ class CodeCell {
     }
     sendOnShiftEnter(e) {
         if (e.shiftKey && e.key === 'Enter') {
-            this.socket.send(this.div.innerText);
+            this.socket.send(this.div.textContent);
             return;
         }
     }

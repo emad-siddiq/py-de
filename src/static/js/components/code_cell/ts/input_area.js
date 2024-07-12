@@ -8,9 +8,9 @@ class InputArea {
         this.total_lines = 0;
         this.grid = {};
         //Out of grid starting area
-        this.caretX = 0; /* |      -------------> X   InputArea[i, j] = this.grid[caretY, caretX] */
+        this.caretX = -1; /* |      -------------> X   InputArea[i, j] = this.grid[caretY, caretX] */
         this.caretY = -1; /* |                                                                     */
-        this.addLine(this.caretY); /* ▼ Y is the line-number                                                */
+        this.addLineAfter(this.caretY); /* ▼ Y is the line-number                                                */
         /* grid[i, 0] is reserved for line_number */
     }
     getDiv() {
@@ -41,13 +41,13 @@ class InputArea {
         return input_area;
     }
     //Add <div><line-number-caretY> <text area></div> to input area
-    addLine(caretY, text) {
-        let line_number = caretY + 2; //Since we initialize caretY at -1 so when we add the first line caretY = 0 = firstArr = firstRow
+    addLineAfter(caretY, text) {
+        this.caretX = 0;
+        this.caretY = caretY + 1;
+        let line_number = this.caretY + 1; //Since we initialize caretY at 0 so line = caretY + 1 since line starts at 1
         let line = InputAreaEditor.createLine(this.id, line_number, text);
         this.div.appendChild(line);
         this.total_lines += 1;
-        this.caretX = 1;
-        this.caretY += 1;
     }
     getCodeAreaByLine(line_number) {
         let code_area_id = InputAreaEditor.getCodeAreaId(this.id, line_number);
@@ -58,13 +58,13 @@ class InputArea {
         delete this.grid[line_number];
         let line_number_id = this.id + "-line-number-" + line_number.toString();
         let code_area_id = line_number_id + "-text";
-        removeElement(code_area_id);
-        removeElement(line_number_id);
+        let line_container_id = InputAreaEditor.generateLineContainerId(this.id, line_number);
+        removeElement(line_container_id);
         InputAreaEditor.decreaseCodeCellSize(this.div);
+        let prev_code_area = this.getCodeAreaByLine(caretY);
+        InputAreaEditor.moveCaretToEndOfCodeArea(prev_code_area);
         this.caretY -= 1;
         this.caretX = this.grid[this.caretY].length - 1;
-        let prev_code_area = this.getCodeAreaByLine(caretY + 1);
-        InputAreaEditor.moveCaretToEndOfCodeArea(prev_code_area);
     }
     addEventListeners() {
         this.div.addEventListener("keydown", this.handleInput.bind(this));
@@ -72,15 +72,14 @@ class InputArea {
     }
     handleClick(e) {
         //Move caret to start of input area.
-        let first_line_code_area_id = InputAreaEditor.getCodeAreaId(this.id, this.caretY + 1);
-        let first_line_code_area = document.getElementById(first_line_code_area_id);
-        if (first_line_code_area.innerText.length > 0) {
+        let first_line_code_area = this.getCodeAreaByLine(this.caretY + 1);
+        if (first_line_code_area.textContent.length > 0) {
             return true;
         }
         console.log(e.clientX, e.clientY, first_line_code_area.getBoundingClientRect());
         if (first_line_code_area) {
             InputAreaEditor.moveCaretToBeginningOfCodeArea(first_line_code_area);
-            // first_line_code_area.innerText = "";
+            // first_line_code_area.textContent = "";
         }
     }
     handleInput(e) {
@@ -91,18 +90,15 @@ class InputArea {
         e.preventDefault();
         e.stopPropagation();
         if (e.code === "Enter") {
+            this.removeDefaultBr(); //contenteditable adds <br> on pressing entering
             this.addToGrid("\n");
             InputAreaEditor.increaseCodeCellSize(this.div);
-            this.removeDefaultBr(); //contenteditable adds <br> on pressing entering
-            this.addLine(this.caretY);
-            let new_line_code_area_id = InputAreaEditor.getCodeAreaId(this.id, this.caretY + 1); //since line number = caretY + 1
-            let new_line_code_area = document.getElementById(new_line_code_area_id);
-            if (new_line_code_area) {
-                InputAreaEditor.moveCaretToBeginningOfCodeArea(new_line_code_area);
-            }
+            this.addLineAfter(this.caretY);
+            let new_code_area = this.getCodeAreaByLine(this.caretY + 1);
+            InputAreaEditor.moveCaretToBeginningOfCodeArea(new_code_area);
         }
         else if (e.code === "Backspace" || e.code === "Delete") { // for backspace 
-            let startOfLine = this.caretX === 1;
+            let startOfLine = this.caretX === 0;
             let firstLine = this.caretY === 0;
             if (startOfLine) {
                 if (firstLine) {
@@ -112,20 +108,22 @@ class InputArea {
                 this.removeLine(this.caretY);
             }
             else {
-                this.caretX -= 1;
-                this.removeFromGrid();
+                this.removeCharFromLine();
             }
         }
         else if (e.code === "Space") {
-            this.addToGrid(e.key);
             this.caretX += 1;
+            this.addToGrid(" ");
+            let code_area = this.getCodeAreaByLine(this.caretY + 1);
+            console.log(code_area.innerHTML.length, this.caretX);
+            InputAreaEditor.moveCaretToIndexOfCodeArea(code_area, this.caretX);
         }
         else {
-            this.addToGrid(e.key);
             this.caretX += 1;
+            this.addToGrid(e.key);
             let curr_code_area = this.getCodeAreaByLine(this.caretY + 1);
             if (curr_code_area) {
-                InputAreaEditor.moveCaretToEndOfCodeArea(curr_code_area);
+                InputAreaEditor.moveCaretToIndexOfCodeArea(curr_code_area, this.caretX);
             }
         }
     }
@@ -137,21 +135,26 @@ class InputArea {
             this.grid[this.caretY] = [];
             this.grid[this.caretY][this.caretX] = char;
         }
-        this.renderEditableContentArea(this.caretY);
+        this.renderLine(this.caretY + 1);
     }
-    removeFromGrid() {
+    removeCharFromLine() {
         let line = this.grid[this.caretY];
         let before_char = line.slice(0, this.caretX);
         let after_char = line.slice(this.caretX + 1, line.length);
         this.grid[this.caretY] = before_char.concat(after_char);
-        this.renderEditableContentArea(this.caretY);
+        this.renderLine(this.caretY + 1);
+        let code_area = this.getCodeAreaByLine(this.caretY + 1);
+        InputAreaEditor.moveCaretToIndexOfCodeArea(code_area, this.caretX - 1);
+        this.caretX -= 1;
     }
-    renderEditableContentArea(caretY) {
+    renderLine(line_number) {
         var _a;
-        let line_number = caretY + 1;
-        let code_area = document.getElementById(InputAreaEditor.getCodeAreaId(this.id, line_number));
+        let code_area = this.getCodeAreaByLine(line_number);
         if (code_area) {
-            code_area.innerText = (_a = this.grid[caretY]) === null || _a === void 0 ? void 0 : _a.join('');
+            let code_area_text = (_a = this.grid[line_number - 1]) === null || _a === void 0 ? void 0 : _a.join('');
+            code_area.textContent = code_area_text;
+            //code_area.innerHTML = code_area_text;
+            console.log("code_area", code_area_text, code_area_text.length, code_area);
         }
     }
     removeDefaultBr() {
