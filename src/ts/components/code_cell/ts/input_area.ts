@@ -97,6 +97,7 @@ class InputArea {
     addEventListeners():void {
         this.div.addEventListener("keydown", this.handleInput.bind(this));
         this.div.addEventListener("click", this.handleClick.bind(this));
+
     }
 
     getCodeAreaByLine(line_number: number): HTMLElement | null {
@@ -186,6 +187,7 @@ class InputArea {
 
          
         else if (e.code === "Backspace" || e.code === "Delete") { // for backspace 
+            // TODO handle case for selection across multiple lines
             e.preventDefault();
             e.stopPropagation();
            let startOfLine = this.caretX === 0;

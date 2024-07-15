@@ -135,6 +135,7 @@ class InputArea {
             InputAreaEditor.moveCaretToEndOfCodeArea(new_code_area);
         }
         else if (e.code === "Backspace" || e.code === "Delete") { // for backspace 
+            // TODO handle case for selection across multiple lines
             e.preventDefault();
             e.stopPropagation();
             let startOfLine = this.caretX === 0;

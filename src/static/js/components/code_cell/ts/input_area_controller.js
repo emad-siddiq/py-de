@@ -50,6 +50,7 @@ class InputAreaEditor {
         let line_container = document.createElement("div");
         line_container.setAttribute("id", line_container_id);
         line_container.style.display = "flex";
+        line_container.style.whiteSpace = "normal";
         let line_number_div = document.createElement("div");
         line_number_div.setAttribute("id", line_number_id);
         line_number_div.setAttribute("class", line_number_id);
@@ -83,6 +84,20 @@ class InputAreaEditor {
         code_area_div.style.fontSize = "16px";
         code_area_div.style.backgroundColor = "";
         code_area_div.style.whiteSpace = "pre";
+        document.addEventListener("selectionchange", event => {
+            let selection = document.getSelection();
+            console.log(selection.anchorNode, selection.anchorOffset, selection.focusNode, selection.focusOffset, selection.direction);
+            if (selection.anchorNode !== selection.focusNode) {
+                let old_line_range = document.createRange();
+                old_line_range.selectNode(selection.anchorNode);
+                let new_line_range = document.createRange();
+                new_line_range.setEnd(selection.focusNode, selection.focusNode.focusOffset);
+                new_line_range.setStart(selection.focusNode, selection.focusNode.textContent.length);
+                selection.removeAllRanges();
+                selection.addRange(old_line_range);
+                selection.addRange(new_line_range);
+            }
+        });
         code_area_div.textContent = text ? text : "";
         line_container.appendChild(line_number_div);
         line_container.appendChild(code_area_div);
