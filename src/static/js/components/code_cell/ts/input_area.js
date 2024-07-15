@@ -49,10 +49,6 @@ class InputArea {
         this.div.appendChild(line);
         this.total_lines += 1;
     }
-    getCodeAreaByLine(line_number) {
-        let code_area_id = InputAreaEditor.getCodeAreaId(this.id, line_number);
-        return document.getElementById(code_area_id);
-    }
     removeLine(caretY) {
         let line_number = caretY + 1;
         delete this.grid[line_number];
@@ -70,6 +66,10 @@ class InputArea {
         this.div.addEventListener("keydown", this.handleInput.bind(this));
         this.div.addEventListener("click", this.handleClick.bind(this));
     }
+    getCodeAreaByLine(line_number) {
+        let code_area_id = InputAreaEditor.getCodeAreaId(this.id, line_number);
+        return document.getElementById(code_area_id);
+    }
     handleClick(e) {
         //Move caret to start of input area.
         let first_line_code_area = this.getCodeAreaByLine(this.caretY + 1);
@@ -83,50 +83,6 @@ class InputArea {
         }
         else {
             // TODO implement logic to handle click on earlier line in code area
-        }
-    }
-    handleInput(e) {
-        // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code 
-        // this = InputArea class, e.target = <div id="code-cell-1-input-area">
-        // Do textprocessing with line number and figure out new height
-        //document.getSelection().collapseToEnd();
-        e.preventDefault();
-        e.stopPropagation();
-        if (e.code === "Enter") {
-            this.removeDefaultBr(); //contenteditable adds <br> on pressing entering
-            InputAreaEditor.increaseCodeCellSize(this.div);
-            this.addLineAfter(this.caretY);
-            let new_code_area = this.getCodeAreaByLine(this.caretY + 1);
-            InputAreaEditor.moveCaretToBeginningOfCodeArea(new_code_area);
-        }
-        else if (e.code === "Backspace" || e.code === "Delete") { // for backspace 
-            let startOfLine = this.caretX === 0;
-            let firstLine = this.caretY === 0;
-            if (startOfLine) {
-                if (firstLine) {
-                    //Can't delete since beginning of first line
-                    return;
-                }
-                this.removeLine(this.caretY);
-            }
-            else {
-                this.removeCharFromLine();
-            }
-        }
-        else if (e.code === "Space") {
-            this.caretX += 1;
-            this.addToGrid(" ");
-            let code_area = this.getCodeAreaByLine(this.caretY + 1);
-            console.log(code_area.innerHTML.length, this.caretX);
-            InputAreaEditor.moveCaretToIndexOfCodeArea(code_area, this.caretX);
-        }
-        else {
-            this.caretX += 1;
-            this.addToGrid(e.key);
-            let curr_code_area = this.getCodeAreaByLine(this.caretY + 1);
-            if (curr_code_area) {
-                InputAreaEditor.moveCaretToIndexOfCodeArea(curr_code_area, this.caretX);
-            }
         }
     }
     addToGrid(char) {
@@ -156,12 +112,109 @@ class InputArea {
             let code_area_text = (_a = this.grid[line_number - 1]) === null || _a === void 0 ? void 0 : _a.join('');
             code_area.textContent = code_area_text;
             //code_area.innerHTML = code_area_text;
-            console.log("code_area", code_area_text, code_area_text.length, code_area);
+            //  console.log("code_area", code_area_text, code_area_text.length, code_area);
         }
     }
     removeDefaultBr() {
+        //TODO only remove break from previous code cell
         let br = document.querySelector('br');
         br === null || br === void 0 ? void 0 : br.remove();
+    }
+    handleInput(e) {
+        // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code 
+        // this = InputArea class, e.target = <div id="code-cell-1-input-area">
+        // Do textprocessing with line number and figure out new height
+        //document.getSelection().collapseToEnd();
+        if (e.code === "Enter") {
+            e.preventDefault();
+            e.stopPropagation();
+            this.removeDefaultBr(); //contenteditable adds <br> on pressing entering
+            InputAreaEditor.increaseCodeCellSize(this.div);
+            this.addLineAfter(this.caretY);
+            let new_code_area = this.getCodeAreaByLine(this.caretY + 1);
+            InputAreaEditor.moveCaretToEndOfCodeArea(new_code_area);
+        }
+        else if (e.code === "Backspace" || e.code === "Delete") { // for backspace 
+            e.preventDefault();
+            e.stopPropagation();
+            let startOfLine = this.caretX === 0;
+            let firstLine = this.caretY === 0;
+            if (startOfLine) {
+                if (firstLine) {
+                    //Can't delete since beginning of first line
+                    return;
+                }
+                this.removeLine(this.caretY);
+            }
+            else {
+                this.removeCharFromLine();
+            }
+        }
+        else if (e.code === "Space") {
+            e.preventDefault();
+            e.stopPropagation();
+            this.caretX += 1;
+            this.addToGrid(" ");
+            let code_area = this.getCodeAreaByLine(this.caretY + 1);
+            console.log(code_area.innerHTML.length, this.caretX);
+            InputAreaEditor.moveCaretToIndexOfCodeArea(code_area, this.caretX);
+        }
+        else if (e.metaKey || e.ctrlKey) {
+            if (e.key === "a") {
+                e.stopPropagation();
+                e.preventDefault();
+                //Create a range (a range is a like the selection but invisible)
+                let selection = window.getSelection();
+                selection === null || selection === void 0 ? void 0 : selection.removeAllRanges();
+                for (let i = 1; i <= Object.keys(this.grid).length; i++) {
+                    let range = document.createRange();
+                    let code_area = this.getCodeAreaByLine(i);
+                    let text_area = code_area === null || code_area === void 0 ? void 0 : code_area.childNodes[0];
+                    range.selectNode(text_area);
+                    selection === null || selection === void 0 ? void 0 : selection.addRange(range);
+                }
+            }
+        }
+        else if (e.shiftKey) {
+            if (InputAreaEditor.isAlphaNumericChar(e.key) || InputAreaEditor.isSpecialChar(e.key)) {
+                console.log("shift alphnuym", e.key);
+                e.preventDefault();
+                e.stopPropagation();
+                this.caretX += 1;
+                this.addToGrid(e.key);
+                let curr_code_area = this.getCodeAreaByLine(this.caretY + 1);
+                if (curr_code_area) {
+                    InputAreaEditor.moveCaretToIndexOfCodeArea(curr_code_area, this.caretX);
+                }
+            }
+        }
+        //If alphanumeric, increment caret and add key to code_area of current line.
+        else if (InputAreaEditor.isAlphaNumericChar(e.key)) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.caretX += 1;
+            this.addToGrid(e.key);
+            let curr_code_area = this.getCodeAreaByLine(this.caretY + 1);
+            if (curr_code_area) {
+                InputAreaEditor.moveCaretToIndexOfCodeArea(curr_code_area, this.caretX);
+            }
+        }
+        else {
+            console.log("Not caught code:", e.code, " key ", e.key);
+            if (e.shiftKey) {
+                console.log("Shift Key");
+            }
+            else {
+                e.preventDefault();
+                e.stopPropagation();
+                this.caretX += 1;
+                this.addToGrid(e.key);
+                let curr_code_area = this.getCodeAreaByLine(this.caretY + 1);
+                if (curr_code_area) {
+                    InputAreaEditor.moveCaretToIndexOfCodeArea(curr_code_area, this.caretX);
+                }
+            }
+        }
     }
 }
 function removeElement(id) {

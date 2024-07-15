@@ -54,38 +54,35 @@ class InputAreaEditor {
         line_number_div.setAttribute("id", line_number_id);
         line_number_div.setAttribute("class", line_number_id);
         line_number_div.setAttribute("contenteditable", "false");
+        line_number_div.style.userSelect = "none";
+        line_number_div.style.webkitUserSelect = "none";
+        line_number_div.style.setProperty("-moz-user-select", "none");
+        line_number_div.style.setProperty("-khtml-user-select", "none");
+        line_number_div.style.setProperty("-webkit-user-select", "none");
+        line_number_div.style.setProperty("-o-user-selectt", "none");
         line_number_div.textContent = line_number.toString() + ".";
-        line_number_div.style.fontSize = "14px";
+        line_number_div.style.fontSize = "16px";
         line_number_div.style.color = "gray";
         //TODO: handle sidebar indent
-        line_number_div.style.width = "15px";
+        line_number_div.style.width = "10px";
         line_number_div.style.textAlign = "center";
-        line_number_div.style.alignContent = "center";
-        line_number_div.style.height = "16px";
-        line_number_div.style.paddingTop = "2px";
-
-
-
-
+        line_number_div.style.alignContent = "end";
         // if (line_number >= 10) {
         //     line_number_div.style.marginLeft = "-10px";
         // } else {
         //     line_number_div.style.paddingRight = "0px";
         // }
-
-
-        line_number_div.style.marginRight = "5px";
+        line_number_div.style.marginRight = "10px";
         line_number_div.style.paddingLeft = "5px";
         let code_area_div = document.createElement("div");
         code_area_div.setAttribute("id", code_area_id);
         code_area_div.setAttribute("class", code_area_id);
         code_area_div.setAttribute("contenteditable", "true");
         code_area_div.setAttribute("tab-index", "1");
+        code_area_div.style.userSelect = "auto";
         code_area_div.style.fontSize = "16px";
         code_area_div.style.backgroundColor = "";
         code_area_div.style.whiteSpace = "pre";
-        code_area_div.style.height = "16px";
-
         code_area_div.textContent = text ? text : "";
         line_container.appendChild(line_number_div);
         line_container.appendChild(code_area_div);
@@ -151,6 +148,36 @@ class InputAreaEditor {
         let selection = window.getSelection(); //get the selection object (allows you to change selection)
         selection === null || selection === void 0 ? void 0 : selection.removeAllRanges(); //remove any selections already made
         selection === null || selection === void 0 ? void 0 : selection.addRange(range); //make the range you have just created the visible selection
+    }
+    // Char check:
+    // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key#specifications
+    // https://en.wikipedia.org/wiki/List_of_Unicode_characters
+    static isAlphaNumericChar(key) {
+        //https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key#specifications
+        if (key.length > 1 || key.length == 0) {
+            return false;
+        }
+        let utf_16 = key.charCodeAt(0);
+        let a_to_z = (ch) => {
+            //console.log("a to z", key, ch);
+            return ch >= 97 && ch <= 122;
+        };
+        let A_TO_Z = (ch) => {
+            //console.log("A to Z", key, ch);
+            return ch >= 65 && ch <= 90;
+        };
+        let one_to_nine = (ch) => {
+            //console.log("1 to 9", key, ch);
+            return ch >= 48 && ch <= 57;
+        };
+        return a_to_z(utf_16) || A_TO_Z(utf_16) || one_to_nine(utf_16);
+    }
+    static isSpecialChar(key) {
+        if (key.length > 1 || key.length == 0) {
+            return false;
+        }
+        let utf_16 = key.charCodeAt(0);
+        return utf_16 >= 33 && utf_16 <= 47;
     }
 }
 export { InputAreaEditor };
