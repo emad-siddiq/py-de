@@ -5,25 +5,22 @@ class InputArea {
     id: string;
     caretX: number;
     caretY: number;
-    curr_caret_line: number;
     total_lines: number;
     div: HTMLElement;
     grid: Object;
     line_number: string;
+    allSelected: boolean;
 
-    constructor(parentId) {
-        this.id = parentId + "-input-area";
+    constructor(id) {
+        this.id = id;
         this.div = this.createInputArea();
-        this.addEventListeners();
-        this.curr_caret_line = 1;
+        this.div = this.addEventListeners(this.div);
         this.total_lines = 0;
         this.grid = {};
         //Out of grid starting area
         this.caretX = -1;                    /* |      -------------> X   InputArea[i, j] = this.grid[caretY, caretX] */
-        this.caretY = -1;                   /* |                                                                     */
-        this.addLineAfter(this.caretY);          /* ▼ Y is the line-number                                                */
-                                            /* grid[i, 0] is reserved for line_number */
-    }
+        this.caretY = -1;                    /* |                                                                     */
+                                             /* ▼ Y is the line-number                                                */    }
 
     getDiv() {
         return this.div;
@@ -60,12 +57,13 @@ class InputArea {
     addLineAfter(caretY: number, text?: string): void {
 
         this.caretX = 0;
-        this.caretY = caretY + 1;
+        this.caretY += 1;
 
         let line_number = this.caretY+1; //Since we initialize caretY at 0 so line = caretY + 1 since line starts at 1
         let line = InputAreaEditor.createLine(this.id, line_number, text);
        
-        this.div.appendChild(line);
+        let input_area = document.getElementById(this.id);
+        input_area.appendChild(line);
         this.total_lines += 1;
 
         
@@ -90,13 +88,19 @@ class InputArea {
             this.caretX = this.grid[this.caretY] ? this.grid[this.caretY].length - 1: 0; 
         }
 
+        this.total_lines -= 1;
+
+
 
     }
 
 
-    addEventListeners():void {
-        this.div.addEventListener("keydown", this.handleInput.bind(this));
-        this.div.addEventListener("click", this.handleClick.bind(this));
+    addEventListeners(div: HTMLElement):HTMLElement {
+        
+        div.addEventListener("keydown", this.handleInput.bind(this));
+        div.addEventListener("click", this.handleClick.bind(this));
+
+        return div;
 
     }
 
@@ -164,12 +168,15 @@ class InputArea {
         br?.remove();
     }
 
+
     handleInput(e: KeyboardEvent):void {
         // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code 
 
 
         // this = InputArea class, e.target = <div id="code-cell-1-input-area">
         // Do textprocessing with line number and figure out new height
+
+        console.log("INPUT");
     
         //document.getSelection().collapseToEnd();
                     
@@ -190,9 +197,24 @@ class InputArea {
             // TODO handle case for selection across multiple lines
             e.preventDefault();
             e.stopPropagation();
-           let startOfLine = this.caretX === 0;
-           let firstLine = this.caretY === 0;
-           if (startOfLine) {
+            if (this.allSelected) {
+                //removeElement(this.id);
+        
+                while (document.getElementById(this.id).children.length !== 1) {
+                    this.removeLine(this.caretY);
+                }
+                let code_area = this.getCodeAreaByLine(this.caretY+1);
+                code_area.innerText = "";
+                this.caretX = 0;
+                this.grid = {};
+                InputAreaEditor.moveCaretToEndOfCodeArea(code_area);
+
+                return;
+            }
+
+            let startOfLine = this.caretX === 0;
+            let firstLine = this.caretY === 0;
+            if (startOfLine) {
                 if (firstLine) {
                     //Can't delete since beginning of first line
                     return;
@@ -233,6 +255,9 @@ class InputArea {
                     range.selectNode(text_area);
                     selection?.addRange(range);
                 }
+
+                this.allSelected = true;
+                console.log("all selected", this.allSelected);
 
 
             }

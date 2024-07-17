@@ -54,10 +54,11 @@ class CodeCell {
 
         //code_cell.style.border = "solid 4px";
         this.code_cell_number = new CodeCellNumber(this.cc_id);
-        this.input_area = new InputArea(this.id);
+        this.input_area = new InputArea(this.id + "-input-area");
 
         code_cell.appendChild(this.code_cell_number.getDiv());
         code_cell.appendChild(this.input_area.getDiv());
+
 
         return code_cell;
     }

@@ -81,7 +81,10 @@ class Editor {
  
     addCodeCell() {
         let code_cell = new CodeCell(this.cc_id, this.socket);
-        document.getElementById("editor").appendChild(code_cell.getDiv())
+
+        document.getElementById("editor").appendChild(code_cell.getDiv());
+        code_cell.input_area.addLineAfter(-1); // add first line
+
         this.cc_id += 1;
     }
 

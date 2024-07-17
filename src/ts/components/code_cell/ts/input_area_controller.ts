@@ -61,8 +61,6 @@ class InputAreaEditor {
         line_container.setAttribute("id", line_container_id)
         line_container.style.display = "flex";
         line_container.style.whiteSpace = "normal";
-        
-
 
         let line_number_div = document.createElement("div");
         line_number_div.setAttribute("id", line_number_id);
@@ -108,17 +106,26 @@ class InputAreaEditor {
 
         document.addEventListener("selectionchange", event=>{
             let selection: any = document.getSelection();
-            console.log(selection.anchorNode, selection.anchorOffset, selection.focusNode, selection.focusOffset, selection.direction);
+            //console.log(selection.anchorNode, selection.anchorOffset, selection.focusNode, selection.focusOffset, selection.direction);
             
             if (selection.anchorNode !== selection.focusNode) {
-                let old_line_range = document.createRange();
+
+                let ranges = [];
+
+                for (let i = 0; i < selection.rangeCount; i++) {
+                    ranges[i] = selection.getRangeAt(i);
+                }
+
+                console.log(ranges);
+
+                
+                let old_line_range = ranges[0];
                 old_line_range.selectNode(selection.anchorNode);
         
                 let new_line_range = document.createRange();
                 new_line_range.setEnd(selection.focusNode, selection.focusNode.focusOffset);
                 new_line_range.setStart(selection.focusNode, selection.focusNode.textContent.length);
 
-                selection.removeAllRanges();
                 selection.addRange(old_line_range);
                 selection.addRange(new_line_range);
 
@@ -198,7 +205,6 @@ class InputAreaEditor {
 
     }
 
-
     static moveSelection(startNode: Node, startOffset: number, endNode: Node, endOffset: number, toStart?: boolean) {
 
         let range = document.createRange();//Create a range (a range is a like the selection but invisible)
@@ -235,7 +241,7 @@ class InputAreaEditor {
             return ch >= 65 && ch <= 90;
         }
 
-        let one_to_nine = (ch) {
+        let one_to_nine = (ch) => {
             //console.log("1 to 9", key, ch);
             return ch >= 48 && ch <= 57;
         };
