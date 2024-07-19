@@ -29,7 +29,7 @@ connectToWS().then(server => {
 
     let code_area = document.getElementById("code-cell-1-input-area-line-number-1-code-area");
     InputAreaEditor.moveCaretToEndOfCodeArea(code_area);
-    //code_area.focus();
+    code_area.focus();
 
     socket.onmessage = (event) => {
         console.log(event.data);
@@ -47,8 +47,8 @@ window.onbeforeunload = function(event)
 
 
 document.addEventListener("keydown", function(e) {
-    if (e.shiftKey && e.key === "Tab") {
-        console.log("darkmode")
+    if (e.key === "F1") {
+        console.log("darkmode");
         e.stopPropagation();
         e.preventDefault();
         DarkMode.toggle();

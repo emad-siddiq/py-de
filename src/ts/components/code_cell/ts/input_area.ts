@@ -1,4 +1,7 @@
+// TODO: add text highlighting functionality
+// TODO: add color syntax
 import {InputAreaEditor} from "./input_area_controller.js";
+import { DarkMode } from "../../../themes/darkmode/darkmode.js";
 
 class InputArea {
 
@@ -176,7 +179,7 @@ class InputArea {
         // this = InputArea class, e.target = <div id="code-cell-1-input-area">
         // Do textprocessing with line number and figure out new height
 
-        console.log("INPUT");
+        console.log("INPUT", e.code, e.key, e.shiftKey, e.ctrlKey, e.altKey);
     
         //document.getSelection().collapseToEnd();
                     
@@ -190,6 +193,38 @@ class InputArea {
             this.addLineAfter(this.caretY);
             let new_code_area = this.getCodeAreaByLine(this.caretY+1);
             InputAreaEditor.moveCaretToEndOfCodeArea(new_code_area);
+        }
+
+        else if (e.key === "F1") {
+            console.log("darkmode");
+            e.stopPropagation();
+            e.preventDefault();
+            DarkMode.toggle();
+        }
+        
+
+        // TODO these two cases should indent properly
+        else if (e.shiftKey && e.code === "Tab") {
+            e.stopPropagation();
+            e.preventDefault();
+            // let code_area = this.getCodeAreaByLine(this.caretY+1);
+
+            // if (this.caretX < 4) {
+            //     this.caretX = 0;
+            // } else {
+            //     this.caretX -= 4;
+            // }
+            // InputAreaEditor.moveCaretToIndexOfCodeArea(code_area, this.caretX);
+            // TODO implement shift tab, (should move all code)
+            
+
+        }
+
+        else if (e.code === "Tab") {
+            e.stopPropagation();
+            e.preventDefault();
+            this.addString(" ", 4);
+        // TODO: implement tab
         }
 
          
@@ -229,12 +264,7 @@ class InputArea {
         else if (e.code === "Space") {
             e.preventDefault();
             e.stopPropagation();
-            this.caretX += 1;
-            this.addToGrid(" ");
-            let code_area = this.getCodeAreaByLine(this.caretY + 1);
-            console.log(code_area.innerHTML.length, this.caretX);
-            InputAreaEditor.moveCaretToIndexOfCodeArea(code_area, this.caretX);
-
+            this.addString(" ", 1);
         }
 
         else if  (e.metaKey || e.ctrlKey) {
@@ -297,22 +327,36 @@ class InputArea {
 
         else {
             console.log("Not caught code:", e.code, " key " , e.key);
-            if (e.shiftKey) {
-                console.log("Shift Key")
-            } else {
-                e.preventDefault();
-                e.stopPropagation();
-                this.caretX += 1;
-                this.addToGrid(e.key);
-                let curr_code_area = this.getCodeAreaByLine(this.caretY+1);
-                if (curr_code_area) {
-                    InputAreaEditor.moveCaretToIndexOfCodeArea(curr_code_area, this.caretX);
-                }
+            
+            e.preventDefault();
+            e.stopPropagation();
+            this.caretX += 1;
+            this.addToGrid(e.key);
+            let curr_code_area = this.getCodeAreaByLine(this.caretY+1);
+            if (curr_code_area) {
+                InputAreaEditor.moveCaretToIndexOfCodeArea(curr_code_area, this.caretX);
             }
+            
           
         }
                 
     }
+
+    /*
+        Adds a string numOftimes to the the current line (this.caretY+1);
+    */
+    addString(str: string, numOfTimes: number) {
+        let code_area = this.getCodeAreaByLine(this.caretY + 1);
+
+        for (let i = 0; i < numOfTimes; i++) {
+            for (let j = 0; j < str.length; j++) {
+                this.caretX += 1;
+                this.addToGrid(str[j]);
+            }
+        }
+        InputAreaEditor.moveCaretToIndexOfCodeArea(code_area, this.caretX);
+    }
+        
 
 }
 
@@ -320,5 +364,7 @@ function removeElement(id: string) {
     var elem = document.getElementById(id);
     return elem?.parentNode?.removeChild(elem);
 }
+
+
 
 export {InputArea};

@@ -78,7 +78,7 @@ class InputAreaEditor {
         line_number_div.style.color = "gray";
 
         //TODO: handle sidebar indent
-        line_number_div.style.width = "10px";
+        line_number_div.style.width = "20px";
         line_number_div.style.textAlign = "center";
         line_number_div.style.alignContent = "end";
 
@@ -88,7 +88,7 @@ class InputAreaEditor {
         //     line_number_div.style.paddingRight = "0px";
         // }
 
-        line_number_div.style.marginRight = "10px";
+        //line_number_div.style.marginRight = "10px";
         line_number_div.style.paddingLeft = "5px";
 
 
@@ -103,6 +103,8 @@ class InputAreaEditor {
         code_area_div.style.fontSize = "16px";
         code_area_div.style.backgroundColor = "";
         code_area_div.style.whiteSpace = "pre";
+        code_area_div.style.marginRight = "-10px";
+
 
         document.addEventListener("selectionchange", event=>{
             let selection: any = document.getSelection();
@@ -205,6 +207,7 @@ class InputAreaEditor {
 
     }
 
+
     static moveSelection(startNode: Node, startOffset: number, endNode: Node, endOffset: number, toStart?: boolean) {
 
         let range = document.createRange();//Create a range (a range is a like the selection but invisible)
@@ -241,24 +244,26 @@ class InputAreaEditor {
             return ch >= 65 && ch <= 90;
         }
 
-        let one_to_nine = (ch) => {
+        let zero_to_nine = (ch) => {
             //console.log("1 to 9", key, ch);
             return ch >= 48 && ch <= 57;
         };
 
-        return a_to_z(utf_16) || A_TO_Z(utf_16) || one_to_nine(utf_16);
+        return a_to_z(utf_16) || A_TO_Z(utf_16) || zero_to_nine(utf_16);
 
     }
 
 
     static isSpecialChar(key: string): boolean {
-
+        //(UTF 16 33-47 and 58-64 inclusive)
+        // ! " # $ % & ' ( ) * + , - . /  : ; < = > ? @  
+        // console.log(String.fromCharCode(i));
         if (key.length > 1 || key.length == 0) {
             return false;
         }
         let utf_16 = key.charCodeAt(0);
 
-        return utf_16 >= 33 && utf_16 <= 47;
+        return utf_16 >= 33 && utf_16 <= 47 || utf_16 >= 58 && utf_16 <= 64;
 
     }
 
