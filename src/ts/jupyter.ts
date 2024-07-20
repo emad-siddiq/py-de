@@ -4,8 +4,8 @@ import { Explorer } from "./windows/explorer.js";
 import { Terminal } from "./windows/terminal.js";
 import { Editor } from "./windows/editor.js";
 import {DarkMode} from "./themes/darkmode/darkmode.js";
-import { InputArea } from "./components/code_cell/ts/input_area.js";
-import { InputAreaEditor } from "./components/code_cell/ts/input_area_controller.js";
+import { InputArea } from "./components/code_cell/ts/views/input_area.js";
+import { InputAreaEditor } from "./components/code_cell/ts/controllers/input_area_controller.js";
 
 var socket;
 /*

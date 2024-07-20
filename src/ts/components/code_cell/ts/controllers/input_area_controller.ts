@@ -4,7 +4,35 @@ class InputAreaEditor {
                        Code Cell Textual Processing
     *******************************************************************/ 
 
-    static decreaseCodeCellSize(div: any) {
+        /* 
+      Creates and returns div for input area 
+    */
+    static  createInputArea(id: string): HTMLElement {
+        let input_area = document.createElement("div");
+
+        input_area.setAttribute("contenteditable", "true");
+        input_area.setAttribute("id", id);
+        input_area.setAttribute("class", id);
+        input_area.setAttribute("spellcheck", "false");
+
+        //let randColor = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
+        input_area.style.backgroundColor = "white"; //TODO extract to theme
+        input_area.style.zIndex = "2";
+        input_area.style.position = "absolute";
+        input_area.style.top = "10px";
+        input_area.style.left = "3%";
+        input_area.style.boxSizing = "border-box";
+        input_area.style.paddingTop = "10px";
+        input_area.style.textIndent = "0.5%";
+        input_area.style.boxShadow = "0px 2px 15px 0px rgba(0, 0, 0, .1)";
+        input_area.style.width = "96.25%";
+        input_area.style.height = "40px";
+        input_area.style.fontFamily = "ui-monospace,SFMono-Regular,\"SF Mono\",Menlo,Consolas,\"Liberation Mono\",monospace";
+
+        return input_area;
+    } 
+
+    static decreaseCodeCellHeight(div: any) {
         let currHeight = div.getBoundingClientRect().height;
         console.log("currHeight", currHeight);
         if (currHeight < 45) {
@@ -15,11 +43,12 @@ class InputAreaEditor {
         div.parentNode.style.height = div.parentNode.getBoundingClientRect().height - 19 + "px";
     }
 
-    static increaseCodeCellSize(div: any) {
+    static increaseCodeCellHeight(div: HTMLElement) {
         let currHeight = div.getBoundingClientRect().height;
         let newHeight = currHeight + 19;
         div.style.height = newHeight + "px";
-        div.parentNode.style.height = div.parentNode.getBoundingClientRect().height + 19 + "px";
+        let parentNode: HTMLElement = div.parentNode as HTMLElement;
+        parentNode.style.height = parentNode.getBoundingClientRect().height + 19 + "px";
     }
 
     //Returns the line if for a line # inside input_area_id
@@ -29,7 +58,7 @@ class InputAreaEditor {
     }
 
     static generateLineNumberDivId(line_container_id: string) {
-        let line_number_div_id = line_container_id + "-number"
+        let line_number_div_id = line_container_id + "-number";
         return line_number_div_id;
     }
 
@@ -41,8 +70,8 @@ class InputAreaEditor {
 
     //Returns the id for the div that contains the line number e.g 2. or 3.
     static getLineNumberDivId(input_area_id: string, line_number: number | string) {
-        let line_container_id = InputAreaEditor.generateLineContainerId(input_area_id, line_number);
-        return InputAreaEditor.generateLineNumberDivId(line_container_id);
+        let line_container_id = this.generateLineContainerId(input_area_id, line_number);
+        return this.generateLineNumberDivId(line_container_id);
     }
 
     // Return id of line# code area
@@ -53,9 +82,9 @@ class InputAreaEditor {
 
     // Creates a line for the input area, adding a line number and editable text area
     static createLine(input_area_id: string, line_number: number, text) {
-        let line_container_id = InputAreaEditor.generateLineContainerId(input_area_id, line_number);
-        let line_number_id = InputAreaEditor.generateLineNumberDivId(line_container_id);
-        let code_area_id = InputAreaEditor.generateCodeAreaDivId(line_container_id);
+        let line_container_id = this.generateLineContainerId(input_area_id, line_number);
+        let line_number_id = this.generateLineNumberDivId(line_container_id);
+        let code_area_id = this.generateCodeAreaDivId(line_container_id);
 
         let line_container = document.createElement("div");
         line_container.setAttribute("id", line_container_id)

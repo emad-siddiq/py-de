@@ -1,4 +1,4 @@
-import { CodeCell } from "../components/code_cell/ts/code_cell.js";
+import { CodeCell } from "../components/code_cell/ts/views/code_cell.js";
 
 
 class Editor {
@@ -83,7 +83,7 @@ class Editor {
         let code_cell = new CodeCell(this.cc_id, this.socket);
 
         document.getElementById("editor").appendChild(code_cell.getDiv());
-        code_cell.input_area.addLineAfter(-1); // add first line
+        code_cell.input_area.addLineAfter(0); // add first line
 
         this.cc_id += 1;
     }
