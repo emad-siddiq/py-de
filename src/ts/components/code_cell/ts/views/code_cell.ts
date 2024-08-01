@@ -1,5 +1,5 @@
-import {InputArea} from "./input_area.js";
-import { CodeCellNumber } from "./cell_number.js";
+import {InputArea} from "./child_views/input_area.js";
+import { CodeCellNumber } from "./child_views/cell_number.js";
 
 class CodeCell {
     // TODO: Add color syntax highlighting to CodeCell
@@ -11,8 +11,6 @@ class CodeCell {
     input_area_id: string;
     div: HTMLElement;
     input_area: InputArea;
-    code_cell_number: CodeCellNumber;
-
 
     constructor(id, socket) 
     {
@@ -53,10 +51,10 @@ class CodeCell {
         code_cell.style.position = "relative";
 
         //code_cell.style.border = "solid 4px";
-        this.code_cell_number = new CodeCellNumber(this.cc_id);
-        this.input_area = new InputArea(this.id + "-input-area");
+        let code_cell_number = new CodeCellNumber(this.cc_id);
+        this.input_area = new InputArea(this.input_area_id);
 
-        code_cell.appendChild(this.code_cell_number.getDiv());
+        code_cell.appendChild(code_cell_number.getDiv());
         code_cell.appendChild(this.input_area.getDiv());
 
 

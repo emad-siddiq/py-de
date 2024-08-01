@@ -2,16 +2,16 @@
 import { Debugger } from "./windows/debugger.js";
 import { Explorer } from "./windows/explorer.js";
 import { Terminal } from "./windows/terminal.js";
+import { Menu } from "./windows/menu.js";
 import { Editor } from "./windows/editor.js";
 import {DarkMode} from "./themes/darkmode/darkmode.js";
-import { InputArea } from "./components/code_cell/ts/views/input_area.js";
 import { InputAreaEditor } from "./components/code_cell/ts/controllers/input_area_controller.js";
 
 var socket;
 /*
    Connect to WS for sending Python code to backend.
 */
-
+let _menu = new Menu();
 let _debugger = new Debugger();
 let _explorer = new Explorer();
 let _terminal = new Terminal();

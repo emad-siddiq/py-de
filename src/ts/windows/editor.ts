@@ -32,7 +32,6 @@ class Editor {
         div.style.backgroundColor = "white";
         div.style.width = "100%";
         div.style.height = "100%";
-        div.style.border = "solid 2px";
         div.style.boxSizing = "border-box"; // https://developer.mozilla.org/en-US/docs/Web/CSS/box-sizing
 
         let fileNameDiv = this.createFileNameDiv();

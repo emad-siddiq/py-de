@@ -1,4 +1,4 @@
-import { InputArea } from "../views/input_area.js";
+import { InputArea } from "../views/child_views/input_area.js";
 import { InputAreaEditor } from "../controllers/input_area_controller.js";
 import { DarkMode } from "../../../../themes/darkmode/darkmode.js";
 

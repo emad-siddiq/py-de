@@ -1,8 +1,8 @@
 // TODO: add text highlighting functionality
 // TODO: add color syntax
-import {InputAreaEditor} from "../controllers/input_area_controller.js";
-import { DarkMode } from "../../../../themes/darkmode/darkmode.js";
-import { InputAreaKeyDown } from "../handlers/keydown_handler.js";
+import {InputAreaEditor} from "../../controllers/input_area_controller.js";
+import { DarkMode } from "../../../../../themes/darkmode/darkmode.js";
+import { InputAreaKeyDown } from "../../handlers/keydown_handler.js";
 
 class InputArea {
 
