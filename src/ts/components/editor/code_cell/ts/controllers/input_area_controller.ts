@@ -121,7 +121,7 @@ class InputAreaEditor {
         line_number_div.style.paddingLeft = "5px";
 
 
-
+        //Code Area Next to Line Number on line
         let code_area_div = document.createElement("div");
         code_area_div.setAttribute("id", code_area_id);
         code_area_div.setAttribute("class", code_area_id);

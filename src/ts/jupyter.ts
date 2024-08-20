@@ -2,19 +2,22 @@
 import { Debugger } from "./windows/debugger.js";
 import { Explorer } from "./windows/explorer.js";
 import { Terminal } from "./windows/terminal.js";
-import { Menu } from "./windows/menu.js";
+import { Menu } from "./windows/menu/menu.js";
 import { Editor } from "./windows/editor.js";
 import {DarkMode} from "./themes/darkmode/darkmode.js";
-import { InputAreaEditor } from "./components/code_cell/ts/controllers/input_area_controller.js";
+import { InputAreaEditor } from "./components/editor/code_cell/ts/controllers/input_area_controller.js";
+import { AddMenu } from "./components/editor/add_menu/add_menu.js";
+
 
 var socket;
 /*
    Connect to WS for sending Python code to backend.
 */
-let _menu = new Menu();
+//let _menu = new Menu(); TODO: Finish implementing the top menu bar
 let _debugger = new Debugger();
 let _explorer = new Explorer();
 let _terminal = new Terminal();
+let _add_menu = new AddMenu();
 
 
 // TODO: Reveal menu on hover against top
@@ -42,8 +45,6 @@ window.onbeforeunload = function(event)
     socket.close();
     return confirm("Confirm refresh");
 };
-
-
 
 
 document.addEventListener("keydown", function(e) {

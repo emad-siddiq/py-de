@@ -1,7 +1,9 @@
 import { InputArea } from "../views/child_views/input_area.js";
 import { InputAreaEditor } from "../controllers/input_area_controller.js";
 import { DarkMode } from "../../../../themes/darkmode/darkmode.js";
-
+import { removeElement } from "../../../../utility/dom.js";
+import { TextCell } from "../views/text_cell.js";
+import { CodeCell } from "../../code_cell/ts/views/code_cell.js";
 class InputAreaKeyDown {
     
     //InputArea instance is bound to these functions, since our instances are linked to divs directly
@@ -21,6 +23,7 @@ class InputAreaKeyDown {
         e.stopPropagation();
         DarkMode.toggle();
     }
+ 
 
     static ShiftTab(e: KeyboardEvent, input_area: InputArea) {
         e.stopPropagation();

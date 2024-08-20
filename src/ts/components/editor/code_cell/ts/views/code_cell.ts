@@ -41,6 +41,9 @@ class CodeCell {
         let code_cell = document.createElement("div");
         code_cell.setAttribute("id", this.id);
         code_cell.setAttribute("class", this.id);
+        console.log("SET THE CCID", this.cc_id);
+        code_cell.setAttribute("cc_id", this.cc_id.toString());
+
         code_cell.style.left = "0%";
         code_cell.style.top = "0%";
 
@@ -52,12 +55,12 @@ class CodeCell {
 
         //code_cell.style.border = "solid 4px";
         let code_cell_number = new CodeCellNumber(this.cc_id);
-        this.input_area = new InputArea(this.input_area_id);
+        this.input_area = new InputArea(this.input_area_id, this.cc_id);
 
         code_cell.appendChild(code_cell_number.getDiv());
         code_cell.appendChild(this.input_area.getDiv());
 
-
+        console.log(code_cell);
         return code_cell;
     }
 

@@ -1,4 +1,4 @@
-import { CodeCell } from "../components/code_cell/ts/views/code_cell.js";
+import { CodeCell } from "../components/editor/code_cell/ts/views/code_cell.js";
 
 
 class Editor {
@@ -12,6 +12,7 @@ class Editor {
         this.cc_id = 1;
         this.id = "editor";
         this.socket = socket;
+        document.body.appendChild(this.div);
         document.body.addEventListener("keydown", this.CMD_PLUS_addCodeCell.bind(this)); 
         document.body.addEventListener("keydown", this.CMD_MINUS_removeCodeCell.bind(this)); 
     }
@@ -36,7 +37,6 @@ class Editor {
 
         let fileNameDiv = this.createFileNameDiv();
         div.appendChild(fileNameDiv);
-        document.body.appendChild(div);
 
         return div;
     }
@@ -77,12 +77,15 @@ class Editor {
         }
      
     }
+
+
+
  
     addCodeCell() {
         let code_cell = new CodeCell(this.cc_id, this.socket);
 
         document.getElementById("editor").appendChild(code_cell.getDiv());
-        code_cell.input_area.addLineAfter(0); // add first line
+        code_cell.input_area.addLineAfter(0); // add first line TODO: Check this logic and fix it
 
         this.cc_id += 1;
     }

@@ -4,6 +4,7 @@ class Menu {
     div: HTMLElement;
     visible: boolean;
 
+
     constructor() {
         this.div = this.createMenuDiv();
         this.div.addEventListener("mouseenter", this.enable.bind(this));
@@ -40,8 +41,8 @@ class Menu {
         let div = document.createElement("div");
         div.innerHTML = "File";
 
-        div.setAttribute("id", "file");
-        div.setAttribute("class", "file");
+        div.setAttribute("id", "menu-file");
+        div.setAttribute("class", "menu-file");
     
         div.style.fontSize = "1.75vh";
         div.style.color = "black";
@@ -54,7 +55,8 @@ class Menu {
 
         div.addEventListener("mouseenter", (e) => {
             div.style.backgroundColor = "#f2d8f0";
-            //revealDropDown();
+
+            div.appendChild(createDropDown());
         })
 
         div.addEventListener("mouseleave", (e) => {
@@ -66,9 +68,7 @@ class Menu {
         return div;
     }
 
-    revealDropDown() {
-
-    }
+    
 
     enable(){
         let menu = document.getElementById("menu");
@@ -88,6 +88,24 @@ class Menu {
     }
 
 
+}
+
+function createDropDown():HTMLElement {
+    let div = document.createElement("div");
+    div.setAttribute("id", "file-dropdown");
+    div.setAttribute("class", "file-dropdown");
+
+    
+
+    div.style.backgroundColor = "#f2d8f0";
+    div.style.position = "absolute";
+    div.style.left = "0";
+    div.style.top = "3vh";
+    div.style.width = "10vw";
+    div.style.height = "30vh";
+
+
+    return div;
 }
 
 export {Menu};
