@@ -49,7 +49,7 @@ class CodeCell {
 
         code_cell.style.width = "100%";
         code_cell.style.height = "70px";
-        code_cell.style.overflow = "visible";
+        //code_cell.style.overflow = "visible";
         code_cell.style.boxSizing = "border-box";
         code_cell.style.position = "relative";
 

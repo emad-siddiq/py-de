@@ -2,22 +2,25 @@
 import { Debugger } from "./windows/debugger.js";
 import { Explorer } from "./windows/explorer.js";
 import { Terminal } from "./windows/terminal.js";
-import { Menu } from "./windows/menu/menu.js";
+import { Menu } from "./windows/drop_down_menu/menu.js";
 import { Editor } from "./windows/editor.js";
 import {DarkMode} from "./themes/darkmode/darkmode.js";
 import { InputAreaEditor } from "./components/editor/code_cell/ts/controllers/input_area_controller.js";
-import { AddMenu } from "./components/editor/add_menu/add_menu.js";
-
+import { AddMenu } from "./components/editor/menu/add_menu.js";
+import { ObjectManager } from "./managers/object_manager.js";
 
 var socket;
 /*
    Connect to WS for sending Python code to backend.
 */
 //let _menu = new Menu(); TODO: Finish implementing the top menu bar
-let _debugger = new Debugger();
+
+let _objectManager = new ObjectManager();
+
+let _debugger = new Debugger(_objectManager);
 let _explorer = new Explorer();
 let _terminal = new Terminal();
-let _add_menu = new AddMenu();
+
 
 
 // TODO: Reveal menu on hover against top
@@ -26,7 +29,9 @@ let _add_menu = new AddMenu();
 
 connectToWS().then(server => {
     socket = server;
-    let _editor = new Editor(socket);
+    let _editor = new Editor(socket, _objectManager);
+    let _add_menu = new AddMenu(_objectManager);
+
     _editor.addCodeCell();
     //DarkMode.enable();
 

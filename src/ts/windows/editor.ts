@@ -6,8 +6,9 @@ class Editor {
     cc_id: number;
     id: string;
     socket: WebSocket;
+    objectManager: ObjectManager;
 
-    constructor(socket: WebSocket) {
+    constructor(socket: WebSocket, objectManager: ObjectManager) {
         this.div = this.createEditorDiv();
         this.cc_id = 1;
         this.id = "editor";
@@ -15,6 +16,8 @@ class Editor {
         document.body.appendChild(this.div);
         document.body.addEventListener("keydown", this.CMD_PLUS_addCodeCell.bind(this)); 
         document.body.addEventListener("keydown", this.CMD_MINUS_removeCodeCell.bind(this)); 
+        this.objectManager = objectManager;
+        this.objectManager.associate(this.id, this);
     }
 
     getDiv() {
@@ -84,7 +87,7 @@ class Editor {
     addCodeCell() {
         let code_cell = new CodeCell(this.cc_id, this.socket);
 
-        document.getElementById("editor").appendChild(code_cell.getDiv());
+        document.getElementById("editor").appendChild(code_cell.getDiv()); // TODO: Fix this to add cell after the code cell currently being operatsad on 
         code_cell.input_area.addLineAfter(0); // add first line TODO: Check this logic and fix it
 
         this.cc_id += 1;

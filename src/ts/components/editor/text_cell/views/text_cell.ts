@@ -45,7 +45,7 @@ class TextCell {
 
         text_cell.style.width = "100%";
         text_cell.style.height = "70px";
-        text_cell.style.overflow = "visible";
+        //text_cell.style.overflow = "visible";
         text_cell.style.boxSizing = "border-box";
         text_cell.style.position = "relative";
         text_cell.style.backgroundColor = "red";

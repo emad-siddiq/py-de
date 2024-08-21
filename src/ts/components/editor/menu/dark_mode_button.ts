@@ -1,10 +1,12 @@
 // Bar in top left of the screen for basic actions like add cell, remove cell
 
-class AddMenu {
+import { createIconLabel, createImgDiv } from "./utility.js";
+
+class DarkModeButton {
     id: string;
     div: HTMLElement;
     constructor() {
-        this.id = "add-menu";
+        this.id = "dark-mode-icon";
         this.div = this.createDiv();
         document.body.appendChild(this.div);
 
@@ -20,47 +22,39 @@ class AddMenu {
         // Set location in browser window
         div.style.position = "absolute";
         //div position from top-left term corner in terms of view-width and view-height
-        div.style.top = "5vh";
-        div.style.left = "60vw";
+        div.style.top = "1vh";
+        div.style.left = "98vw";
         div.style.zIndex = "3";
 
         //div size
-        div.style.width = "30vw";
-        div.style.height = "10vh";
+        div.style.width = "3vh";
+        div.style.height = "3vh";
         //temp styling
-        div.style.backgroundColor = "red";
-
+        div.style.backgroundColor = "#f2ebf2";
+        div.style.display = "flex";
 
         //Add child nodes
-        div.appendChild(this.addCellIcon());
-        
+        div.appendChild(this.addDarkModeButton());
+
         //Return div with styling set
         return div;
         
     }
 
-    addCellIcon(): HTMLElement {
-        return this.createImgDiv("add-cell-icon", "./../img/svg/plus.svg");
-    }
-
-
-    createImgDiv(id: string, path: string) {
+    addDarkModeButton(): HTMLElement {
         let div = document.createElement("div");
-        div.setAttribute("id", id);
-        div.setAttribute("class", id);
-        var image = new Image();
-        image.src = path;
-        image.style.width = "2vw";
-        image.style.height = "2vw";
-        image.style.position = "relative";
-        image.style.top = "0vh";
-        image.style.left = "0vw";
-        div.appendChild(image);
+
+        div.appendChild(createImgDiv("add-text-cell-icon", "./../img/svg/dark_mode.svg"));
+        div.style.display = "flex";
         return div;
     }
+
+    
+
+
 
 
 
 }
 
-export {AddMenu}
+export {DarkModeButton}

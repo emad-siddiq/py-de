@@ -1,10 +1,15 @@
 class Debugger {
 
     div: HTMLElement
-    
-    constructor() {
+    objectManager: ObjectManager;
+    id: string;
+    constructor(objectManager: ObjectManager) {
+        this.objectManager = objectManager;
         this.div = this.createDebuggerDiv();
+        this.id = "debugger";
         document.body.addEventListener("keydown", this.toggleBinding.bind(this));
+        this.objectManager.associate(this.id, this);
+
     }
 
     getDiv() {
