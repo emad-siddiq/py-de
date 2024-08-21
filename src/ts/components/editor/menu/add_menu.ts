@@ -12,7 +12,7 @@ class AddMenu {
     constructor(objectManger: ObjectManager) {
         this.objectManager = objectManger;
         new AddCodeCellButton(this.objectManager);
-        new AddTextCellButton();
+        new AddTextCellButton(this.objectManager);
         new DarkModeButton();
     }
 

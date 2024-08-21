@@ -1,9 +1,11 @@
 import { CodeCell } from "../components/editor/code_cell/ts/views/code_cell.js";
-
+import { TextCell } from "../components/editor/text_cell/views/text_cell.js";
+import { ObjectManager } from "../managers/object_manager.js";
 
 class Editor {
     div: HTMLElement;
     cc_id: number;
+    tc_id:number;
     id: string;
     socket: WebSocket;
     objectManager: ObjectManager;
@@ -11,6 +13,7 @@ class Editor {
     constructor(socket: WebSocket, objectManager: ObjectManager) {
         this.div = this.createEditorDiv();
         this.cc_id = 1;
+        this.tc_id = 1;
         this.id = "editor";
         this.socket = socket;
         document.body.appendChild(this.div);
@@ -82,8 +85,6 @@ class Editor {
     }
 
 
-
- 
     addCodeCell() {
         let code_cell = new CodeCell(this.cc_id, this.socket);
 
@@ -97,6 +98,14 @@ class Editor {
         let to_remove = document.getElementById("editor").children[document.getElementById("editor").children.length-1];
 
         document.getElementById("editor").removeChild(to_remove);
+    }
+
+
+    addTextCell() {
+        let text_cell = new TextCell(this.tc_id);
+
+        document.getElementById("editor").appendChild(text_cell.getDiv()); // TODO: Fix this to add cell after the code cell currently being operatsad on 
+        this.tc_id += 1;
     }
 
     CMD_PLUS_addCodeCell(e) {

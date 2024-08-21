@@ -1,15 +1,20 @@
 // Bar in top left of the screen for basic actions like add cell, remove cell
 
+import { ObjectManager } from "../../../managers/object_manager.js";
 import { createIconLabel, createImgDiv } from "./utility.js";
+import { Editor } from "../../../windows/editor.js";
 
 class AddTextCellButton {
     id: string;
     div: HTMLElement;
-    constructor() {
+    objectManager: ObjectManager;
+
+    constructor(objectManager: ObjectManager) {
+        this.objectManager = objectManager;
         this.id = "add-text-cell";
         this.div = this.createDiv();
         document.body.appendChild(this.div);
-
+        this.addEventListeners();
     }
 
     createDiv():HTMLElement {
@@ -54,6 +59,14 @@ class AddTextCellButton {
         div.style.fontSize = "18px";
 
         return div;
+    }
+
+    addEventListeners() {
+        this.div.addEventListener('click', () => {
+            let _editor = this.objectManager.getObject("editor") as Editor;
+            _editor.addTextCell();
+        })
+            
     }
 
  

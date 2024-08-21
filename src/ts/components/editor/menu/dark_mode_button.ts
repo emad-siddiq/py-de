@@ -1,5 +1,6 @@
 // Bar in top left of the screen for basic actions like add cell, remove cell
 
+import { DarkMode } from "../../../themes/darkmode/darkmode.js";
 import { createIconLabel, createImgDiv } from "./utility.js";
 
 class DarkModeButton {
@@ -9,6 +10,7 @@ class DarkModeButton {
         this.id = "dark-mode-icon";
         this.div = this.createDiv();
         document.body.appendChild(this.div);
+        this.addEventListeners();
 
     }
 
@@ -49,6 +51,13 @@ class DarkModeButton {
         return div;
     }
 
+
+    addEventListeners() {
+        this.div.addEventListener('click', () => {
+            DarkMode.toggle()
+        })
+            
+    }
     
 
 
