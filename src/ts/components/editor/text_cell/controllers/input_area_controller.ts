@@ -20,7 +20,7 @@ class InputAreaEditor {
         input_area.style.zIndex = "2";
         input_area.style.position = "absolute";
         input_area.style.top = "10px";
-        input_area.style.left = "3%";
+        input_area.style.left = "2.5%";
         input_area.style.boxSizing = "border-box";
         input_area.style.paddingTop = "10px";
         input_area.style.textIndent = "0.5%";

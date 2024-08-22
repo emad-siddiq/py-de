@@ -39,7 +39,7 @@ class AddCodeCellButton {
         div.style.height = "3vh";
 
         //temp styling
-        div.style.backgroundColor = "#f2ebf2";
+        div.style.backgroundColor = "green";
 
         div.style.display = "flex";
 

@@ -8,6 +8,7 @@ import {DarkMode} from "./themes/darkmode/darkmode.js";
 import { InputAreaEditor } from "./components/editor/code_cell/ts/controllers/input_area_controller.js";
 import { AddMenu } from "./components/editor/menu/add_menu.js";
 import { ObjectManager } from "./managers/object_manager.js";
+import { Chat } from "./components/gpt/chat.js";
 
 var socket;
 /*
@@ -31,6 +32,7 @@ connectToWS().then(server => {
     socket = server;
     let _editor = new Editor(socket, _objectManager);
     let _add_menu = new AddMenu(_objectManager);
+    let _chat = new Chat(_objectManager);
 
     _editor.addCodeCell();
     //DarkMode.enable();

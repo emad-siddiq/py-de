@@ -25,7 +25,7 @@ class InputAreaEditor {
         input_area.style.paddingTop = "10px";
         input_area.style.textIndent = "0.5%";
         input_area.style.boxShadow = "0px 2px 15px 0px rgba(0, 0, 0, .1)";
-        input_area.style.width = "96.25%";
+        input_area.style.width = "94.5%";
         input_area.style.height = "40px";
         input_area.style.fontFamily = "ui-monospace,SFMono-Regular,\"SF Mono\",Menlo,Consolas,\"Liberation Mono\",monospace";
 

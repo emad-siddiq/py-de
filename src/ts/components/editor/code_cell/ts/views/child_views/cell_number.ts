@@ -27,7 +27,7 @@ class CodeCellNumber {
         // code_cell_number.style.border = "solid 5px #9F14A9";
         code_cell_number.style.top = "20px";
         code_cell_number.style.left = "0px";
-        code_cell_number.style.paddingLeft = "5px";
+        code_cell_number.style.paddingLeft = "10px";
         code_cell_number.style.paddingRight = "5px";
         code_cell_number.style.fontFamily = "ui-monospace,SFMono-Regular,\"SF Mono\",Menlo,Consolas,\"Liberation Mono\",monospace";
     

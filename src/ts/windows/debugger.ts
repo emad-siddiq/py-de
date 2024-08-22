@@ -1,3 +1,5 @@
+import { ObjectManager } from "../managers/object_manager";
+
 class Debugger {
 
     div: HTMLElement

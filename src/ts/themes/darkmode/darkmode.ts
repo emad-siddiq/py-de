@@ -28,6 +28,9 @@ class DarkMode {
     }
 
     static enable() {
+
+        //TODO: enable darkmode component by component
+
         document.body.style.backgroundColor = "rgb(30,30,30)";
         let editor = document.getElementById("editor");
         editor.style.backgroundColor = "rgb(10,15,22)";
@@ -41,6 +44,11 @@ class DarkMode {
            node.style.backgroundColor = "black";
            node.style.color = "white";
            node.style.boxShadow = "0px 5px 15px 5px rgba(20, 255, 60, .2)";
+        }
+
+        let all_nodes: Array<HTMLElement> = Array.from(document.querySelectorAll('*'));
+        for (let node of all_nodes) {
+           node.style.backgroundColor = "black";
         }
         
     }
