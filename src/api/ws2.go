@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -73,10 +74,20 @@ func callChatGPTAPI(prompt string) (string, error) {
 		return "", errors.New("API key is not set")
 	}
 
+	if err := listAvailableModels(); err != nil {
+		log.Fatalf("Error: %v", err)
+	}
+
+	if err := checkRateLimits(); err != nil {
+		log.Fatalf("Error: %v", err)
+	}
+
+	fmt.Println("Sending this message to ChatGPT:", prompt)
+
 	apiUrl := "https://api.openai.com/v1/chat/completions"
 
 	requestBody, err := json.Marshal(ChatGPTRequest{
-		Model: "gpt-4", // or "gpt-3.5-turbo"
+		Model: "gpt-3.5-turbo", // or "gpt-3.5-turbo"
 		Messages: []Message{
 			{Role: "system", Content: "You are a helpful assistant."},
 			{Role: "user", Content: prompt},
@@ -123,4 +134,97 @@ func callChatGPTAPI(prompt string) (string, error) {
 	}
 
 	return chatGPTResponse.Choices[0].Message.Content, nil
+}
+
+type Model struct {
+	ID string `json:"id"`
+}
+
+type ListModelsResponse struct {
+	Data []Model `json:"data"`
+}
+
+func listAvailableModels() error {
+	apiKey := os.Getenv("OPENAI_API_KEY")
+	if apiKey == "" {
+		return fmt.Errorf("API key is not set")
+	}
+
+	apiUrl := "https://api.openai.com/v1/models"
+
+	req, err := http.NewRequest("GET", apiUrl, nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+apiKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := ioutil.ReadAll(resp.Body)
+		return fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, body)
+	}
+
+	var modelsResponse ListModelsResponse
+	if err := json.NewDecoder(resp.Body).Decode(&modelsResponse); err != nil {
+		return err
+	}
+
+	if len(modelsResponse.Data) == 0 {
+		fmt.Println("No models found")
+		return nil
+	}
+
+	fmt.Println("Available models:")
+	for _, model := range modelsResponse.Data {
+		fmt.Println(model.ID)
+	}
+
+	return nil
+}
+
+func checkRateLimits() error {
+	apiKey := os.Getenv("OPENAI_API_KEY")
+	if apiKey == "" {
+		return fmt.Errorf("API key is not set")
+	}
+
+	apiUrl := "https://api.openai.com/v1/models"
+
+	req, err := http.NewRequest("GET", apiUrl, nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+apiKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Check rate limit headers
+	rateLimit := resp.Header.Get("X-RateLimit-Limit")
+	rateLimitRemaining := resp.Header.Get("X-RateLimit-Remaining")
+	rateLimitReset := resp.Header.Get("X-RateLimit-Reset")
+
+	if rateLimit != "" && rateLimitRemaining != "" && rateLimitReset != "" {
+		fmt.Printf("Rate Limit: %s\n", rateLimit)
+		fmt.Printf("Rate Limit Remaining: %s\n", rateLimitRemaining)
+		fmt.Printf("Rate Limit Reset: %s\n", rateLimitReset)
+	} else {
+		fmt.Println("Rate limit headers not found")
+	}
+
+	return nil
 }

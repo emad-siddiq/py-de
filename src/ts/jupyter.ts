@@ -12,7 +12,8 @@ import { Chat } from "./components/gpt/chat.js";
 import { WebSocketClientCodeCell } from "./components/ws_client/ws_client.js";
 import { WebSocketClientChatGPT } from "./components/ws_client/ws_client_chatgpt.js";
 
-var socket;
+var socket1;
+var socket2;
 /*
    Connect to WS for sending Python code to backend.
 */
@@ -35,8 +36,8 @@ const wsClientCodeCell = new WebSocketClientCodeCell(
     'ws://localhost:8080/v1/ws',
     (_socket) => {
         console.log('Running custom code after WebSocket connection is established.');
-        socket = _socket;
-        let _editor = new Editor(socket, _objectManager);
+        socket1 = _socket;
+        let _editor = new Editor(socket1, _objectManager);
         let _add_menu = new AddMenu(_objectManager);
     
         _editor.addCodeCell();
@@ -45,6 +46,13 @@ const wsClientCodeCell = new WebSocketClientCodeCell(
         let code_area = document.getElementById("code-cell-1-input-area-line-number-1-code-area");
         InputAreaEditor.moveCaretToEndOfCodeArea(code_area);
         code_area.focus();
+
+        //Close connection before reloading
+window.onbeforeunload = function(event)
+{
+    socket1.close();
+    return confirm("Confirm refresh");
+};
         
     }
 );
@@ -52,23 +60,22 @@ const wsClientCodeCell = new WebSocketClientCodeCell(
 const wsClientChatGPT = new WebSocketClientChatGPT(
     'ws://localhost:8080/v1/ws/chatgpt',
     (_socket) => {
-        console.log('Running custom code after WebSocket connection is established.');
-        socket = _socket;
-       
-        let _chat = new Chat(socket);
-    
+        socket2 = _socket;
+        console.log('Running custom code after WebSocket connection is established.');       
+        let _chat = new Chat(socket2);
+    //Close connection before reloading
+window.onbeforeunload = function(event)
+{
+    socket2.close();
+    return confirm("Confirm refresh");
+};
        
     
     }
 );
 
 
-//Close connection before reloading
-window.onbeforeunload = function(event)
-{
-    socket.close();
-    return confirm("Confirm refresh");
-};
+
 
 
 document.addEventListener("keydown", function(e) {
@@ -82,27 +89,3 @@ document.addEventListener("keydown", function(e) {
 
 
 
-
-async function connectToWS() {
-    try {
-        let server = await connect()
-        console.log("connected to socket")
-        return server
-        // ... use server
-    } catch (error) {
-        console.log("ooops ", error)
-    }
-  }
-
-function connect() {
-    return new Promise(function(resolve, reject) {
-        var server = new WebSocket('');
-        server.onopen = function() {
-            resolve(server);
-        };
-        server.onerror = function(err) {
-            reject(err);
-        };
-
-    });
-}
