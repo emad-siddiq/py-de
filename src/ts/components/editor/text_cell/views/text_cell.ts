@@ -1,5 +1,3 @@
-import {InputArea} from "./child_views/input_area.js";
-
 // Class to represent the text cells inside the code editor
 // A text cell can be added using the keyboard shortcut ⌘ + shift + 
 // Or by clicking the top menu icon

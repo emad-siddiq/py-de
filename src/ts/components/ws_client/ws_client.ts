@@ -1,8 +1,7 @@
 // WebSocketClient.ts
-export class WebSocketClient {
+class WebSocketClientCodeCell {
     private url: string;
     private socket: WebSocket | null;
-    private codeCellDiv: HTMLElement;
     private onOpenCallback: ((socket: WebSocket) => void) | null;
 
     constructor(url: string, onOpenCallback?: (socket: WebSocket) => void) {
@@ -26,7 +25,7 @@ export class WebSocketClient {
         if (this.onOpenCallback && this.socket) {
             this.onOpenCallback(this.socket);
         }
-        this.sendMessage('Client connected.');
+        this.sendMessage('Code Cell Client connected.');
     }
 
     private onMessage(event: MessageEvent): void {
@@ -64,11 +63,8 @@ export class WebSocketClient {
        // this.messageContainer.scrollTop = this.messageContainer.scrollHeight;
     }
 
-    public setActiveCodeCell(codeCellId: string): void {
-        const newCell = document.getElementById(codeCellId);
-        if (!newCell) {
-            throw new Error(`Element with id ${codeCellId} not found.`);
-        }
-        this.codeCellDiv = newCell;
-    }
+   
 }
+
+
+export {WebSocketClientCodeCell}

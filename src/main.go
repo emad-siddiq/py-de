@@ -16,6 +16,7 @@ func main() {
 	//http.HandleFunc("/", pages.HomeHandler)
 
 	http.HandleFunc("/v1/ws", api.WebSocketV1)
+	http.HandleFunc("/v1/ws/chatgpt", api.WebSocketChatGPT)
 
 	fmt.Printf("PySync local server is launching")
 	http.ListenAndServe(":8080", nil)

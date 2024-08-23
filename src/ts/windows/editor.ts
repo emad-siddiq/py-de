@@ -1,6 +1,5 @@
 import { CodeCell } from "../components/editor/code_cell/ts/views/code_cell.js";
 import { TextCell } from "../components/editor/text_cell/views/text_cell.js";
-import { WebSocketClient } from "../components/ws_client/ws_client.js";
 import { ObjectManager } from "../managers/object_manager.js";
 
 class Editor {

@@ -1,1 +1,1 @@
-Client connected.
+Code Cell Client connected.

@@ -1,5 +1,4 @@
 import { ObjectManager } from "../../../managers/object_manager.js";
-import { WebSocketClient } from "../../ws_client/ws_client.js";
 
 // Class to represent the output from execution in the corresponding code cell
 // Or by clicking the top menu icon

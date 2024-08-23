@@ -3,7 +3,6 @@
 import {InputAreaEditor} from "../../controllers/input_area_controller.js";
 import { DarkMode } from "../../../../../../themes/darkmode/darkmode.js";
 import { InputAreaKeyDown } from "../../handlers/keydown_handler.js";
-import { WebSocketClient } from "../../../../../ws_client/ws_client.js";
 
 class InputArea {
 

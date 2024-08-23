@@ -9,7 +9,8 @@ import { InputAreaEditor } from "./components/editor/code_cell/ts/controllers/in
 import { AddMenu } from "./components/editor/menu/add_menu.js";
 import { ObjectManager } from "./managers/object_manager.js";
 import { Chat } from "./components/gpt/chat.js";
-import { WebSocketClient } from "./components/ws_client/ws_client.js";
+import { WebSocketClientCodeCell } from "./components/ws_client/ws_client.js";
+import { WebSocketClientChatGPT } from "./components/ws_client/ws_client_chatgpt.js";
 
 var socket;
 /*
@@ -30,15 +31,13 @@ let _terminal = new Terminal();
 // TODO: File --> Open, select local .md and render correctly
 
 
-// Example usage
-const wsClient = new WebSocketClient(
+const wsClientCodeCell = new WebSocketClientCodeCell(
     'ws://localhost:8080/v1/ws',
     (_socket) => {
         console.log('Running custom code after WebSocket connection is established.');
         socket = _socket;
         let _editor = new Editor(socket, _objectManager);
         let _add_menu = new AddMenu(_objectManager);
-        let _chat = new Chat(_objectManager);
     
         _editor.addCodeCell();
         //DarkMode.enable();
@@ -47,6 +46,19 @@ const wsClient = new WebSocketClient(
         InputAreaEditor.moveCaretToEndOfCodeArea(code_area);
         code_area.focus();
         
+    }
+);
+
+const wsClientChatGPT = new WebSocketClientChatGPT(
+    'ws://localhost:8080/v1/ws/chatgpt',
+    (_socket) => {
+        console.log('Running custom code after WebSocket connection is established.');
+        socket = _socket;
+       
+        let _chat = new Chat(socket);
+    
+       
+    
     }
 );
 

@@ -1,5 +1,5 @@
-import { ObjectManager } from "../../managers/object_manager";
-import { createImgDiv } from "../editor/menu/utility";
+import { ObjectManager } from "../../managers/object_manager.js";
+import { WebSocketClientChatGPT } from "../ws_client/ws_client_chatgpt.js";
 
 class Chat {
     id: string;
@@ -10,11 +10,13 @@ class Chat {
     private messagesContainer: HTMLDivElement;
     private chatInputArea: HTMLTextAreaElement;
     private sendButton: HTMLButtonElement;
+    socket: WebSocket;
 
-    constructor(objectManger: ObjectManager) {
+    constructor(webSocket: WebSocket) {
         this.id = "chat-gpt";
         this.div = this.createDiv();
         this.toggle = false;
+        this.socket = webSocket;
         
 
         document.body.appendChild(this.div);
@@ -24,6 +26,7 @@ class Chat {
 
 
     }
+
 
     createDiv() {
         let div = document.createElement("div");
@@ -131,6 +134,9 @@ class Chat {
 
         // Create messages container
         this.messagesContainer = document.createElement('div');
+        this.messagesContainer.setAttribute("id", "message-container");
+        this.messagesContainer.setAttribute("class", "message-container");
+
         this.applyMessagesContainerStyles(this.messagesContainer);
         this.chatContainer.appendChild(this.messagesContainer);
 
@@ -162,7 +168,7 @@ class Chat {
 
     private sendMessage(): void {
         const message = this.chatInputArea.value.trim();
-        console.log(message);
+        console.log("Sending message through websocket to chatgpt", message);
 
         if (message !== '') {
             const messageElement = document.createElement('div');
@@ -170,6 +176,7 @@ class Chat {
             this.messagesContainer.appendChild(messageElement);
             this.chatInputArea.value = '';
             this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+            this.socket.send(message);
         }
     }
 

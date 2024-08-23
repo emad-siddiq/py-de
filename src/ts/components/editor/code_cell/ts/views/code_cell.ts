@@ -1,6 +1,5 @@
 import {InputArea} from "./child_views/input_area.js";
 import { CodeCellNumber } from "./child_views/cell_number.js";
-import { WebSocketClient } from "../../../../ws_client/ws_client.js";
 import { Editor } from "../../../../../windows/editor.js";
 
 class CodeCell {
