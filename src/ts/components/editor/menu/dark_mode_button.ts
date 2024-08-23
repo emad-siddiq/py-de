@@ -25,14 +25,14 @@ class DarkModeButton {
         div.style.position = "absolute";
         //div position from top-left term corner in terms of view-width and view-height
         div.style.top = "1vh";
-        div.style.left = "98vw";
+        div.style.left = "97vw";
         div.style.zIndex = "3";
 
         //div size
-        div.style.width = "3vh";
-        div.style.height = "3vh";
+        div.style.width = "4vh";
+        div.style.height = "4vh";
         //temp styling
-        div.style.backgroundColor = "#f2ebf2";
+        //div.style.backgroundColor = "#f2ebf2";
         div.style.display = "flex";
 
         //Add child nodes

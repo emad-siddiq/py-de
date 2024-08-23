@@ -3,6 +3,7 @@
 import {InputAreaEditor} from "../../controllers/input_area_controller.js";
 import { DarkMode } from "../../../../../../themes/darkmode/darkmode.js";
 import { InputAreaKeyDown } from "../../handlers/keydown_handler.js";
+import { WebSocketClient } from "../../../../../ws_client/ws_client.js";
 
 class InputArea {
 
@@ -15,14 +16,16 @@ class InputArea {
     line_number: string;
     allSelected: boolean;
     cc_id: number;
+    socket: WebSocket;
 
-    constructor(id, cc_id) {
+    constructor(id, cc_id, socket) {
         this.id = id;
         this.div = InputAreaEditor.createInputArea(this.id);
         this.div = this.addEventListeners(this.div);
         this.total_lines = 0;
         this.grid = {};
         this.cc_id = cc_id;
+        this.socket = socket;
         //Out of grid starting area
         this.caretX = -1;                    /* |      -------------> X   InputArea[i, j] = this.grid[caretY, caretX] */
         this.caretY = -1;                    /* |                                                                     */
@@ -185,18 +188,26 @@ class InputArea {
 
         console.log("INPUT", e.code, e.key, e.shiftKey, e.ctrlKey, e.altKey);
                         
-        if (e.code === "Enter") {
+        if (e.shiftKey && e.key === 'Enter') {
+            console.log("INput received");
+            this.socket.send(this.exportCode());
+            console.log("Sending", this.exportCode());
+            return;
+        }
+    
+        
+        else if (e.code === "Enter") {
             InputAreaKeyDown.Enter(e, this);
         }
 
         else if (e.key === "F1") {
             InputAreaKeyDown.F1(e, this);
         }
-        
         // TODO these two cases should indent properly
         else if (e.shiftKey && e.code === "Tab") {
             InputAreaKeyDown.ShiftTab(e, this);
         }
+
 
         else if (e.code === "Tab") {
             InputAreaKeyDown.Tab(e, this);
@@ -235,6 +246,20 @@ class InputArea {
           
         }
                 
+    }
+
+
+    exportCode():string {
+        console.log(this.grid);
+        let out = "";
+        for (let i = 0; i < Object.keys(this.grid).length; i++) {
+            for (let j = 0; j < this.grid[i].length; j++) {
+                out += this.grid[i][j];
+            }
+            out += "\n";
+        }
+
+        return out;
     }
 
 

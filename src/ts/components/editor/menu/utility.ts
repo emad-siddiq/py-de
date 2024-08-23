@@ -18,8 +18,8 @@ function createImgDiv(id: string, path: string) {
     div.setAttribute("class", id);
     var image = new Image();
     image.src = path;
-    image.style.width = "3vh";
-    image.style.height = "3vh";
+    image.style.width = "4vh";
+    image.style.height = "4vh";
     image.style.position = "relative";
     image.style.top = "0vh";
     image.style.left = "0vw";

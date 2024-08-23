@@ -1,5 +1,7 @@
 import {InputArea} from "./child_views/input_area.js";
 import { CodeCellNumber } from "./child_views/cell_number.js";
+import { WebSocketClient } from "../../../../ws_client/ws_client.js";
+import { Editor } from "../../../../../windows/editor.js";
 
 class CodeCell {
     // TODO: Add color syntax highlighting to CodeCell
@@ -11,9 +13,12 @@ class CodeCell {
     input_area_id: string;
     div: HTMLElement;
     input_area: InputArea;
+    editor: Editor;
 
-    constructor(id, socket) 
-    {
+    constructor(id, editor, socket) 
+    {   
+        // Editor where all the other cells live
+        this.editor = editor;
         // Socket to send code to run
         this.socket = socket;
 
@@ -34,7 +39,7 @@ class CodeCell {
     }
 
     addEventListeners(div) {
-       div.addEventListener("keydown", this.sendOnShiftEnter.bind(this));
+       div.addEventListener("click", this.clickHandler.bind(this))
     }
 
     createCodeCellDiv() {
@@ -55,7 +60,7 @@ class CodeCell {
 
         //code_cell.style.border = "solid 4px";
         let code_cell_number = new CodeCellNumber(this.cc_id);
-        this.input_area = new InputArea(this.input_area_id, this.cc_id);
+        this.input_area = new InputArea(this.input_area_id, this.cc_id, this.socket);
 
         code_cell.appendChild(code_cell_number.getDiv());
         code_cell.appendChild(this.input_area.getDiv());
@@ -64,13 +69,10 @@ class CodeCell {
         return code_cell;
     }
 
-    sendOnShiftEnter(e: KeyboardEvent) {
-        if (e.shiftKey && e.key === 'Enter') {
-            this.socket.send(this.div.textContent);
-            return;
-        }
+    clickHandler() {
+        this.div.style.boxShadow = ""
+        this.div.style.boxShadow = "0px 5px 15px 5px rgba(20, 255, 60, .2)";
     }
-
 
    
 }

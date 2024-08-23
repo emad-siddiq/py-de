@@ -30,16 +30,18 @@ class AddCodeCellButton {
         // Set location in browser window
         div.style.position = "sticky";
         //div position from top-left term corner in terms of view-width and view-height
-        div.style.top = "1vh";
-        div.style.left = "88vw";
+        div.style.top = "1.5vh";
+        div.style.left = "85vw";
         div.style.zIndex = "1000";
 
         //div size
-        div.style.width = "4vw";
-        div.style.height = "3vh";
+        div.style.width = "5vw";
+        div.style.height = "3.5vh";
 
         //temp styling
-        div.style.backgroundColor = "green";
+        div.style.borderRadius = "10%";
+        div.style.backgroundColor = "white";
+        div.style.boxShadow = "0px 2px 15px 0px rgba(0, 0, 0, .2)";
 
         div.style.display = "flex";
 

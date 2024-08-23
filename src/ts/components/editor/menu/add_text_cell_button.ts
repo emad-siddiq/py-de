@@ -27,17 +27,22 @@ class AddTextCellButton {
         // Set location in browser window
         div.style.position = "sticky";
         //div position from top-left term corner in terms of view-width and view-height
-        div.style.top = "1vh";
-        div.style.left = "93vw";
-        div.style.zIndex = "1000";
+        div.style.top = "1.5vh";
+        div.style.left = "91vw";
+        div.style.zIndex = "100000";
 
         //div size
-        div.style.width = "4vw";
-        div.style.height = "3vh";
-        div.style.marginTop = "-3vh";
+        div.style.width = "5vw";
+        div.style.height = "3.5vh";
+        div.style.marginTop = "-3.5vh";
         //temp styling
-        div.style.backgroundColor = "#f2ebf2";
         div.style.display = "flex";
+        div.style.backgroundColor = "white";
+
+        div.style.borderRadius = "10%";
+        div.style.boxShadow = "0px 2px 15px 0px rgba(0, 0, 0, .2)";
+
+
 
         //Add child nodes
         div.appendChild(this.addTextCellButton());

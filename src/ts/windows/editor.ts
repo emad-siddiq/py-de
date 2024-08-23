@@ -1,11 +1,13 @@
 import { CodeCell } from "../components/editor/code_cell/ts/views/code_cell.js";
 import { TextCell } from "../components/editor/text_cell/views/text_cell.js";
+import { WebSocketClient } from "../components/ws_client/ws_client.js";
 import { ObjectManager } from "../managers/object_manager.js";
 
 class Editor {
     div: HTMLElement;
-    cc_id: number;
-    tc_id:number;
+    cc_id: number;    //total -> ?
+    tc_id:number;     //      -> ? TODO: Figure out how the id's are being assigned/
+    active_code_cell_id: string;
     id: string;
     socket: WebSocket;
     objectManager: ObjectManager;
@@ -14,11 +16,13 @@ class Editor {
         this.div = this.createEditorDiv();
         this.cc_id = 1;
         this.tc_id = 1;
+        this.active_code_cell_id = "";
         this.id = "editor";
         this.socket = socket;
         document.body.appendChild(this.div);
         document.body.addEventListener("keydown", this.CMD_PLUS_addCodeCell.bind(this)); 
         document.body.addEventListener("keydown", this.CMD_MINUS_removeCodeCell.bind(this)); 
+
         this.objectManager = objectManager;
         this.objectManager.associate(this.id, this);
     }
@@ -86,10 +90,20 @@ class Editor {
 
 
     addCodeCell() {
-        let code_cell = new CodeCell(this.cc_id, this.socket);
+        let code_cell = new CodeCell(this.cc_id, this, this.socket);
 
-        document.getElementById("editor").appendChild(code_cell.getDiv()); // TODO: Fix this to add cell after the code cell currently being operatsad on 
+        let editorDiv = document.getElementById("editor");
+        let currNode = code_cell.getDiv();
+
+        if (this.active_code_cell_id === "" || currNode.nextSibling === null) {
+            editorDiv.appendChild(code_cell.getDiv()); 
+        } else {
+            editorDiv.insertBefore(currNode.nextSibling, document.getElementById(this.active_code_cell_id));
+            
+        }
+
         code_cell.input_area.addLineAfter(0); // add first line TODO: Check this logic and fix it
+        this.active_code_cell_id = code_cell.id;
 
         this.cc_id += 1;
     }
@@ -126,6 +140,9 @@ class Editor {
             this.removeCodeCell();
         }
     }
+
+   
+
 
 
 
