@@ -20,7 +20,9 @@
 
 [Install Go](https://go.dev/dl/)
 
-Then `go run .` from root. (pysync folder)
+`cd src`
+
+Then `go run .` from inside the src. (pysync folder)
 
 ## Shortcuts:
 
