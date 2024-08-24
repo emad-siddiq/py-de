@@ -95,7 +95,7 @@ class Editor {
         let code_cell = new CodeCell(this.cc_id, this, this.socket);
 
         let editorDiv = document.getElementById("editor");
-        let selectedCodeCell = document.getElementById(this.active_code_cell_id));
+        let selectedCodeCell = document.getElementById(this.active_code_cell_id);
 
         if (this.active_code_cell_id === "" || selectedCodeCell.nextSibling === null) {
             editorDiv.appendChild(code_cell.getDiv()); 

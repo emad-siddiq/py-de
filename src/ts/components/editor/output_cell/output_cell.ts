@@ -17,12 +17,12 @@ class OutputCell {
     constructor(code_cell_id: string, content: string) 
     {
         // class name, css id
-        this.name = "text-cell";
+        this.name = "output-cell";
         this.id = code_cell_id.toString() + "-output-cell";
         this.input_area_id = this.id + "-input-area";
 
-        this.div = this.createTextCellDiv();
-        this.div.textContent = content;
+        this.div = this.createOutputCellDiv();
+        this.renderText(content);
     }
 
     getDiv() 
@@ -30,53 +30,69 @@ class OutputCell {
         return this.div;
     }
 
-    createTextCellDiv() {
-        let text_cell = document.createElement("div");
-        text_cell.setAttribute("id", this.id);
-        text_cell.setAttribute("class", this.id);
-        text_cell.style.left = "2.5%";
-        text_cell.style.top = "0%";
+    createOutputCellDiv() {
+        let output_cell = document.createElement("div");
+        output_cell.setAttribute("id", this.id);
+        output_cell.setAttribute("class", this.id);
+        output_cell.style.left = "3%";
+        output_cell.style.top = "0%";
 
-        text_cell.style.width = "98.2%";
-        text_cell.style.height = "60px";
-        //text_cell.style.overflow = "visible";
-        text_cell.style.boxSizing = "border-box";
-        text_cell.style.position = "relative";
-        text_cell.style.backgroundColor = "red";
+        output_cell.style.width = "94.5%";
+        output_cell.style.height = "60px";
+        output_cell.style.overflowY = 'auto';
+        output_cell.style.boxSizing = "border-box";
+        output_cell.style.position = "relative";
+        output_cell.style.fontSize = "13px";
+        output_cell.style.backgroundColor = "#eeeeee";
+        output_cell.style.textIndent = "0.8vw";
+        output_cell.style.fontFamily = "Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New";
+        output_cell.style.paddingTop = "1.2vh";
+        output_cell.style.paddingBottom = "1.2vh";
+        output_cell.style.boxShadow = "0px 2px 15px 0px rgba(0, 0, 0, .1)";
 
 
 
-        //code_cell.style.border = "solid 4px";
-        const textareaElement = document.createElement('textarea');
+
+
+
+        return output_cell;
+    }
+
+    renderText(content: string) {
+        // Create a div element
+        const maxHeight = 300;     // Maximum height before scrolling is enabled
     
-                // Optionally, set properties on the textarea
-        // Set the textarea to take up all the space in the parent div
-        textareaElement.style.width = '100%';
-        textareaElement.style.height = '100%';
-        textareaElement.style.boxSizing = 'border-box'; // Ensures padding and border are included in width/height
-        textareaElement.style.textIndent = '0.5%'; // Ensures padding and border are included in width/height
-        textareaElement.style.resize = 'none'; // Ensures padding and border are included in width/height
-        textareaElement.style.overflowY = 'hidden'; // Hide the vertical scrollbar
+        // Split the content by newline characters and iterate over each line
+        content.split('\n').forEach(line => {
+            // Create a paragraph element for each line
+            const lineDiv = document.createElement('div');
+            lineDiv.textContent = line;
+            
+            // Add a line break after each line
+            this.div.appendChild(lineDiv);
 
+                // Adjust the height dynamically based on content up to the maximum height
+            
+            const contentHeight = this.div.scrollHeight;
+            if (contentHeight > maxHeight) {
+                this.div.style.height = `${maxHeight}px`;
+                this.div.style.overflowY = 'auto'; // Enable scrolling if content exceeds max height
+            } else {
+                this.div.style.height = `${contentHeight}px`; // Set height to content height
+            }
 
-        textareaElement.placeholder = 'Enter your text here...';
+        });
 
-        const autoResize = () => {
-            textareaElement.style.height = 'auto'; // Reset height to auto before calculating
-            textareaElement.style.height = Math.max(60, textareaElement.scrollHeight) + 'px'; // Set the height to the scrollHeight
-            text_cell.style.height = textareaElement.style.height;
-        };
-    
-        // Adjust the textarea size whenever the user types
-        textareaElement.addEventListener('input', autoResize);
-    
-        // Optionally, call autoResize initially if the textarea has pre-filled content
-        //autoResize();
-        
-        text_cell.appendChild(textareaElement);
-
-
-        return text_cell;
+        // Use requestAnimationFrame to ensure the content is rendered before calculating height
+    requestAnimationFrame(() => {
+        const contentHeight = this.div.scrollHeight;
+        if (contentHeight > maxHeight) {
+            this.div.style.height = `${maxHeight}px`;
+            this.div.style.overflowY = 'auto'; // Enable scrolling if content exceeds max height
+        } else {
+            this.div.style.height = `${contentHeight}px`; // Set height to content height
+        }
+    });
     }
 
 
