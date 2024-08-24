@@ -1,4 +1,5 @@
 import { CodeCell } from "../components/editor/code_cell/ts/views/code_cell.js";
+import { OutputCell } from "../components/editor/output_cell/output_cell.js";
 import { TextCell } from "../components/editor/text_cell/views/text_cell.js";
 import { ObjectManager } from "../managers/object_manager.js";
 
@@ -18,6 +19,8 @@ class Editor {
         this.active_code_cell_id = "";
         this.id = "editor";
         this.socket = socket;
+        this.socket.addEventListener('message', this.onMessage.bind(this));
+
         document.body.appendChild(this.div);
         document.body.addEventListener("keydown", this.CMD_PLUS_addCodeCell.bind(this)); 
         document.body.addEventListener("keydown", this.CMD_MINUS_removeCodeCell.bind(this)); 
@@ -92,12 +95,12 @@ class Editor {
         let code_cell = new CodeCell(this.cc_id, this, this.socket);
 
         let editorDiv = document.getElementById("editor");
-        let currNode = code_cell.getDiv();
+        let selectedCodeCell = document.getElementById(this.active_code_cell_id));
 
-        if (this.active_code_cell_id === "" || currNode.nextSibling === null) {
+        if (this.active_code_cell_id === "" || selectedCodeCell.nextSibling === null) {
             editorDiv.appendChild(code_cell.getDiv()); 
         } else {
-            editorDiv.insertBefore(currNode.nextSibling, document.getElementById(this.active_code_cell_id));
+            editorDiv.insertBefore(selectedCodeCell.nextSibling, code_cell.getDiv()); //Get current active code cell and 
             
         }
 
@@ -138,6 +141,38 @@ class Editor {
             e.preventDefault();
             this.removeCodeCell();
         }
+    }
+
+    private onMessage(event: MessageEvent): void {
+
+        // Check this to see if valid python output
+
+        console.log('Python executed output:\n', event.data);
+        if (event.data) {
+            this.displayMessage(event.data);
+
+        }
+    }
+    
+    private displayMessage(message: string, type: 'normal' | 'error' = 'normal'): void {
+
+        let output_cell = new OutputCell(this.active_code_cell_id, message);
+
+        let code_cell = document.getElementById(this.active_code_cell_id);
+        
+        if (code_cell.nextSibling === null) {
+            this.div.appendChild(output_cell.getDiv()); 
+        } else {
+            this.div.insertBefore(code_cell.nextSibling, output_cell.getDiv());
+            
+        }
+        // const messageElement = document.createElement('p');
+        // messageElement.textContent = message;
+        // if (type === 'error') {
+        //     messageElement.style.color = 'red';
+        // }
+       // this.messageContainer.appendChild(messageElement);
+       // this.messageContainer.scrollTop = this.messageContainer.scrollHeight;
     }
 
    

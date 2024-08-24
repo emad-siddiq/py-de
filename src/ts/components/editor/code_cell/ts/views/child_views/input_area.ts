@@ -252,7 +252,7 @@ class InputArea {
         console.log(this.grid);
         let out = "";
         for (let i = 0; i < Object.keys(this.grid).length; i++) {
-            for (let j = 0; j < this.grid[i].length; j++) {
+            for (let j = 1; j < this.grid[i].length; j++) {
                 out += this.grid[i][j];
             }
             out += "\n";

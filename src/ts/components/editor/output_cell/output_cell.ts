@@ -13,27 +13,21 @@ class OutputCell {
     input_area_id: string;
     div: HTMLElement;
     objectManager: ObjectManager;
-    socket: WebSocket;
 
-    constructor(code_cell_id: string, socket: WebSocket) 
+    constructor(code_cell_id: string, content: string) 
     {
         // class name, css id
         this.name = "text-cell";
         this.id = code_cell_id.toString() + "-output-cell";
         this.input_area_id = this.id + "-input-area";
-        this.socket = socket;
 
         this.div = this.createTextCellDiv();
-        this.addEventListeners(this.div);
+        this.div.textContent = content;
     }
 
     getDiv() 
     {  
         return this.div;
-    }
-
-    addEventListeners(div) {
-       div.addEventListener("keydown", this.saveOnShiftEnter.bind(this));
     }
 
     createTextCellDiv() {
@@ -83,13 +77,6 @@ class OutputCell {
 
 
         return text_cell;
-    }
-
-    saveOnShiftEnter(e: KeyboardEvent) {
-        if (e.shiftKey && e.key === 'Enter') {
-            this.socket.send(this.div.textContent);
-            return;
-        }
     }
 
 

@@ -15,7 +15,6 @@ class WebSocketClientCodeCell {
         this.socket = new WebSocket(this.url);
 
         this.socket.addEventListener('open', this.onOpen.bind(this));
-        this.socket.addEventListener('message', this.onMessage.bind(this));
         this.socket.addEventListener('error', this.onError.bind(this));
         this.socket.addEventListener('close', this.onClose.bind(this));
     }
@@ -28,11 +27,7 @@ class WebSocketClientCodeCell {
         this.sendMessage('Code Cell Client connected.');
     }
 
-    private onMessage(event: MessageEvent): void {
-        console.log('Received message:', event.data);
-        this.displayMessage(event.data);
-    }
-
+    
     private onError(event: Event): void {
         console.error('WebSocket error:', event);
         this.displayMessage(`Error: ${event.type}`, 'error');
