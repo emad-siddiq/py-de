@@ -53,22 +53,92 @@ class Editor {
         return div;
     }
 
-    createFileNameDiv() {
-        let file_name = "Untitled";
-        let fileNameDiv = document.createElement("div");
+    
+    createFileNameDiv(): HTMLDivElement {
+        let fileName: string = "Untitled";
+        let fileNameDiv: HTMLDivElement = document.createElement("div");
         fileNameDiv.setAttribute("id", "filename");
         fileNameDiv.setAttribute("class", "filename");
-
-        fileNameDiv.innerHTML = file_name;
+    
+        // Initial setup for the div
+        fileNameDiv.innerHTML = fileName;
         fileNameDiv.style.fontSize = "24px";
-        fileNameDiv.style.width = "95%";
-
-        fileNameDiv.style.fontFamily = "ui-monospace,SFMono-Regular,\"SF Mono\",Menlo,Consolas,\"Liberation Mono\",monospace";
+        fileNameDiv.style.width = "150px"; // Set a smaller initial width
+        fileNameDiv.style.display = "inline-block"; // Allows width and height to fit content
+        fileNameDiv.style.fontFamily = "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace";
         fileNameDiv.style.marginBottom = "10px";
-        fileNameDiv.style.paddingTop   = "10px";
+        fileNameDiv.style.paddingTop = "10px";
         fileNameDiv.style.paddingLeft = "10px";
+        fileNameDiv.style.boxSizing = "border-box"; // Include padding in width and height
+    
+        // Function to switch from div to input for editing
+        function enableEditing(): void {
+            const input: HTMLInputElement = document.createElement("input");
+            input.type = "text";
+            input.value = fileName;
+            input.style.fontSize = "24px";
+            input.style.width = "auto"; // Allow width to grow based on content
+            input.style.minWidth = "150px"; // Ensure a minimum width for initial view
+            input.style.display = "inline-block"; // Adjust width to fit content
+            input.style.fontFamily = "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace";
+            input.style.marginBottom = "10px";
+            input.style.paddingTop = "10px";
+            input.style.paddingLeft = "10px";
+            input.style.boxSizing = "border-box";
+    
+            // Replace the div with the input element
+            fileNameDiv.replaceWith(input);
+            input.focus();
+    
+            // Temporary span for measuring text width
+            const measureSpan: HTMLSpanElement = document.createElement("span");
+            measureSpan.style.position = "absolute";
+            measureSpan.style.visibility = "hidden";
+            measureSpan.style.whiteSpace = "pre";
+            measureSpan.style.fontSize = "24px";
+            measureSpan.style.fontFamily = "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace";
+            document.body.appendChild(measureSpan);
+    
+            // Function to update the width of the div
+            function updateDivSize(): void {
+                measureSpan.textContent = input.value || "Untitled"; // Default to "Untitled" if input is empty
+                const newWidth = measureSpan.offsetWidth + 20; // Add some padding
+                fileNameDiv.style.width = `${newWidth}px`; // Adjust width to fit the measured width
+                input.style.width = `${newWidth}px`; // Sync input width with div width
+            }
+    
+            // Update size initially
+            updateDivSize();
+    
+            // Event listener to handle the input's blur (when it loses focus)
+            input.addEventListener("blur", () => {
+                fileName = input.value;
+                fileNameDiv.innerHTML = fileName;
+                fileNameDiv.style.width = 'auto'; // Reset width to fit content
+                input.replaceWith(fileNameDiv);
+                document.body.removeChild(measureSpan); // Clean up
+            });
+    
+            // Handle Enter key to confirm the edit
+            input.addEventListener("keydown", (event: KeyboardEvent) => {
+                if (event.key === "Enter") {
+                    input.blur(); // Trigger the blur event to save the text
+                }
+            });
+    
+            // Update width as user types
+            input.addEventListener("input", updateDivSize);
+        }
+    
+        // Double-click event to enable editing
+        fileNameDiv.addEventListener("dblclick", enableEditing);
+    
         return fileNameDiv;
     }
+    
+    
+    
+    
 
 
     toggleBinding(e) {
