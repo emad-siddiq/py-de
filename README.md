@@ -16,8 +16,11 @@
 
 ## Build instructions
 
-Run `tsc -w` from the `src/ts` folder. 
-Then go run . from root. (pysync folder)
+(Dev) Run `tsc -w` from the `src/ts` folder. 
+
+[Install Go](https://go.dev/dl/)
+
+Then `go run .` from root. (pysync folder)
 
 ## Shortcuts:
 
