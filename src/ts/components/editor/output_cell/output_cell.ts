@@ -1,4 +1,4 @@
-import { ObjectManager } from "../../../managers/object_manager.js";
+import { ObjectManager } from "../../../managers/object_manager";
 
 // Class to represent the output from execution in the corresponding code cell
 // Or by clicking the top menu icon

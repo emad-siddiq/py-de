@@ -1,8 +1,9 @@
 // TODO: add text highlighting functionality
 // TODO: add color syntax
-import {InputAreaEditor} from "../../controllers/input_area_controller.js";
-import { DarkMode } from "../../../../../../themes/darkmode/darkmode.js";
-import { InputAreaKeyDown } from "../../handlers/keydown_handler.js";
+import {InputAreaEditor} from "../../controllers/input_area_controller";
+import { DarkMode } from "../../../../../../themes/darkmode/darkmode";
+import { InputAreaKeyDown } from "../../handlers/keydown_handler";
+
 
 class InputArea {
 
@@ -189,6 +190,8 @@ class InputArea {
                         
         if (e.shiftKey && e.key === 'Enter') {
             console.log("INput received");
+            e.preventDefault();
+            e.stopPropagation();
             this.socket.send(this.exportCode());
             console.log("Sending", this.exportCode());
             return;
@@ -244,6 +247,7 @@ class InputArea {
             
           
         }
+
                 
     }
 

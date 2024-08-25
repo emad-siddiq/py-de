@@ -1,6 +1,6 @@
-import {InputArea} from "./child_views/input_area.js";
-import { CodeCellNumber } from "./child_views/cell_number.js";
-import { Editor } from "../../../../../windows/editor.js";
+import {InputArea} from "./child_views/input_area";
+import { CodeCellNumber } from "./child_views/cell_number";
+import { Editor } from "../../../../../windows/editor";
 
 class CodeCell {
     // TODO: Add color syntax highlighting to CodeCell

@@ -1,7 +1,8 @@
-import { CodeCell } from "../components/editor/code_cell/ts/views/code_cell.js";
-import { OutputCell } from "../components/editor/output_cell/output_cell.js";
-import { TextCell } from "../components/editor/text_cell/views/text_cell.js";
-import { ObjectManager } from "../managers/object_manager.js";
+import { CodeCell } from "../components/editor/code_cell/ts/views/code_cell";
+import { OutputCell } from "../components/editor/output_cell/output_cell";
+import { TextCell } from "../components/editor/text_cell/views/text_cell";
+import { ObjectManager } from "../managers/object_manager";
+import { removeElement } from "../utility/dom";
 
 class Editor {
     div: HTMLElement;
@@ -165,14 +166,22 @@ class Editor {
         let code_cell = new CodeCell(this.cc_id, this, this.socket);
 
         let editorDiv = document.getElementById("editor");
+
         let selectedCodeCell = document.getElementById(this.active_code_cell_id);
 
-        if (this.active_code_cell_id === "" || selectedCodeCell.nextSibling === null) {
+  
+
+        if (this.active_code_cell_id === "" || (selectedCodeCell && selectedCodeCell.nextSibling === null))  {
             editorDiv.appendChild(code_cell.getDiv()); 
         } else {
+            console.log( selectedCodeCell,selectedCodeCell.nextSibling )
+
             editorDiv.insertBefore(selectedCodeCell.nextSibling, code_cell.getDiv()); //Get current active code cell and 
             
         }
+        
+
+       
 
         code_cell.input_area.addLineAfter(0); // add first line TODO: Check this logic and fix it
         this.active_code_cell_id = code_cell.id;
@@ -233,7 +242,14 @@ class Editor {
         if (code_cell.nextSibling === null) {
             this.div.appendChild(output_cell.getDiv()); 
         } else {
-            this.div.insertBefore(code_cell.nextSibling, output_cell.getDiv());
+            console.log(code_cell.nextElementSibling);
+            if (code_cell.nextElementSibling.getAttribute("id") === code_cell.id + "-output-cell") {
+                code_cell.nextElementSibling.replaceWith(output_cell.getDiv());
+            } else {
+                this.div.insertBefore(code_cell.nextSibling, output_cell.getDiv());
+
+            }
+          
             
         }
         // const messageElement = document.createElement('p');

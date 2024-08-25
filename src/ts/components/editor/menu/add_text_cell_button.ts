@@ -1,8 +1,8 @@
 // Bar in top left of the screen for basic actions like add cell, remove cell
 
-import { ObjectManager } from "../../../managers/object_manager.js";
-import { createIconLabel, createImgDiv } from "./utility.js";
-import { Editor } from "../../../windows/editor.js";
+import { ObjectManager } from "../../../managers/object_manager";
+import { createIconLabel, createImgDiv } from "./utility";
+import { Editor } from "../../../windows/editor";
 
 class AddTextCellButton {
     id: string;

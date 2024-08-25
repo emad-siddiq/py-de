@@ -1,7 +1,7 @@
-import { InputArea } from "../views/child_views/input_area.js";
-import { InputAreaEditor } from "../controllers/input_area_controller.js";
-import { DarkMode } from "../../../../../themes/darkmode/darkmode.js";
-import { TextCell } from "../../../text_cell/views/text_cell.js";
+import { InputArea } from "../views/child_views/input_area";
+import { InputAreaEditor } from "../controllers/input_area_controller";
+import { DarkMode } from "../../../../../themes/darkmode/darkmode";
+import { TextCell } from "../../../text_cell/views/text_cell";
 
 class InputAreaKeyDown {
     

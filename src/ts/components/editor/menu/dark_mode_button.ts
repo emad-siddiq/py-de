@@ -1,7 +1,7 @@
 // Bar in top left of the screen for basic actions like add cell, remove cell
 
-import { DarkMode } from "../../../themes/darkmode/darkmode.js";
-import { createIconLabel, createImgDiv } from "./utility.js";
+import { DarkMode } from "../../../themes/darkmode/darkmode";
+import { createIconLabel, createImgDiv } from "./utility";
 
 class DarkModeButton {
     id: string;

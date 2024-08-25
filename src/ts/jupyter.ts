@@ -1,16 +1,16 @@
 
-import { Debugger } from "./windows/debugger.js";
-import { Explorer } from "./windows/explorer.js";
-import { Terminal } from "./windows/terminal.js";
-import { Menu } from "./windows/drop_down_menu/menu.js";
-import { Editor } from "./windows/editor.js";
-import {DarkMode} from "./themes/darkmode/darkmode.js";
-import { InputAreaEditor } from "./components/editor/code_cell/ts/controllers/input_area_controller.js";
-import { AddMenu } from "./components/editor/menu/add_menu.js";
-import { ObjectManager } from "./managers/object_manager.js";
-import { Chat } from "./components/gpt/chat.js";
-import { WebSocketClientCodeCell } from "./components/ws_client/ws_client.js";
-import { WebSocketClientChatGPT } from "./components/ws_client/ws_client_chatgpt.js";
+import { Debugger } from "./windows/debugger";
+import { Explorer } from "./windows/explorer";
+import { Terminal } from "./windows/terminal";
+import { Menu } from "./windows/drop_down_menu/menu";
+import { Editor } from "./windows/editor";
+import {DarkMode} from "./themes/darkmode/darkmode";
+import { InputAreaEditor } from "./components/editor/code_cell/ts/controllers/input_area_controller";
+import { AddMenu } from "./components/editor/menu/add_menu";
+import { ObjectManager } from "./managers/object_manager";
+import { Chat } from "./components/gpt/chat";
+import { WebSocketClientCodeCell } from "./components/ws_client/ws_client";
+import { WebSocketClientChatGPT } from "./components/ws_client/ws_client_chatgpt";
 
 var socket1;
 var socket2;

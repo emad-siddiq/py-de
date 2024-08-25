@@ -1,5 +1,5 @@
-import { ObjectManager } from "../../managers/object_manager.js";
-import { WebSocketClientChatGPT } from "../ws_client/ws_client_chatgpt.js";
+import { ObjectManager } from "../../managers/object_manager";
+import { WebSocketClientChatGPT } from "../ws_client/ws_client_chatgpt";
 
 class Chat {
     id: string;
