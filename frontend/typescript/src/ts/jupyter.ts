@@ -12,16 +12,20 @@ import { Chat } from "./components/gpt/chat";
 import { WebSocketClientCodeCell } from "./components/ws_client/ws_client";
 import { WebSocketClientChatGPT } from "./components/ws_client/ws_client_chatgpt";
 
-var socket1;
-var socket2;
+
 /*
    Connect to WS for sending Python code to backend.
 */
 //let _menu = new Menu(); TODO: Finish implementing the top menu bar
 
-let _objectManager = new ObjectManager();
+// Instantiate the ObjectManager
+const objectManager = ObjectManager.getInstance();
 
-let _debugger = new Debugger(_objectManager);
+// Define your WebSocket instances
+const socketId1 = 'socket1';
+const socketId2 = 'socket2';
+
+let _debugger = new Debugger(objectManager);
 let _explorer = new Explorer();
 let _terminal = new Terminal();
 
@@ -36,9 +40,10 @@ const wsClientCodeCell = new WebSocketClientCodeCell(
     'ws://localhost:8080/v1/ws',
     (_socket) => {
         console.log('Running custom code after WebSocket connection is established.');
-        socket1 = _socket;
-        let _editor = new Editor(socket1, _objectManager);
-        let _add_menu = new AddMenu(_objectManager);
+        objectManager.addWebSocket(socketId1, _socket);
+
+        let _editor = new Editor(_socket, objectManager);
+        let _add_menu = new AddMenu(objectManager);
     
         _editor.addCodeCell();
         //DarkMode.enable();
@@ -50,7 +55,8 @@ const wsClientCodeCell = new WebSocketClientCodeCell(
         //Close connection before reloading
 window.onbeforeunload = function(event)
 {
-    socket1.close();
+    objectManager.getWebSocket(socketId1).close();
+
     return confirm("Confirm refresh");
 };
         
@@ -60,13 +66,15 @@ window.onbeforeunload = function(event)
 const wsClientChatGPT = new WebSocketClientChatGPT(
     'ws://localhost:8080/v1/ws/chatgpt',
     (_socket) => {
-        socket2 = _socket;
+
+        objectManager.addWebSocket(socketId2, _socket);
+
         console.log('Running custom code after WebSocket connection is established.');       
-        let _chat = new Chat(socket2);
+        let _chat = new Chat(_socket);
     //Close connection before reloading
 window.onbeforeunload = function(event)
 {
-    socket2.close();
+    objectManager.getWebSocket(socketId2).close();
     return confirm("Confirm refresh");
 };
        

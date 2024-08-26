@@ -29,7 +29,7 @@ class AddTextCellButton {
         //div position from top-left term corner in terms of view-width and view-height
         div.style.top = "1.5vh";
         div.style.left = "91vw";
-        div.style.zIndex = "100000";
+        div.style.zIndex = "1000";
 
         //div size
         div.style.width = "5vw";

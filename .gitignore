@@ -1,1 +1,7 @@
-src/static/js/
+frontend/typescript/src/static/
+frontend/typescript/src/ts/node_modules/
+code.py
+.gitignore
+frontend/typescript/dist
+**/node_modules/
+**/dist/
