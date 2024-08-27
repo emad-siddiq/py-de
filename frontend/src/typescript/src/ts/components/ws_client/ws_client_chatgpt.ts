@@ -1,3 +1,5 @@
+import { Chat } from "../gpt/chat";
+
 // WebSocketClient.ts
 class WebSocketClientChatGPT {
     private url: string;
@@ -34,12 +36,13 @@ class WebSocketClientChatGPT {
 
         
         console.log('Received message:', event.data);
-        this.displayMessage(event.data);
+        Chat.displayMessage(event.data);
+
     }
 
     private onError(event: Event): void {
         console.error('WebSocket error:', event);
-        this.displayMessage(`Error: ${event.type}`, 'error');
+        Chat.displayMessage(`Error: ${event.type}`, 'error');
     }
 
     private onClose(): void {
@@ -55,19 +58,6 @@ class WebSocketClientChatGPT {
         } else {
             console.warn('WebSocket is not open. Cannot send message.');
         }
-    }
-
-    private displayMessage(message: string, type: 'normal' | 'error' = 'normal'): void {
-        const messageElement = document.createElement('p');
-        messageElement.textContent = message;
-        if (type === 'error') {
-            messageElement.style.color = 'red';
-        }
-        let chatMessageContainer = document.getElementById("message-container");
-        messageElement.textContent = message;
-        chatMessageContainer.appendChild(messageElement);
-
-       chatMessageContainer.scrollTop = chatMessageContainer.scrollHeight;
     }
 
    

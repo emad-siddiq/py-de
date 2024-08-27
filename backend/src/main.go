@@ -7,21 +7,38 @@ import (
 	"net/http"
 )
 
-//var c *config.YAML = config.ReadConfigFile()
+// CORS Middleware
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Add CORS headers
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		// Handle preflight OPTIONS request
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
 
 func main() {
-	//fs := http.FileServer(http.Dir("./static/"))
-	//http.Handle("/", fs)
+	// Create a new ServeMux
+	mux := http.NewServeMux()
 
-	//http.HandleFunc("/", pages.HomeHandler)
+	// Register your handlers
+	mux.HandleFunc("/v1/ws", api.WebSocketV1)
+	mux.HandleFunc("/v1/ws/chatgpt", api.WebSocketChatGPT)
+	mux.HandleFunc("/api/deploy", api.DeployHandler)
 
-	http.HandleFunc("/v1/ws", api.WebSocketV1)
-	http.HandleFunc("/v1/ws/chatgpt", api.WebSocketChatGPT)
-	http.HandleFunc("/api/deploy", api.DeployHandler)
+	// Wrap the mux with the CORS middleware
+	handler := corsMiddleware(mux)
 
 	fmt.Println("PySync local server is launching on port 8080")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if err := http.ListenAndServe(":8080", handler); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
-
 }

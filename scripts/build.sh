@@ -12,11 +12,17 @@ FRONTEND_UBUNTU_BINARY="frontend_ubuntu_amd64"
 # Ensure the output directory exists
 mkdir -p "$OUTPUT_DIR"
 
+# Build node files
+cd frontend/src/typescript/src
+npm install
+npm run build
+
+cd ../../../../
+
 # Change to backend
 cd backend/src
 
 echo $(pwd)
-
 
 
 # Build for backend project

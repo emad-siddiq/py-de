@@ -22,6 +22,65 @@ class Chat {
         this.addEventListeners();
     }
 
+    static displayMessage(message: string, type: 'normal' | 'error' = 'normal'): void {
+        const chatMessageContainer = document.getElementById("message-container");
+
+        if (!chatMessageContainer) {
+            console.error("Chat message container not found.");
+            return;
+        }
+
+        // Split the message by newline characters
+        const lines = message.split('\n');
+        let insideCodeBlock = false;
+        let codeBlockContent = '';
+
+        lines.forEach(line => {
+            if (line.startsWith('```')) {
+                // Toggle code block mode
+                if (insideCodeBlock) {
+                    // Close the code block
+                    const codeElement = document.createElement('div');
+                    codeElement.className = 'markdown-block';
+                    codeElement.textContent = codeBlockContent;
+                    Chat.applyMarkdownStyles(codeElement);
+                    chatMessageContainer.appendChild(codeElement);
+                    insideCodeBlock = false;
+                    codeBlockContent = '';
+                } else {
+                    // Open a new code block
+                    insideCodeBlock = true;
+                }
+            } else if (insideCodeBlock) {
+                // Accumulate code block content
+                codeBlockContent += line + '\n';
+            } else {
+                // Handle normal text lines
+                const messageElement = document.createElement('p');
+                messageElement.textContent = line;
+                if (type === 'error') {
+                    messageElement.style.color = 'red';
+                }
+                chatMessageContainer.appendChild(messageElement);
+            }
+        });
+
+        // Scroll to the bottom of the chat container
+        chatMessageContainer.scrollTop = chatMessageContainer.scrollHeight;
+    }
+
+    // Helper function to apply styles to markdown code blocks
+    static applyMarkdownStyles(element: HTMLDivElement): void {
+        element.style.backgroundColor = '#2d2d2d'; // Dark background for code block
+        element.style.color = '#f8f8f2';           // Light text color
+        element.style.padding = '10px';
+        element.style.borderRadius = '5px';
+        element.style.marginTop = '10px';
+        element.style.fontFamily = 'monospace';
+        element.style.whiteSpace = 'pre-wrap';     // Preserve whitespace
+        element.style.overflowX = 'auto';          // Horizontal scrolling for long lines
+    }
+
     createDiv() {
         let div = document.createElement("div");
         div.setAttribute("id", this.id);
@@ -136,61 +195,13 @@ class Chat {
         console.log("Sending message through websocket to chatgpt", message);
 
         if (message !== '') {
-            const formattedMessage = this.formatMarkdown(message);
-            this.socket.send(formattedMessage);
-
             const messageElement = document.createElement('div');
-            messageElement.className = "chat-message";
             messageElement.textContent = message;
             this.messagesContainer.appendChild(messageElement);
-
-            if (formattedMessage !== message) {
-                const markdownElement = this.createMarkdownElement(formattedMessage);
-                this.messagesContainer.appendChild(markdownElement);
-            }
-
             this.chatInputArea.value = '';
             this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+            this.socket.send(message);
         }
-    }
-
-    private formatMarkdown(text: string): string {
-        // Replace triple backticks with HTML code tags
-        return text.replace(/```([\s\S]*?)```/g, (match, p1) => {
-            return `<pre><code>${this.escapeHtml(p1)}</code></pre>`;
-        });
-    }
-
-    private escapeHtml(text: string): string {
-        return text.replace(/&/g, '&amp;')
-                   .replace(/</g, '&lt;')
-                   .replace(/>/g, '&gt;')
-                   .replace(/"/g, '&quot;')
-                   .replace(/'/g, '&#039;');
-    }
-
-    private createMarkdownElement(htmlContent: string): HTMLDivElement {
-        const div = document.createElement('div');
-        div.className = 'markdown-block';
-        div.innerHTML = htmlContent;
-        this.applyMarkdownStyles(div);
-        return div;
-    }
-
-    private applyMarkdownStyles(element: HTMLDivElement): void {
-        element.style.backgroundColor = '#2d2d2d'; // Dark background for code block
-        element.style.color = '#f8f8f2';           // Light text color
-        element.style.padding = '10px';
-        element.style.borderRadius = '5px';
-        element.style.marginTop = '10px';
-        element.style.fontFamily = 'monospace';
-        element.style.whiteSpace = 'pre-wrap';     // Preserve whitespace
-        element.style.overflowX = 'auto';          // Horizontal scrolling for long lines
-
-        const codeElements = element.querySelectorAll('code');
-        codeElements.forEach((codeElement) => {
-            codeElement.style.color = '#f8f8f2'; // Syntax highlighting colors
-        });
     }
 
     private applyChatContainerStyles(element: HTMLDivElement): void {
