@@ -188,7 +188,7 @@ class AWSForm {
             sshKeyPath: formData.get("sshKeyPath") as string,
         };
 
-        fetch('/api/uploadCredentials', {
+        fetch('http://localhost:8080/api/deploy', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(credentials),

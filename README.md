@@ -24,6 +24,8 @@
 
 Then `go run .` from inside the src. (pysync folder)
 
+go build -o "../build/alpha_frontend"
+
 ## Shortcuts:
 
 Add Code Cell: 

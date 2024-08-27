@@ -7,7 +7,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.29
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.176.0
 	github.com/gorilla/websocket v1.5.3
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (

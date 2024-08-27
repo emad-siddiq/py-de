@@ -13,6 +13,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 )
 
+// Path to the source code archive
+const sourceCodeArchivePath = "/dist/source_code.tar.gz"
+
 // DeployHandler handles the deployment process
 func DeployHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -26,7 +29,6 @@ func DeployHandler(w http.ResponseWriter, r *http.Request) {
 		SecretAccessKey string `json:"secretAccessKey"`
 		SSHUser         string `json:"sshUser"`
 		SSHKeyPath      string `json:"sshKeyPath"`
-		BinaryPath      string `json:"binaryPath"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
@@ -61,23 +63,50 @@ func DeployHandler(w http.ResponseWriter, r *http.Request) {
 
 	instanceIP := *instance.Reservations[0].Instances[0].PublicIpAddress
 
-	// SSH into instance and deploy binary
-	deployCmd := fmt.Sprintf(
-		"ssh -i %s %s@%s sudo cp %s /home/%s && sudo chmod +x /home/%s/%s",
-		requestBody.SSHKeyPath,
-		requestBody.SSHUser,
-		instanceIP,
-		requestBody.BinaryPath,
-		requestBody.SSHUser,
-		requestBody.SSHUser,
-		requestBody.BinaryPath,
-	)
-	cmd := exec.Command("sh", "-c", deployCmd)
+	// Archive the source code
+	archiveCmd := "tar -czf /dist/source_code.tar.gz -C /path/to/source/code ."
+	cmd := exec.Command("sh", "-c", archiveCmd)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err = cmd.Run()
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error deploying binary: %v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Error creating source code archive: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Copy the source code archive to the instance
+	scpCmd := fmt.Sprintf(
+		"scp -i %s /dist/source_code.tar.gz %s@%s:/home/%s",
+		requestBody.SSHKeyPath,
+		requestBody.SSHUser,
+		instanceIP,
+		requestBody.SSHUser,
+	)
+	cmd = exec.Command("sh", "-c", scpCmd)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err = cmd.Run()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error copying source code archive: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// SSH into instance and extract the source code
+	extractCmd := fmt.Sprintf(
+		"ssh -i %s %s@%s 'tar -xzf /home/%s/source_code.tar.gz -C /home/%s && rm /home/%s/source_code.tar.gz'",
+		requestBody.SSHKeyPath,
+		requestBody.SSHUser,
+		instanceIP,
+		requestBody.SSHUser,
+		requestBody.SSHUser,
+		requestBody.SSHUser,
+	)
+	cmd = exec.Command("sh", "-c", extractCmd)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err = cmd.Run()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error extracting source code: %v", err), http.StatusInternalServerError)
 		return
 	}
 
