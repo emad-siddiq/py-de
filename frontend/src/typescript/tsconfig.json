@@ -1,0 +1,16 @@
+// frontend/tsconfig.json
+{
+  "compilerOptions": {
+    "target": "ES2015",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "outDir": "dist/js", // Output directory for compiled JS
+    "baseUrl": "src", // Base directory for relative imports
+    "paths": {
+      "*": ["*"]
+    }
+  },
+  "include": ["src/**/*"]
+}
