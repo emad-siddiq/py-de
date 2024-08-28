@@ -1,11 +1,4 @@
-// Class to represent the text cells inside the code editor
-// A text cell can be added using the keyboard shortcut ⌘ + shift + 
-// Or by clicking the top menu icon
-
-
-// It uses a custom input area 
-
-
+import { marked } from 'marked';
 
 class TextCell {
     socket: WebSocket;
@@ -13,90 +6,74 @@ class TextCell {
     name: string;
     input_area_id: string;
     div: HTMLElement;
+    textareaElement: HTMLTextAreaElement;
 
-    constructor(id) 
-    {
-        // class name, css id
+    constructor(id: number) {
         this.name = "text-cell";
-        this.id = "text-cell-"+id.toString();
+        this.id = "text-cell-" + id.toString();
         this.input_area_id = this.id + "-input-area";
 
         this.div = this.createTextCellDiv();
         this.addEventListeners(this.div);
     }
 
-    getDiv() 
-    {  
+    getDiv(): HTMLElement {
         return this.div;
     }
 
-    addEventListeners(div) {
-       div.addEventListener("keydown", this.saveOnShiftEnter.bind(this));
+    addEventListeners(div: HTMLElement): void {
+        div.addEventListener("keydown", this.saveOnShiftEnter.bind(this));
     }
 
-    createTextCellDiv() {
+    createTextCellDiv(): HTMLElement {
         let text_cell = document.createElement("div");
         text_cell.setAttribute("id", this.id);
         text_cell.setAttribute("class", this.id);
         text_cell.style.left = "2.5%";
         text_cell.style.top = "0%";
-
-        text_cell.style.width = "98.2%";
+        text_cell.style.width = "95.2%";
         text_cell.style.height = "60px";
-        //text_cell.style.overflow = "visible";
         text_cell.style.boxSizing = "border-box";
         text_cell.style.position = "relative";
-        text_cell.style.backgroundColor = "red";
+        text_cell.style.boxShadow = "0px 5px 15px 5px rgba(20, 255, 60, 0.2)";
 
 
-
-        //code_cell.style.border = "solid 4px";
-        const textareaElement = document.createElement('textarea');
-    
-        // Optionally, set properties on the textarea
-  // Set the textarea to take up all the space in the parent div
-  textareaElement.style.width = '100%';
-  textareaElement.style.height = '100%';
-  textareaElement.style.boxSizing = 'border-box'; // Ensures padding and border are included in width/height
-  textareaElement.style.textIndent = '0.5%'; // Ensures padding and border are included in width/height
-  textareaElement.style.resize = 'none'; // Ensures padding and border are included in width/height
-  textareaElement.style.overflowY = 'hidden'; // Hide the vertical scrollbar
-
-
-        textareaElement.placeholder = 'Enter your text here...';
+        this.textareaElement = document.createElement('textarea');
+        this.textareaElement.style.width = '100%';
+        this.textareaElement.style.height = '100%';
+        this.textareaElement.style.boxSizing = 'border-box';
+        this.textareaElement.style.textIndent = '0.5%';
+        this.textareaElement.style.resize = 'none';
+        this.textareaElement.style.overflowY = 'hidden';
+        this.textareaElement.placeholder = 'Enter your text here...';
 
         const autoResize = () => {
-            textareaElement.style.height = 'auto'; // Reset height to auto before calculating
-            textareaElement.style.height = Math.max(60, textareaElement.scrollHeight) + 'px'; // Set the height to the scrollHeight
-            text_cell.style.height = textareaElement.style.height;
+            this.textareaElement.style.height = 'auto';
+            this.textareaElement.style.height = Math.max(60, this.textareaElement.scrollHeight) + 'px';
+            text_cell.style.height = this.textareaElement.style.height;
         };
     
-        // Adjust the textarea size whenever the user types
-        textareaElement.addEventListener('input', autoResize);
-    
-        // Optionally, call autoResize initially if the textarea has pre-filled content
-        //autoResize();
-        
-        text_cell.appendChild(textareaElement);
-
+        this.textareaElement.addEventListener('input', autoResize);
+        text_cell.appendChild(this.textareaElement);
 
         return text_cell;
     }
 
-    saveOnShiftEnter(e: KeyboardEvent) {
+    async saveOnShiftEnter(e: KeyboardEvent): Promise<void> {
         if (e.shiftKey && e.key === 'Enter') {
-            this.socket.send(this.div.textContent);
-            return;
+            e.preventDefault(); // Prevent the default newline behavior
+            const markdownContent = this.textareaElement.value;
+            const renderedHTML = await this.convertMarkdownToHTML(markdownContent); // Wait for the promise to resolve
+            this.div.innerHTML = renderedHTML; // Replace the div content with the rendered HTML
+            this.socket.send(renderedHTML);
         }
     }
 
-
-   
+    convertMarkdownToHTML(markdown: string): string {
+        // Using marked.js to convert markdown to HTML
+        const html = marked(markdown);
+        return `<div style="background-color: #F0F0F0; padding: 10px; border-radius: 5px;">${html}</div>`;
+    }
 }
 
-
-
-
-  
-
-export {TextCell};
+export { TextCell };

@@ -18,12 +18,13 @@ class DarkMode {
         let divs = document.querySelectorAll("div");
 
         divs.forEach(div => {
-            div.style.backgroundColor = "rgb(10, 15, 22)";
-            div.style.color = "#FCF5F5";
+            const htmlDiv = div as HTMLElement;
+            htmlDiv.style.backgroundColor = "rgb(10, 15, 22)";
+            htmlDiv.style.color = "#FCF5F5";
             
             // Only apply box shadow if the div originally has one
-            if (window.getComputedStyle(div).boxShadow !== 'none') {
-                div.style.boxShadow = "0px 3px 10px 3px rgba(20, 255, 60, 0.1)";
+            if (window.getComputedStyle(htmlDiv).boxShadow !== 'none') {
+                htmlDiv.style.boxShadow = "0px 3px 10px 3px rgba(20, 255, 60, 0.1)";
             }
         });
 
@@ -37,18 +38,36 @@ class DarkMode {
             }
         });
 
+        // Update select elements
         let selects = document.querySelectorAll("select");
         selects.forEach(select => {
-            select.style.backgroundColor = "rgb(10, 15, 22)";
-            select.style.color = "#FCF5F5";
-            select.style.borderColor = "rgb(50, 50, 50)";
+            const htmlSelect = select as HTMLSelectElement;
+            htmlSelect.style.backgroundColor = "rgb(10, 15, 22)";
+            htmlSelect.style.color = "#FCF5F5";
+            htmlSelect.style.borderColor = "rgb(50, 50, 50)";
         });
 
+        // Update button elements
         let buttons = document.querySelectorAll("button");
         buttons.forEach(button => {
-            button.style.backgroundColor = "rgb(50, 50, 50)";
-            button.style.color = "#FCF5F5";
-            button.style.borderColor = "rgb(70, 70, 70)";
+            const htmlButton = button as HTMLButtonElement;
+            htmlButton.style.backgroundColor = "rgb(50, 50, 50)";
+            htmlButton.style.color = "#FCF5F5";
+            htmlButton.style.borderColor = "rgb(70, 70, 70)";
+        });
+
+        // Update TextCell elements
+        let textCells = document.querySelectorAll(".text-cell");
+        textCells.forEach(textCell => {
+            const htmlTextCell = textCell as HTMLElement;
+            htmlTextCell.style.backgroundColor = "rgb(20, 20, 20)";
+            htmlTextCell.style.color = "#FCF5F5";
+            const textarea = htmlTextCell.querySelector('textarea') as HTMLTextAreaElement;
+            if (textarea) {
+                textarea.style.backgroundColor = "rgb(30, 30, 30)";
+                textarea.style.color = "#FCF5F5";
+                textarea.style.borderColor = "rgb(50, 50, 50)";
+            }
         });
     }
 
@@ -60,12 +79,13 @@ class DarkMode {
         let divs = document.querySelectorAll("div");
 
         divs.forEach(div => {
-            div.style.backgroundColor = "white";
-            div.style.color = "black";
+            const htmlDiv = div as HTMLElement;
+            htmlDiv.style.backgroundColor = "white";
+            htmlDiv.style.color = "black";
             
             // Only revert box shadow if the div originally has one
-            if (window.getComputedStyle(div).boxShadow !== 'none') {
-                div.style.boxShadow = "0px 10px 15px 5px rgba(20, 255, 60, 0.2)";
+            if (window.getComputedStyle(htmlDiv).boxShadow !== 'none') {
+                htmlDiv.style.boxShadow = "0px 10px 15px 5px rgba(20, 255, 60, 0.2)";
             }
         });
 
@@ -79,18 +99,36 @@ class DarkMode {
             }
         });
 
+        // Revert styles for select elements
         let selects = document.querySelectorAll("select");
         selects.forEach(select => {
-            select.style.backgroundColor = "white";
-            select.style.color = "black";
-            select.style.borderColor = "rgb(200, 200, 200)";
+            const htmlSelect = select as HTMLSelectElement;
+            htmlSelect.style.backgroundColor = "white";
+            htmlSelect.style.color = "black";
+            htmlSelect.style.borderColor = "rgb(200, 200, 200)";
         });
 
+        // Revert styles for button elements
         let buttons = document.querySelectorAll("button");
         buttons.forEach(button => {
-            button.style.backgroundColor = "white";
-            button.style.color = "black";
-            button.style.borderColor = "rgb(200, 200, 200)";
+            const htmlButton = button as HTMLButtonElement;
+            htmlButton.style.backgroundColor = "white";
+            htmlButton.style.color = "black";
+            htmlButton.style.borderColor = "rgb(200, 200, 200)";
+        });
+
+        // Revert TextCell elements
+        let textCells = document.querySelectorAll(".text-cell");
+        textCells.forEach(textCell => {
+            const htmlTextCell = textCell as HTMLElement;
+            htmlTextCell.style.backgroundColor = "white";
+            htmlTextCell.style.color = "black";
+            const textarea = htmlTextCell.querySelector('textarea') as HTMLTextAreaElement;
+            if (textarea) {
+                textarea.style.backgroundColor = "white";
+                textarea.style.color = "black";
+                textarea.style.borderColor = "rgb(200, 200, 200)";
+            }
         });
     }
 }
