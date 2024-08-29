@@ -82,6 +82,17 @@ class AWSForm {
         instanceIdInput.style.border = "1px solid #ccc";
         instanceIdInput.style.borderRadius = "4px";
 
+        const regionInput = document.createElement("input");
+        regionInput.type = "text";
+        regionInput.name = "region";
+        regionInput.placeholder = "AWS Region";
+        regionInput.required = true;
+        regionInput.style.width = "100%";
+        regionInput.style.marginBottom = "10px";
+        regionInput.style.padding = "8px";
+        regionInput.style.border = "1px solid #ccc";
+        regionInput.style.borderRadius = "4px";
+
         const sshUserInput = document.createElement("input");
         sshUserInput.type = "text";
         sshUserInput.name = "sshUser";
@@ -126,6 +137,7 @@ class AWSForm {
         form.appendChild(accessKeyInput);
         form.appendChild(secretKeyInput);
         form.appendChild(instanceIdInput);
+        form.appendChild(regionInput); // Region input field
         form.appendChild(sshUserInput);
         form.appendChild(sshKeyPathInput);
         form.appendChild(submitButton);
@@ -184,6 +196,7 @@ class AWSForm {
             accessKeyID: formData.get("accessKeyID") as string,
             secretAccessKey: formData.get("secretAccessKey") as string,
             instanceID: formData.get("instanceID") as string,
+            region: formData.get("region") as string, // Include region in the payload
             sshUser: formData.get("sshUser") as string,
             sshKeyPath: formData.get("sshKeyPath") as string,
         };
@@ -199,7 +212,7 @@ class AWSForm {
             if (data.success) {
                 this.showSuccessBanner();
                 this.hide();
-                this.updateWebSocketConnections(data.awsIp);
+                this.updateWebSocketConnections(data.publicIP); // Updated field name
             } else {
                 this.showError(data.errorMessage || 'An error occurred');
             }

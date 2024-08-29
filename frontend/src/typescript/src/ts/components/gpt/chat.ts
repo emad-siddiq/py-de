@@ -151,7 +151,7 @@ class Chat {
         div.style.height = "91vh";
         div.style.display = "none";
         div.style.zIndex = "3";
-        div.style.backgroundColor = "#fcf5f5";
+        div.style.backgroundColor = "black";
         div.style.boxShadow = "0px 2px 15px 0px rgba(0, 0, 0, .4)";
         div.appendChild(this.createChatApp());
         return div;

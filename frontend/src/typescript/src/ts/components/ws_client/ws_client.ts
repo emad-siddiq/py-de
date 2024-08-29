@@ -24,7 +24,7 @@ class WebSocketClientCodeCell {
         if (this.onOpenCallback && this.socket) {
             this.onOpenCallback(this.socket);
         }
-        this.sendMessage('Code Cell Client connected.');
+        //this.sendMessage('Code Cell Client connected.');
     }
 
     

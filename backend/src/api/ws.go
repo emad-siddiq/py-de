@@ -41,7 +41,7 @@ func WebSocketV1(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if msgType == websocket.TextMessage {
-				fmt.Printf("Incoming Text Message")
+				fmt.Printf("Incoming Text Message: \n")
 			}
 
 			if err != nil {
@@ -80,7 +80,7 @@ func executePythonCode(code []byte, out chan []byte) {
 	}
 
 	//Run Python code and redirect stdout/stderr
-	fmt.Printf("Starting python code")
+	fmt.Printf("Running python code\n")
 	cmd := exec.Command("python", "code.py")
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
