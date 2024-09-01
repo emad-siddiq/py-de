@@ -1,4 +1,4 @@
-// WebSocketClient.ts
+// WebSocketClientCodeCell.ts
 class WebSocketClientCodeCell {
     private url: string;
     private socket: WebSocket | null;
@@ -24,10 +24,8 @@ class WebSocketClientCodeCell {
         if (this.onOpenCallback && this.socket) {
             this.onOpenCallback(this.socket);
         }
-        //this.sendMessage('Code Cell Client connected.');
     }
 
-    
     private onError(event: Event): void {
         console.error('WebSocket error:', event);
         this.displayMessage(`Error: ${event.type}`, 'error');
@@ -54,12 +52,19 @@ class WebSocketClientCodeCell {
         if (type === 'error') {
             messageElement.style.color = 'red';
         }
-       // this.messageContainer.appendChild(messageElement);
-       // this.messageContainer.scrollTop = this.messageContainer.scrollHeight;
+        // Append message to message container if needed
+        // this.messageContainer.appendChild(messageElement);
+        // this.messageContainer.scrollTop = this.messageContainer.scrollHeight;
     }
 
-   
+    public reconnect(url: string): void {
+        console.log(`Reconnecting CodeCell WebSocket to new URL: ${url}`);
+        if (this.socket) {
+            this.socket.close();
+        }
+        this.url = url;
+        this.connect();
+    }
 }
 
-
-export {WebSocketClientCodeCell}
+export { WebSocketClientCodeCell };

@@ -3,9 +3,11 @@ package api
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -18,88 +20,117 @@ var upgrader = websocket.Upgrader{
 }
 
 func WebSocketV1(w http.ResponseWriter, r *http.Request) {
-	var conn, _ = upgrader.Upgrade(w, r, nil)
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Printf("Error upgrading to WebSocket: %v", err)
+		return
+	}
+	defer conn.Close()
+
+	log.Printf("WebSocket connection established with %s", conn.RemoteAddr())
 
 	out := make(chan []byte)
+	defer close(out)
 
-	go func(conn *websocket.Conn, out chan []byte) {
-		for {
-			msgType, msg, err := conn.ReadMessage()
-			// if msg == nil {
-			// 	conn.Close()
-			// 	return
-			// }
+	go handleWebSocket(conn, out)
 
-			if msgType == websocket.BinaryMessage {
-				fmt.Printf("Incoming Binary")
-			}
-
-			if msgType == websocket.CloseMessage {
-				fmt.Printf("Close Message")
-				conn.Close()
-				return
-			}
-
-			if msgType == websocket.TextMessage {
-				fmt.Printf("Incoming Text Message: \n")
-			}
-
-			if err != nil {
-				conn.Close()
-				return
-			}
-
-			fmt.Println("Receiving message")
-			println(string(msg))
-			fmt.Println("-----")
-
-			// Handle incoming python code it
-			// Read about channels
-
-			// We need to write to a socket connection when the python computation is done.
-			// https://gobyexample.com/channel-synchronization
-
-			go executePythonCode(msg, out)
-			output := <-out
-			fmt.Println("Sending... ")
-
-			conn.WriteMessage(websocket.TextMessage, output)
-
-			fmt.Println("Sent: ", string(output))
-
-		}
-	}(conn, out)
+	// Keep the main goroutine alive
+	<-make(chan struct{})
 }
 
-func executePythonCode(code []byte, out chan []byte) {
+func handleWebSocket(conn *websocket.Conn, out chan []byte) {
+	for {
+		msgType, msg, err := conn.ReadMessage()
+		if err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				log.Printf("WebSocket read error: %v", err)
+			} else {
+				log.Printf("WebSocket closed: %v", err)
+			}
+			return
+		}
+
+		switch msgType {
+		case websocket.BinaryMessage:
+			log.Println("Incoming Binary Message")
+		case websocket.CloseMessage:
+			log.Println("Close Message received")
+			return
+		case websocket.TextMessage:
+			log.Printf("Incoming Text Message: %s", string(msg))
+		}
+
+		go executePythonCode(msg, out)
+
+		select {
+		case output := <-out:
+			log.Println("Sending output back to client")
+			if err := conn.WriteMessage(websocket.TextMessage, output); err != nil {
+				log.Printf("Error writing to WebSocket: %v", err)
+				return
+			}
+			log.Printf("Sent: %s", string(output))
+		case <-time.After(30 * time.Second):
+			log.Println("Timeout waiting for Python execution")
+			if err := conn.WriteMessage(websocket.TextMessage, []byte("Execution timed out")); err != nil {
+				log.Printf("Error writing timeout message: %v", err)
+				return
+			}
+		}
+	}
+}
+
+func executePythonCode(code []byte, out chan<- []byte) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("Recovered from panic in executePythonCode: %v", r)
+			out <- []byte(fmt.Sprintf("Error: %v", r))
+		}
+	}()
 
 	err := os.WriteFile("./code.py", code, 0644)
-
 	if err != nil {
+		log.Printf("Error writing Python code to file: %v", err)
+		out <- []byte(fmt.Sprintf("Error writing code: %v", err))
 		return
 	}
 
-	//Run Python code and redirect stdout/stderr
-	fmt.Printf("Running python code\n")
+	log.Println("Running Python code")
 	cmd := exec.Command("python", "code.py")
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		panic(err)
+		log.Printf("Error creating stdout pipe: %v", err)
+		out <- []byte(fmt.Sprintf("Error: %v", err))
+		return
 	}
-	//stderr, err := cmd.StderrPipe()
-	// if err != nil {
-	// 	panic(err)
-	// }
-	err = cmd.Start()
+
+	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		panic(err)
+		log.Printf("Error creating stderr pipe: %v", err)
+		out <- []byte(fmt.Sprintf("Error: %v", err))
+		return
 	}
 
-	std, err := io.ReadAll(stdout)
-	fmt.Printf("Read: %s", string(std))
-	out <- std
+	if err := cmd.Start(); err != nil {
+		log.Printf("Error starting Python process: %v", err)
+		out <- []byte(fmt.Sprintf("Error: %v", err))
+		return
+	}
 
-	cmd.Wait()
-	fmt.Printf("Done with python code")
+	stdoutData, _ := io.ReadAll(stdout)
+	stderrData, _ := io.ReadAll(stderr)
 
+	if err := cmd.Wait(); err != nil {
+		log.Printf("Error waiting for Python process: %v", err)
+		out <- []byte(fmt.Sprintf("Error: %v\nStderr: %s", err, stderrData))
+		return
+	}
+
+	if len(stderrData) > 0 {
+		log.Printf("Python stderr: %s", stderrData)
+	}
+
+	log.Printf("Python stdout: %s", stdoutData)
+	out <- stdoutData
+	log.Println("Done with Python code execution")
 }

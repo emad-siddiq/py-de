@@ -30,9 +30,9 @@ func main() {
 	mux := http.NewServeMux()
 
 	// Register your handlers
-	mux.HandleFunc("/v1/ws", api.WebSocketV1)
-	mux.HandleFunc("/v1/ws/chatgpt", api.WebSocketChatGPT)
-	mux.HandleFunc("/api/deploy", api.DeployHandler)
+	mux.HandleFunc("/v1/ws", logMiddleware(api.WebSocketV1))
+	mux.HandleFunc("/v1/ws/chatgpt", logMiddleware(api.WebSocketChatGPT))
+	mux.HandleFunc("/api/deploy", logMiddleware(api.DeployHandler))
 
 	// Wrap the mux with the CORS middleware
 	handler := corsMiddleware(mux)
@@ -40,5 +40,12 @@ func main() {
 	fmt.Println("PySync local server is launching on port 8080")
 	if err := http.ListenAndServe(":8080", handler); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
+	}
+}
+
+func logMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Received request: %s %s from %s", r.Method, r.URL.Path, r.RemoteAddr)
+		next.ServeHTTP(w, r)
 	}
 }

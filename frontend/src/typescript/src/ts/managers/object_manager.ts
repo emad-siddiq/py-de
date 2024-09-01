@@ -37,18 +37,45 @@ class ObjectManager {
     public updateWebSocket(id: string, url: string) {
         const existingSocket = this.sockets.get(id);
         if (existingSocket) {
-            existingSocket.close(); // Close existing socket
+            existingSocket.addEventListener('close', () => {
+                this.createNewWebSocket(id, url);
+            });
+            existingSocket.close(); // Close existing socket and wait for closure
+        } else {
+            this.createNewWebSocket(id, url);
         }
+    }
 
-        // Create a new WebSocket with the updated URL
+    // Create a new WebSocket and add event listeners
+    private createNewWebSocket(id: string, url: string) {
         const newSocket = new WebSocket(url);
+
+        newSocket.addEventListener('open', () => {
+            console.log(`WebSocket connection for ${id} established at ${url}`);
+        });
+
+        newSocket.addEventListener('message', (event) => {
+            console.log(`Message received on ${id}:`, event.data);
+            // Handle incoming messages
+        });
+
+        newSocket.addEventListener('error', (event) => {
+            console.error(`WebSocket error on ${id}:`, event);
+            // Optionally handle reconnection or other logic here
+        });
+
+        newSocket.addEventListener('close', () => {
+            console.log(`WebSocket connection for ${id} closed.`);
+            // Optionally handle reconnection logic here
+        });
+
         this.sockets.set(id, newSocket);
     }
 
     public updateWebSocketConnections(newBaseUrl: string) {
         // Update URLs for all managed WebSockets
-        this.updateWebSocket('socket1', `${newBaseUrl}/v1/ws`);
-        this.updateWebSocket('socket2', `${newBaseUrl}/v1/ws/gpt`);
+        this.updateWebSocket('socket1', `${newBaseUrl}:8080/v1/ws`);
+        this.updateWebSocket('socket2', `${newBaseUrl}:8080/v1/ws/gpt`);
     }
 }
 

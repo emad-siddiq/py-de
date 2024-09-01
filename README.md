@@ -16,15 +16,48 @@
 
 ## Build instructions
 
-(Dev) Run `tsc -w` from the `src/ts` folder. 
+Build for dev:
+
+```
+
+./scripts/frontend-build-dev.sh
+
+```
 
 [Install Go](https://go.dev/dl/)
 
-`cd src`
+Make the build.sh executable:
+```
+chmod +x ./scripts/build.sh
+```
+Run the build script from the root folder:
+```
+./scripts/build.sh
+```
 
-Then `go run .` from inside the src. (pysync folder)
+# Run instructions
 
-go build -o "../build/alpha_frontend"
+To run the final compiled binaries:
+
+Run the backend:
+
+```
+./dist/backend_binary_for_your_os
+```
+
+Run the frontend:
+
+```
+./dist/frontend_binary_for_your_os
+```
+
+To run frontend to debug:
+
+```
+npm install -g http-server
+cd frontend/src/typescript/src
+http-server
+```
 
 ## Shortcuts:
 

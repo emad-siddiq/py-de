@@ -6,8 +6,10 @@ class AWSForm {
     private submitButton: HTMLButtonElement | null;
     private errorMessage: HTMLDivElement | null;
     private inProgressCircle: HTMLDivElement | null;
+    private userInitiatedSubmit: boolean;
 
     constructor() {
+        this.userInitiatedSubmit = false;
         this.form = this.createForm();
         this.overlay = this.createOverlay();
         this.submitButton = this.form.querySelector("button[type='submit']");
@@ -133,11 +135,16 @@ class AWSForm {
             submitButton.style.backgroundColor = "#007bff";
         });
 
+        // Track user-initiated clicks on the submit button
+        submitButton.addEventListener("pointerdown", () => {
+            this.userInitiatedSubmit = true;
+        });
+
         form.appendChild(title);
         form.appendChild(accessKeyInput);
         form.appendChild(secretKeyInput);
         form.appendChild(instanceIdInput);
-        form.appendChild(regionInput); // Region input field
+        form.appendChild(regionInput);
         form.appendChild(sshUserInput);
         form.appendChild(sshKeyPathInput);
         form.appendChild(submitButton);
@@ -187,6 +194,12 @@ class AWSForm {
     private handleSubmit(event: Event): void {
         event.preventDefault();
 
+        // Only proceed if the submit was user-initiated
+        if (!this.userInitiatedSubmit) {
+            console.log('Form submission blocked because it was not user-initiated.');
+            return;
+        }
+
         if (this.inProgressCircle) {
             this.inProgressCircle.style.display = 'block';
         }
@@ -196,7 +209,7 @@ class AWSForm {
             accessKeyID: formData.get("accessKeyID") as string,
             secretAccessKey: formData.get("secretAccessKey") as string,
             instanceID: formData.get("instanceID") as string,
-            region: formData.get("region") as string, // Include region in the payload
+            region: formData.get("region") as string,
             sshUser: formData.get("sshUser") as string,
             sshKeyPath: formData.get("sshKeyPath") as string,
         };
@@ -222,6 +235,7 @@ class AWSForm {
             this.showError('Failed to connect to the backend');
         })
         .finally(() => {
+            this.userInitiatedSubmit = false; // Reset the flag after submission
             if (this.inProgressCircle) {
                 this.inProgressCircle.style.display = 'none';
             }
@@ -243,6 +257,7 @@ class AWSForm {
         const objectManager = ObjectManager.getInstance();
         console.log("Updating WebSocket connections with:", awsIp);
 
+        // Update WebSocket connections with the new IP
         objectManager.updateWebSocketConnections(`ws://${awsIp}`);
     }
 
