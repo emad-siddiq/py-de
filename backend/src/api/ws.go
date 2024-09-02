@@ -15,12 +15,12 @@ import (
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
-		// Allow connections from any origin
 		return true
 	},
 }
 
 func WebSocketV1(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Attempting to upgrade connection to WebSocket for %s", r.RemoteAddr)
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("Error upgrading to WebSocket: %v", err)
@@ -30,12 +30,21 @@ func WebSocketV1(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("WebSocket connection established with %s", conn.RemoteAddr())
 
+	conn.SetPingHandler(func(appData string) error {
+		log.Printf("Received ping from %s", conn.RemoteAddr())
+		return conn.WriteControl(websocket.PongMessage, []byte(appData), time.Now().Add(time.Second))
+	})
+
+	conn.SetCloseHandler(func(code int, text string) error {
+		log.Printf("WebSocket connection closed by %s with code %d: %s", conn.RemoteAddr(), code, text)
+		return nil
+	})
+
 	out := make(chan []byte)
 	defer close(out)
 
 	go handleWebSocket(conn, out)
 
-	// Keep the main goroutine alive
 	<-make(chan struct{})
 }
 
@@ -89,7 +98,6 @@ func executePythonCode(code []byte, out chan<- []byte) {
 		}
 	}()
 
-	// Get the directory of the current executable
 	execPath, err := os.Executable()
 	if err != nil {
 		log.Printf("Error getting executable path: %v", err)
@@ -98,7 +106,6 @@ func executePythonCode(code []byte, out chan<- []byte) {
 	}
 	execDir := filepath.Dir(execPath)
 
-	// Create the code.py file in the same directory as the executable
 	codePath := filepath.Join(execDir, "code.py")
 	err = os.WriteFile(codePath, code, 0644)
 	if err != nil {

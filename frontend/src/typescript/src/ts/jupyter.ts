@@ -4,13 +4,13 @@ import { Explorer } from "./windows/explorer";
 import { Terminal } from "./windows/terminal";
 import { Menu } from "./windows/drop_down_menu/menu";
 import { Editor } from "./windows/editor";
-import {DarkMode} from "./themes/darkmode/darkmode";
+import { DarkMode } from "./themes/darkmode/darkmode";
 import { InputAreaEditor } from "./components/editor/code_cell/ts/controllers/input_area_controller";
 import { AddMenu } from "./components/editor/menu/add_menu";
 import { ObjectManager } from "./managers/object_manager";
 import { Chat } from "./components/gpt/chat";
-import { WebSocketClientCodeCell } from "./components/ws_client/ws_client";
-import { WebSocketClientChatGPT } from "./components/ws_client/ws_client_chatgpt";
+import { WebSocketCodeCell } from "./components/ws_client/ws_code_cell";
+import { WebSocketChatGPT } from "./components/ws_client/ws_chatgpt";
 
 
 /*
@@ -22,8 +22,9 @@ import { WebSocketClientChatGPT } from "./components/ws_client/ws_client_chatgpt
 const objectManager = ObjectManager.getInstance();
 
 // Define your WebSocket instances
-const socketId1 = 'codeSocket';
-const socketId2 = 'aiSocket';
+const localWebSocketURL = `ws://localhost:8080/ws`;
+const codeSocket = 'codeSocket';
+const aiSocket = 'aiSocket';
 
 let _debugger = new Debugger(objectManager);
 let _explorer = new Explorer();
@@ -36,55 +37,58 @@ let _terminal = new Terminal();
 // TODO: File --> Open, select local .md and render correctly
 
 
-const wsClientCodeCell = new WebSocketClientCodeCell(
-    'ws://localhost:8080/v1/ws',
+const wsClientCodeCell = new WebSocketCodeCell(
+    `${localWebSocketURL}/${codeSocket}`,
     (_socket) => {
         console.log('Running custom code after WebSocket connection is established.');
-        objectManager.addWebSocket(socketId1, _socket);
+        objectManager.addWebSocket(codeSocket, _socket);  //Store websocket using its path
 
-        let _editor = new Editor(_socket, objectManager);
+        let editor = objectManager.getObject('editor');
+        if (!editor) {
+            console.log('Creating new editor instance...');
+            editor = new Editor(_socket, objectManager);
+            objectManager.associate('editor', editor);
+        }
+
+        try {
+            editor.initializeOrRefresh(_socket);
+        } catch (error) {
+            console.error('Error during editor initialization/refresh:', error);
+            // You might want to add some fallback behavior here
+        }
+
         let _add_menu = new AddMenu(objectManager);
-    
-        _editor.addCodeCell();
+
         //DarkMode.enable();
-    
-        let code_area = document.getElementById("code-cell-1-input-area-line-number-1-code-area");
-        InputAreaEditor.moveCaretToEndOfCodeArea(code_area);
-        code_area.focus();
 
-        //Close connection before reloading
-window.onbeforeunload = function(event)
-{
-    objectManager.getWebSocket(socketId1).close();
 
-    return confirm("Confirm refresh");
-};
-        
-    }
-);
+        const wsClientChatGPT = new WebSocketChatGPT(
+            `${localWebSocketURL}/${aiSocket}`,
+            (_socket) => {
+                objectManager.addWebSocket(aiSocket, _socket);
+                console.log('Running custom code after WebSocket connection is established.');
+                let _chat = new Chat(_socket);
 
-const wsClientChatGPT = new WebSocketClientChatGPT(
-    'ws://localhost:8080/v1/ws/chatgpt',
-    (_socket) => {
+            }
+        );
 
-        objectManager.addWebSocket(socketId2, _socket);
 
-        console.log('Running custom code after WebSocket connection is established.');       
-        let _chat = new Chat(_socket);
-    //Close connection before reloading
-window.onbeforeunload = function(event)
-{
-    objectManager.getWebSocket(socketId2).close();
-    return confirm("Confirm refresh");
-};
-       
-    
     }
 );
 
 
+//Close connections before reloading
+window.onbeforeunload = function (event) {
+    objectManager.getWebSocket(codeSocket).close();
+    objectManager.getWebSocket(aiSocket).close();
 
-document.addEventListener("keydown", function(e) {
+    return confirm("Confirm refresh");
+};
+
+
+
+
+document.addEventListener("keydown", function (e) {
     if (e.key === "F1") {
         console.log("darkmode");
         e.stopPropagation();

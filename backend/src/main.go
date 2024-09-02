@@ -30,9 +30,9 @@ func main() {
 	mux := http.NewServeMux()
 
 	// Register your handlers
-	mux.HandleFunc("/v1/ws", logMiddleware(api.WebSocketV1))
-	mux.HandleFunc("/v1/ws/chatgpt", logMiddleware(api.WebSocketChatGPT))
-	mux.HandleFunc("/api/deploy", logMiddleware(api.DeployHandler))
+	mux.HandleFunc("/ws/codeSocket", logMiddleware(api.WebSocketV1))
+	mux.HandleFunc("/ws/aiSocket", logMiddleware(api.WebSocketChatGPT))
+	mux.HandleFunc("/ws/deploySocket", logMiddleware(api.DeployHandler))
 
 	// Wrap the mux with the CORS middleware
 	handler := corsMiddleware(mux)

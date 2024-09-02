@@ -1,5 +1,11 @@
 import { ObjectManager } from "../../../../managers/object_manager";
 
+
+const localWebSocketURL = `http://localhost:8080/ws`; //TODO: Change this to be a websocket
+const deploySocket = 'deploySocket';
+
+
+
 class AWSForm {
     private form: HTMLFormElement;
     private overlay: HTMLDivElement;
@@ -214,7 +220,7 @@ class AWSForm {
             sshKeyPath: formData.get("sshKeyPath") as string,
         };
 
-        fetch('http://localhost:8080/api/deploy', {
+        fetch(`${localWebSocketURL}/${deploySocket}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(credentials),
@@ -225,7 +231,7 @@ class AWSForm {
             if (data.success) {
                 this.showSuccessBanner();
                 this.hide();
-                this.updateWebSocketConnections(data.publicIP); // Updated field name
+                this.updateWebSocketConnections(data.wsBaseURL); // Updated field name
             } else {
                 this.showError(data.errorMessage || 'An error occurred');
             }
@@ -253,12 +259,12 @@ class AWSForm {
         }
     }
 
-    private updateWebSocketConnections(awsIp: string) {
+    private updateWebSocketConnections(wsBaseURL: string) {
         const objectManager = ObjectManager.getInstance();
-        console.log("Updating WebSocket connections with:", awsIp);
+        console.log("Updating WebSocket connections with:", wsBaseURL);
 
         // Update WebSocket connections with the new IP
-        objectManager.updateWebSocketConnections(`ws://${awsIp}`);
+        objectManager.updateWebSocketConnections(wsBaseURL);
     }
 
     public show(): void {

@@ -2,12 +2,12 @@ import { CodeCell } from "../components/editor/code_cell/ts/views/code_cell";
 import { OutputCell } from "../components/editor/output_cell/output_cell";
 import { TextCell } from "../components/editor/text_cell/views/text_cell";
 import { ObjectManager } from "../managers/object_manager";
-import { removeElement } from "../utility/dom";
+import { InputAreaEditor } from "../components/editor/code_cell/ts/controllers/input_area_controller";
 
 class Editor {
     div: HTMLElement;
-    cc_id: number;    //total -> ?
-    tc_id:number;     //      -> ? TODO: Figure out how the id's are being assigned/
+    cc_id: number;
+    tc_id: number;
     active_code_cell_id: string;
     id: string;
     socket: WebSocket;
@@ -30,8 +30,90 @@ class Editor {
         this.objectManager.associate(this.id, this);
     }
 
-    getDiv() {
-        return this.div;
+    public initializeOrRefresh(newSocket: WebSocket): void {
+        console.log('Initializing or refreshing editor...');
+    
+        if (this.socket !== newSocket) {
+            console.log('Updating WebSocket...');
+            this.updateSocket(newSocket);
+        }
+    
+        console.log('Refreshing content...');
+        this.refreshContent(false); // Pass false to indicate not to add a new cell
+    
+        // Check if there are any existing code cells
+        const existingCodeCells = this.div.querySelectorAll('.code-cell');
+        console.log(`Number of existing code cells: ${existingCodeCells.length}`);
+    
+        if (existingCodeCells.length === 0) {
+            console.log('No existing code cells found. Adding initial code cell...');
+            this.addCodeCell();
+        } else {
+            console.log('Existing code cells found. Skipping cell addition.');
+        }
+    
+        // Set focus to the first code area
+        console.log('Setting focus to the first code area...');
+        const firstCodeCell = this.div.querySelector('.code-cell');
+        if (firstCodeCell) {
+            const code_area = firstCodeCell.querySelector('[id$="-code-area"]');
+            if (code_area) {
+                InputAreaEditor.moveCaretToEndOfCodeArea(code_area as HTMLElement);
+                (code_area as HTMLElement).focus();
+                console.log('Focus set successfully.');
+            } else {
+                console.error('Code area not found within the first code cell.');
+            }
+        } else {
+            console.error('No code cells found. Unable to set focus.');
+        }
+    
+        console.log('Editor initialization/refresh complete.');
+    }
+
+    public refreshContent(addNewCell: boolean = true): void {
+        console.log("Starting refreshContent method");
+        
+        if (!this.div) {
+            console.error("Error: this.div is not set");
+            return;
+        }
+    
+        console.log(`Initial child elements: ${this.div.childElementCount}`);
+        console.log(`Initial HTML content: ${this.div.innerHTML}`);
+    
+        // Remove all child elements except the filename div
+        while (this.div.childElementCount > 1) {
+            this.div.removeChild(this.div.lastChild);
+        }
+    
+        console.log(`Child elements after removal: ${this.div.childElementCount}`);
+        console.log(`HTML content after removal: ${this.div.innerHTML}`);
+    
+        // Reset counters
+        this.cc_id = 1;
+        this.tc_id = 1;
+        this.active_code_cell_id = "";
+    
+        // Add a new code cell only if addNewCell is true
+        if (addNewCell) {
+            try {
+                this.addCodeCell();
+                console.log("New code cell added");
+            } catch (error) {
+                console.error("Error adding code cell:", error);
+            }
+        }
+    
+        console.log(`Final child elements: ${this.div.childElementCount}`);
+        console.log(`Final HTML content: ${this.div.innerHTML}`);
+    
+        console.log("refreshContent method completed");
+    }
+
+    private updateSocket(newSocket: WebSocket): void {
+        this.socket = newSocket;
+        this.socket.addEventListener('message', this.onMessage.bind(this));
     }
 
     createEditorDiv() {
@@ -40,13 +122,12 @@ class Editor {
         div.setAttribute("class", "editor");
     
         div.style.position = "absolute";
-
         div.style.top = "0%";
         div.style.left = "0%";
         div.style.backgroundColor = "white";
         div.style.width = "100%";
         div.style.height = "100%";
-        div.style.boxSizing = "border-box"; // https://developer.mozilla.org/en-US/docs/Web/CSS/box-sizing
+        div.style.boxSizing = "border-box";
 
         let fileNameDiv = this.createFileNameDiv();
         div.appendChild(fileNameDiv);
@@ -136,36 +217,21 @@ class Editor {
         return fileNameDiv;
     }
 
-    toggleBinding(e) {
-        let ctrl_cmd = e.metaKey || e.ctrlKey;          // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
-        if (ctrl_cmd && e.key === 'd') {
-            e.preventDefault();
-            e.stopPropagation();
-            this.toggle();
-            return;
-        }
-    }
-
-    toggle() {
-        if (document.getElementById("debugger")) {
-            document.body.removeChild(this.div)
-        } else {
-            document.body.appendChild(this.div);
-        }
-    }
-
     addCodeCell() {
+        console.log(`Adding new code cell. Current cc_id: ${this.cc_id}`);
         let code_cell = new CodeCell(this.cc_id, this);
+        code_cell.getDiv().classList.add('code-cell'); // Add 'code-cell' class
 
         let editorDiv = document.getElementById("editor");
 
         let selectedCodeCell = document.getElementById(this.active_code_cell_id);
 
         if (this.active_code_cell_id === "" || (selectedCodeCell && selectedCodeCell.nextSibling === null))  {
+            console.log(`Appending new code cell to editor`);
             editorDiv.appendChild(code_cell.getDiv()); 
         } else {
-            console.log(selectedCodeCell, selectedCodeCell.nextSibling);
-            editorDiv.insertBefore(selectedCodeCell.nextSibling, code_cell.getDiv());
+            console.log(`Inserting new code cell after ${this.active_code_cell_id}`);
+            editorDiv.insertBefore(code_cell.getDiv(), selectedCodeCell.nextSibling);
         }
 
         console.log(`Adding first line to code cell ${this.cc_id}`);
@@ -175,18 +241,17 @@ class Editor {
         this.active_code_cell_id = code_cell.id;
 
         this.cc_id += 1;
+        console.log(`Code cell added. New cc_id: ${this.cc_id}`);
     }
 
     removeCodeCell() {
         let to_remove = document.getElementById("editor").children[document.getElementById("editor").children.length-1];
-
         document.getElementById("editor").removeChild(to_remove);
     }
 
     addTextCell() {
         let text_cell = new TextCell(this.tc_id);
-
-        document.getElementById("editor").appendChild(text_cell.getDiv()); // TODO: Fix this to add cell after the code cell currently being operatsad on 
+        document.getElementById("editor").appendChild(text_cell.getDiv());
         this.tc_id += 1;
     }
 
@@ -209,7 +274,6 @@ class Editor {
     }
 
     private onMessage(event: MessageEvent): void {
-        // Check this to see if valid python output
         console.log('Python executed output:\n', event.data);
         if (event.data) {
             this.displayMessage(event.data);
@@ -250,36 +314,12 @@ class Editor {
                 output_cell_div.style.color = 'red';
             }
     
-            // Scroll to the new output cell
             output_cell_div.scrollIntoView({ behavior: 'smooth', block: 'end' });
     
         } catch (error) {
             console.error('Error in displayMessage:', error);
         }
     }
-
-    public refreshContent(): void {
-        console.log("Refreshing editor content");
-        
-        // Clear existing content
-        while (this.div.firstChild) {
-            this.div.removeChild(this.div.firstChild);
-        }
-
-        // Reset counters
-        this.cc_id = 1;
-        this.tc_id = 1;
-        this.active_code_cell_id = "";
-
-        // Add a new code cell
-        this.addCodeCell();
-
-        // Focus on the new code cell
-        const code_area = document.getElementById(`code-cell-1-input-area-line-number-1-code-area`);
-        if (code_area) {
-            (code_area as HTMLElement).focus();
-        }
-    }
 }
 
-export {Editor};
+export { Editor };

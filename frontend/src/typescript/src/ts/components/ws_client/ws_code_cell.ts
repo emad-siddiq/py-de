@@ -1,5 +1,5 @@
 // WebSocketClientCodeCell.ts
-class WebSocketClientCodeCell {
+class WebSocketCodeCell {
     private url: string;
     private socket: WebSocket | null;
     private onOpenCallback: ((socket: WebSocket) => void) | null;
@@ -67,4 +67,4 @@ class WebSocketClientCodeCell {
     }
 }
 
-export { WebSocketClientCodeCell };
+export { WebSocketCodeCell };

@@ -1,7 +1,7 @@
 import { Chat } from "../gpt/chat";
 
 // WebSocketClient.ts
-class WebSocketClientChatGPT {
+class WebSocketChatGPT {
     private url: string;
     private socket: WebSocket | null;
     private onOpenCallback: ((socket: WebSocket) => void) | null;
@@ -64,4 +64,4 @@ class WebSocketClientChatGPT {
 }
 
 
-export {WebSocketClientChatGPT}
+export {WebSocketChatGPT}

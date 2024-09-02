@@ -50,13 +50,13 @@ class ObjectManager {
         }
     }
 
-    public updateWebSocketConnections(newBaseUrl: string): void {
-        console.log("Updating WebSocket connections with:", newBaseUrl);
+    public updateWebSocketConnections(wsBaseURL: string): void {
+        console.log("Updating WebSocket base URL with:", wsBaseURL);
         
         // Close existing connections
-        this.webSockets.forEach((ws, key) => {
-            ws.close();
-            const newSocket = new WebSocket(`${newBaseUrl}/${key}`);
+        this.webSockets.forEach((ws, key) => {    //websockets are stored by unique paths as keys in jupyter.ts 
+            ws.close();                       
+            const newSocket = new WebSocket(`${wsBaseURL}/${key}`);
             this.webSockets.set(key, newSocket);
             this.notifySubscribers(key, newSocket);
         });
