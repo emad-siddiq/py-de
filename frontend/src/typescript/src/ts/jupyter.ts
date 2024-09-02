@@ -22,8 +22,8 @@ import { WebSocketClientChatGPT } from "./components/ws_client/ws_client_chatgpt
 const objectManager = ObjectManager.getInstance();
 
 // Define your WebSocket instances
-const socketId1 = 'socket1';
-const socketId2 = 'socket2';
+const socketId1 = 'codeSocket';
+const socketId2 = 'aiSocket';
 
 let _debugger = new Debugger(objectManager);
 let _explorer = new Explorer();

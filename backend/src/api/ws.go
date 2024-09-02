@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -88,7 +89,18 @@ func executePythonCode(code []byte, out chan<- []byte) {
 		}
 	}()
 
-	err := os.WriteFile("./code.py", code, 0644)
+	// Get the directory of the current executable
+	execPath, err := os.Executable()
+	if err != nil {
+		log.Printf("Error getting executable path: %v", err)
+		out <- []byte(fmt.Sprintf("Error: %v", err))
+		return
+	}
+	execDir := filepath.Dir(execPath)
+
+	// Create the code.py file in the same directory as the executable
+	codePath := filepath.Join(execDir, "code.py")
+	err = os.WriteFile(codePath, code, 0644)
 	if err != nil {
 		log.Printf("Error writing Python code to file: %v", err)
 		out <- []byte(fmt.Sprintf("Error writing code: %v", err))
@@ -96,7 +108,7 @@ func executePythonCode(code []byte, out chan<- []byte) {
 	}
 
 	log.Println("Running Python code")
-	cmd := exec.Command("python", "code.py")
+	cmd := exec.Command("python", codePath)
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		log.Printf("Error creating stdout pipe: %v", err)

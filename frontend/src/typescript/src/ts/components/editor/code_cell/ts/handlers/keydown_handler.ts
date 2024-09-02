@@ -11,7 +11,9 @@ class InputAreaKeyDown {
         e.stopPropagation();
         input_area.removeDefaultBr(); //contenteditable adds <br> on pressing entering
         input_area.increaseHeight();
-        input_area.addLineAfter(input_area.caretY+1);
+        console.log(`Enter pressed. Adding line after ${input_area.caretY}`);
+        input_area.addLineAfter(input_area.caretY);
+        console.log(`Line added after Enter press`);
         let new_code_area = input_area.getCodeAreaByLine(input_area.caretY+1);
         InputAreaEditor.moveCaretToEndOfCodeArea(new_code_area);
     }

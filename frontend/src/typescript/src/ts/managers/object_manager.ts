@@ -1,12 +1,10 @@
 class ObjectManager {
     private static instance: ObjectManager;
-    private map: Map<string, any>; // Map for generic objects
-    private sockets: Map<string, WebSocket>; // Map specifically for WebSockets
+    private objects: Map<string, any> = new Map();
+    private webSockets: Map<string, WebSocket> = new Map();
+    private socketSubscriptions: Map<string, Set<(socket: WebSocket) => void>> = new Map();
 
-    private constructor() {
-        this.map = new Map();
-        this.sockets = new Map(); // Initialize socket map
-    }
+    private constructor() {}
 
     public static getInstance(): ObjectManager {
         if (!ObjectManager.instance) {
@@ -15,67 +13,77 @@ class ObjectManager {
         return ObjectManager.instance;
     }
 
-    public associate(divId: string, obj: any) {
-        this.map.set(divId, obj);
+    public associate(id: string, object: any): void {
+        this.objects.set(id, object);
     }
 
-    public getObject(divId: string): any {
-        return this.map.get(divId);
+    public getObject(id: string): any {
+        return this.objects.get(id);
     }
 
-    // Add a WebSocket instance to the manager
-    public addWebSocket(id: string, socket: WebSocket) {
-        this.sockets.set(id, socket);
+    public addWebSocket(id: string, socket: WebSocket): void {
+        this.webSockets.set(id, socket);
+        this.notifySubscribers(id, socket);
     }
 
-    // Retrieve a WebSocket instance by ID
     public getWebSocket(id: string): WebSocket | undefined {
-        return this.sockets.get(id);
+        return this.webSockets.get(id);
     }
 
-    // Update the WebSocket URL and replace the WebSocket instance
-    public updateWebSocket(id: string, url: string) {
-        const existingSocket = this.sockets.get(id);
+    public subscribeToSocket(socketId: string, callback: (socket: WebSocket) => void): void {
+        if (!this.socketSubscriptions.has(socketId)) {
+            this.socketSubscriptions.set(socketId, new Set());
+        }
+        this.socketSubscriptions.get(socketId)!.add(callback);
+
+        // If the socket already exists, call the callback immediately
+        const existingSocket = this.webSockets.get(socketId);
         if (existingSocket) {
-            existingSocket.addEventListener('close', () => {
-                this.createNewWebSocket(id, url);
-            });
-            existingSocket.close(); // Close existing socket and wait for closure
-        } else {
-            this.createNewWebSocket(id, url);
+            callback(existingSocket);
         }
     }
 
-    // Create a new WebSocket and add event listeners
-    private createNewWebSocket(id: string, url: string) {
-        const newSocket = new WebSocket(url);
-
-        newSocket.addEventListener('open', () => {
-            console.log(`WebSocket connection for ${id} established at ${url}`);
-        });
-
-        newSocket.addEventListener('message', (event) => {
-            console.log(`Message received on ${id}:`, event.data);
-            // Handle incoming messages
-        });
-
-        newSocket.addEventListener('error', (event) => {
-            console.error(`WebSocket error on ${id}:`, event);
-            // Optionally handle reconnection or other logic here
-        });
-
-        newSocket.addEventListener('close', () => {
-            console.log(`WebSocket connection for ${id} closed.`);
-            // Optionally handle reconnection logic here
-        });
-
-        this.sockets.set(id, newSocket);
+    private notifySubscribers(socketId: string, socket: WebSocket): void {
+        const subscribers = this.socketSubscriptions.get(socketId);
+        if (subscribers) {
+            subscribers.forEach(callback => callback(socket));
+        }
     }
 
-    public updateWebSocketConnections(newBaseUrl: string) {
-        // Update URLs for all managed WebSockets
-        this.updateWebSocket('socket1', `${newBaseUrl}:8080/v1/ws`);
-        this.updateWebSocket('socket2', `${newBaseUrl}:8080/v1/ws/gpt`);
+    public updateWebSocketConnections(newBaseUrl: string): void {
+        console.log("Updating WebSocket connections with:", newBaseUrl);
+        
+        // Close existing connections
+        this.webSockets.forEach((ws, key) => {
+            ws.close();
+            const newSocket = new WebSocket(`${newBaseUrl}/${key}`);
+            this.webSockets.set(key, newSocket);
+            this.notifySubscribers(key, newSocket);
+        });
+
+        // Notify the editor to refresh
+        const editor = this.getObject('editor');
+        if (editor && typeof editor.refreshContent === 'function') {
+            editor.refreshContent();
+        } else {
+            console.error('Editor not found or refreshContent method not available');
+        }
+    }
+
+    public getAllWebSockets(): Map<string, WebSocket> {
+        return this.webSockets;
+    }
+
+    public removeWebSocket(id: string): boolean {
+        return this.webSockets.delete(id);
+    }
+
+    public clearAllWebSockets(): void {
+        this.webSockets.clear();
+    }
+
+    public hasWebSocket(id: string): boolean {
+        return this.webSockets.has(id);
     }
 }
 

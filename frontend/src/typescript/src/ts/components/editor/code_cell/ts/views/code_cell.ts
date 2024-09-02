@@ -1,11 +1,11 @@
-import {InputArea} from "./child_views/input_area";
+import { InputArea } from "./child_views/input_area";
 import { CodeCellNumber } from "./child_views/cell_number";
 import { Editor } from "../../../../../windows/editor";
 import { DarkMode } from "./../../../../../themes/darkmode/darkmode";
-
+import { ObjectManager } from "../../../../../managers/object_manager";
 
 class CodeCell {
-    socket: WebSocket;
+    private socket: WebSocket | null;
     id: string;
     cc_id: number;
     name: string;
@@ -14,36 +14,34 @@ class CodeCell {
     input_area: InputArea;
     editor: Editor;
 
-    constructor(id, editor, socket) 
-    {   
-        // Editor where all the other cells live
+    constructor(id: number, editor: Editor) {
         this.editor = editor;
-        // Socket to send code to run
-        this.socket = socket;
+        this.socket = null;
 
-        // Class name, CSS id
         this.name = "code-cell";
         this.id = "code-cell-" + id.toString();
         this.cc_id = id;
         this.input_area_id = this.id + "-input-area";
 
-        // Create the code cell div
         this.div = this.createCodeCellDiv();
-
-        // Apply dark mode styles if enabled
         this.applyInitialStyles();
-
-        // Add event listeners
         this.addEventListeners(this.div);
+
+        // Subscribe to socket updates
+        ObjectManager.getInstance().subscribeToSocket("codeSocket", this.updateSocket.bind(this));
     }
 
-    getDiv() 
-    {  
+    private updateSocket(newSocket: WebSocket) {
+        this.socket = newSocket;
+        console.log(`CodeCell ${this.id} updated with new WebSocket`);
+    }
+
+    getDiv() {
         return this.div;
     }
 
-    addEventListeners(div) {
-       div.addEventListener("click", this.clickHandler.bind(this));
+    addEventListeners(div: HTMLElement) {
+        div.addEventListener("click", this.clickHandler.bind(this));
     }
 
     createCodeCellDiv() {
@@ -54,14 +52,13 @@ class CodeCell {
 
         code_cell.style.left = "0%";
         code_cell.style.top = "0%";
-
         code_cell.style.width = "100%";
         code_cell.style.height = "70px";
         code_cell.style.boxSizing = "border-box";
         code_cell.style.position = "relative";
 
         let code_cell_number = new CodeCellNumber(this.cc_id);
-        this.input_area = new InputArea(this.input_area_id, this.cc_id, this.socket);
+        this.input_area = new InputArea(this.input_area_id, this.cc_id);
 
         code_cell.appendChild(code_cell_number.getDiv());
         code_cell.appendChild(this.input_area.getDiv());
@@ -87,8 +84,3 @@ class CodeCell {
 }
 
 export { CodeCell };
-
-
-
-
-  

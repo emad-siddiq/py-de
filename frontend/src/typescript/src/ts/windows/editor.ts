@@ -54,7 +54,6 @@ class Editor {
         return div;
     }
 
-    
     createFileNameDiv(): HTMLDivElement {
         let fileName: string = "Untitled";
         let fileNameDiv: HTMLDivElement = document.createElement("div");
@@ -136,11 +135,6 @@ class Editor {
     
         return fileNameDiv;
     }
-    
-    
-    
-    
-
 
     toggleBinding(e) {
         let ctrl_cmd = e.metaKey || e.ctrlKey;          // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
@@ -158,32 +152,26 @@ class Editor {
         } else {
             document.body.appendChild(this.div);
         }
-     
     }
 
-
     addCodeCell() {
-        let code_cell = new CodeCell(this.cc_id, this, this.socket);
+        let code_cell = new CodeCell(this.cc_id, this);
 
         let editorDiv = document.getElementById("editor");
 
         let selectedCodeCell = document.getElementById(this.active_code_cell_id);
 
-  
-
         if (this.active_code_cell_id === "" || (selectedCodeCell && selectedCodeCell.nextSibling === null))  {
             editorDiv.appendChild(code_cell.getDiv()); 
         } else {
-            console.log( selectedCodeCell,selectedCodeCell.nextSibling )
-
-            editorDiv.insertBefore(selectedCodeCell.nextSibling, code_cell.getDiv()); //Get current active code cell and 
-            
+            console.log(selectedCodeCell, selectedCodeCell.nextSibling);
+            editorDiv.insertBefore(selectedCodeCell.nextSibling, code_cell.getDiv());
         }
+
+        console.log(`Adding first line to code cell ${this.cc_id}`);
+        code_cell.input_area.addLineAfter(0); // add first line
+        console.log(`First line added to code cell ${this.cc_id}`);
         
-
-       
-
-        code_cell.input_area.addLineAfter(0); // add first line TODO: Check this logic and fix it
         this.active_code_cell_id = code_cell.id;
 
         this.cc_id += 1;
@@ -194,7 +182,6 @@ class Editor {
 
         document.getElementById("editor").removeChild(to_remove);
     }
-
 
     addTextCell() {
         let text_cell = new TextCell(this.tc_id);
@@ -212,7 +199,6 @@ class Editor {
         }
     }
 
-
     CMD_MINUS_removeCodeCell(e) {
         let ctrl_cmd = e.metaKey || e.ctrlKey;
         if (ctrl_cmd && e.shiftKey && e.key === "-") {
@@ -223,49 +209,77 @@ class Editor {
     }
 
     private onMessage(event: MessageEvent): void {
-
         // Check this to see if valid python output
-
         console.log('Python executed output:\n', event.data);
         if (event.data) {
             this.displayMessage(event.data);
-
         }
     }
     
     private displayMessage(message: string, type: 'normal' | 'error' = 'normal'): void {
-
-        let output_cell = new OutputCell(this.active_code_cell_id, message);
-
-        let code_cell = document.getElementById(this.active_code_cell_id);
+        console.log(`Displaying message: ${message}, type: ${type}`);
         
-        if (code_cell.nextSibling === null) {
-            this.div.appendChild(output_cell.getDiv()); 
-        } else {
-            console.log(code_cell.nextElementSibling);
-            if (code_cell.nextElementSibling.getAttribute("id") === code_cell.id + "-output-cell") {
-                code_cell.nextElementSibling.replaceWith(output_cell.getDiv());
-            } else {
-                this.div.insertBefore(code_cell.nextSibling, output_cell.getDiv());
-
+        try {
+            const output_cell = new OutputCell(this.active_code_cell_id, message);
+            const code_cell = document.getElementById(this.active_code_cell_id);
+    
+            if (!code_cell) {
+                console.error(`Code cell with id ${this.active_code_cell_id} not found`);
+                return;
             }
-          
-            
+    
+            const output_cell_div = output_cell.getDiv();
+    
+            if (!code_cell.nextSibling) {
+                console.log('No next sibling, appending output cell to this.div');
+                this.div.appendChild(output_cell_div);
+            } else {
+                const next_element = code_cell.nextElementSibling;
+                console.log('Next element:', next_element);
+    
+                if (next_element && next_element.id === `${code_cell.id}-output-cell`) {
+                    console.log('Replacing existing output cell');
+                    next_element.replaceWith(output_cell_div);
+                } else {
+                    console.log('Inserting output cell after code cell');
+                    code_cell.after(output_cell_div);
+                }
+            }
+    
+            if (type === 'error') {
+                output_cell_div.style.color = 'red';
+            }
+    
+            // Scroll to the new output cell
+            output_cell_div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    
+        } catch (error) {
+            console.error('Error in displayMessage:', error);
         }
-        // const messageElement = document.createElement('p');
-        // messageElement.textContent = message;
-        // if (type === 'error') {
-        //     messageElement.style.color = 'red';
-        // }
-       // this.messageContainer.appendChild(messageElement);
-       // this.messageContainer.scrollTop = this.messageContainer.scrollHeight;
     }
 
-   
+    public refreshContent(): void {
+        console.log("Refreshing editor content");
+        
+        // Clear existing content
+        while (this.div.firstChild) {
+            this.div.removeChild(this.div.firstChild);
+        }
 
+        // Reset counters
+        this.cc_id = 1;
+        this.tc_id = 1;
+        this.active_code_cell_id = "";
 
+        // Add a new code cell
+        this.addCodeCell();
 
-
+        // Focus on the new code cell
+        const code_area = document.getElementById(`code-cell-1-input-area-line-number-1-code-area`);
+        if (code_area) {
+            (code_area as HTMLElement).focus();
+        }
+    }
 }
 
 export {Editor};
