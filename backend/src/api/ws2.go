@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -20,9 +19,13 @@ func WebSocketChatGPT(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("Error upgrading to WebSocket for ChatGPT: %v", err)
+		http.Error(w, "Could not upgrade to WebSocket", http.StatusInternalServerError)
 		return
 	}
-	defer ws.Close()
+	// defer func() {
+	// 	log.Printf("Closing WebSocket connection for ChatGPT: %s", ws.RemoteAddr())
+	// 	ws.Close()
+	// }()
 
 	log.Printf("WebSocket connection for ChatGPT established with %s", ws.RemoteAddr())
 
@@ -31,59 +34,60 @@ func WebSocketChatGPT(w http.ResponseWriter, r *http.Request) {
 		return ws.WriteControl(websocket.PongMessage, []byte(appData), time.Now().Add(time.Second))
 	})
 
+	ws.SetPongHandler(func(appData string) error {
+		log.Printf("Received pong from ChatGPT client: %s", ws.RemoteAddr())
+		return nil
+	})
+
 	ws.SetCloseHandler(func(code int, text string) error {
 		log.Printf("WebSocket connection for ChatGPT closed by %s with code %d: %s", ws.RemoteAddr(), code, text)
 		return nil
 	})
 
+	// Start a goroutine for sending periodic pings
+	go func() {
+		ticker := time.NewTicker(15 * time.Second)
+		defer ticker.Stop()
+		for {
+			<-ticker.C
+			if err := ws.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(time.Second)); err != nil {
+				log.Printf("Error sending ping to %s: %v", ws.RemoteAddr(), err)
+				return
+			}
+		}
+	}()
+
 	for {
-		_, message, err := ws.ReadMessage()
+		messageType, message, err := ws.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("ChatGPT WebSocket read error: %v", err)
+				log.Printf("ChatGPT WebSocket read error for %s: %v", ws.RemoteAddr(), err)
 			} else {
-				log.Printf("ChatGPT WebSocket closed: %v", err)
+				log.Printf("ChatGPT WebSocket closed for %s: %v", ws.RemoteAddr(), err)
 			}
 			break
 		}
 
-		log.Printf("Received message from ChatGPT client: %s", string(message))
+		log.Printf("Received message type %d from ChatGPT client %s: %s", messageType, ws.RemoteAddr(), string(message))
 
 		response, err := callChatGPTAPI(string(message))
 		if err != nil {
-			log.Printf("Error calling ChatGPT API: %v", err)
-			response = fmt.Sprintf("Error calling ChatGPT API: %v", err)
+			log.Printf("Error calling ChatGPT API for %s: %v", ws.RemoteAddr(), err)
+			response = fmt.Sprintf("Sorry, the ChatGPT API is currently unavailable. Error: %v", err)
 		}
 
-		log.Printf("Sending response to ChatGPT client: %s", response)
-		err = ws.WriteMessage(websocket.TextMessage, []byte(response))
-		if err != nil {
-			log.Printf("Error writing to ChatGPT WebSocket: %v", err)
+		log.Printf("Sending response to ChatGPT client %s: %s", ws.RemoteAddr(), response)
+		if err := ws.WriteMessage(websocket.TextMessage, []byte(response)); err != nil {
+			log.Printf("Error writing to ChatGPT WebSocket for %s: %v", ws.RemoteAddr(), err)
 			break
 		}
 	}
 }
 
-type ChatGPTRequest struct {
-	Model    string    `json:"model"`
-	Messages []Message `json:"messages"`
-}
-
-type Message struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-}
-
-type ChatGPTResponse struct {
-	Choices []struct {
-		Message Message `json:"message"`
-	} `json:"choices"`
-}
-
 func callChatGPTAPI(prompt string) (string, error) {
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	if apiKey == "" {
-		return "", errors.New("API key is not set")
+		return "ChatGPT API key is not set. Please configure the API key to use this feature.", nil
 	}
 
 	log.Printf("Sending message to ChatGPT: %s", prompt)
@@ -98,7 +102,7 @@ func callChatGPTAPI(prompt string) (string, error) {
 		},
 	})
 	if err != nil {
-		return "", fmt.Errorf("error marshaling request: %v", err)
+		return "", fmt.Errorf("error preparing request: %v", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -118,26 +122,46 @@ func callChatGPTAPI(prompt string) (string, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("error making request: %v", err)
+		return "", fmt.Errorf("error making request to ChatGPT API: %v", err)
 	}
 	defer resp.Body.Close()
 
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("error reading response body: %v", err)
+	}
+
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
 		return "", fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, body)
 	}
 
 	var chatGPTResponse ChatGPTResponse
-	if err := json.NewDecoder(resp.Body).Decode(&chatGPTResponse); err != nil {
+	if err := json.Unmarshal(body, &chatGPTResponse); err != nil {
 		return "", fmt.Errorf("error decoding response: %v", err)
 	}
 
 	if len(chatGPTResponse.Choices) == 0 {
-		return "", errors.New("empty response from ChatGPT")
+		return "", fmt.Errorf("empty response from ChatGPT")
 	}
 
 	response := chatGPTResponse.Choices[0].Message.Content
 	log.Printf("Received response from ChatGPT: %s", response)
 
 	return response, nil
+}
+
+type ChatGPTRequest struct {
+	Model    string    `json:"model"`
+	Messages []Message `json:"messages"`
+}
+
+type Message struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type ChatGPTResponse struct {
+	Choices []struct {
+		Message Message `json:"message"`
+	} `json:"choices"`
 }

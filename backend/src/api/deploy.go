@@ -15,6 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/gorilla/websocket"
 )
 
 func DeployHandler(w http.ResponseWriter, r *http.Request) {
@@ -163,6 +164,15 @@ func DeployHandler(w http.ResponseWriter, r *http.Request) {
 
 		if err == nil {
 			logger.Log("Backend service is running and listening on port 8080")
+
+			// Perform WebSocket connection test
+			wsURL := fmt.Sprintf("ws://%s:8080/ws/testSocket", instanceIP)
+			if err := testWebSocketConnection(wsURL, logger); err != nil {
+				logger.Logf("WebSocket connection test failed: %v", err)
+				handleError(w, "WebSocket connection test failed", err, http.StatusInternalServerError, logger)
+				return
+			}
+			logger.Log("WebSocket connection test passed successfully")
 			break
 		}
 
@@ -183,6 +193,42 @@ func DeployHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 	logger.Log("Deployment completed successfully.")
+}
+
+func testWebSocketConnection(url string, logger *Logger) error {
+	logger.Logf("Attempting to connect to WebSocket test endpoint at %s", url)
+
+	dialer := websocket.Dialer{
+		HandshakeTimeout: 10 * time.Second,
+	}
+
+	conn, resp, err := dialer.Dial(url, nil)
+	if err != nil {
+		if resp != nil {
+			logger.Logf("WebSocket handshake failed. Status code: %d", resp.StatusCode)
+		}
+		return fmt.Errorf("failed to connect to WebSocket: %v", err)
+	}
+	defer conn.Close()
+
+	logger.Logf("WebSocket connection established. Response status: %s", resp.Status)
+
+	// Send a test message
+	testMessage := "Hello, WebSocket!"
+	logger.Logf("Sending test message: %s", testMessage)
+	if err := conn.WriteMessage(websocket.TextMessage, []byte(testMessage)); err != nil {
+		return fmt.Errorf("failed to send test message: %v", err)
+	}
+
+	// Read response
+	logger.Log("Waiting for response...")
+	_, message, err := conn.ReadMessage()
+	if err != nil {
+		return fmt.Errorf("failed to read response: %v", err)
+	}
+	logger.Logf("Received response: %s", string(message))
+
+	return nil
 }
 
 func runSSHCommand(ctx context.Context, sshKeyPath, sshUser, instanceIP, command string, logger *Logger) (string, error) {

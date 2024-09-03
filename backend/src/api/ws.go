@@ -14,8 +14,10 @@ import (
 )
 
 var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
-		return true
+		return true // Allowing all origins for this example
 	},
 }
 
@@ -24,15 +26,28 @@ func WebSocketV1(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("Error upgrading to WebSocket: %v", err)
+		http.Error(w, "Could not upgrade to WebSocket", http.StatusInternalServerError)
 		return
 	}
-	defer conn.Close()
+	defer func() {
+		log.Printf("Closing WebSocket connection for %s", conn.RemoteAddr())
+		conn.Close()
+	}()
 
 	log.Printf("WebSocket connection established with %s", conn.RemoteAddr())
 
 	conn.SetPingHandler(func(appData string) error {
 		log.Printf("Received ping from %s", conn.RemoteAddr())
-		return conn.WriteControl(websocket.PongMessage, []byte(appData), time.Now().Add(time.Second))
+		err := conn.WriteControl(websocket.PongMessage, []byte(appData), time.Now().Add(time.Second))
+		if err != nil {
+			log.Printf("Error sending pong to %s: %v", conn.RemoteAddr(), err)
+		}
+		return err
+	})
+
+	conn.SetPongHandler(func(appData string) error {
+		log.Printf("Received pong from %s", conn.RemoteAddr())
+		return nil
 	})
 
 	conn.SetCloseHandler(func(code int, text string) error {
@@ -53,37 +68,39 @@ func handleWebSocket(conn *websocket.Conn, out chan []byte) {
 		msgType, msg, err := conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("WebSocket read error: %v", err)
+				log.Printf("WebSocket read error for %s: %v", conn.RemoteAddr(), err)
 			} else {
-				log.Printf("WebSocket closed: %v", err)
+				log.Printf("WebSocket closed for %s: %v", conn.RemoteAddr(), err)
 			}
 			return
 		}
 
+		log.Printf("Received message type %d from %s", msgType, conn.RemoteAddr())
+
 		switch msgType {
 		case websocket.BinaryMessage:
-			log.Println("Incoming Binary Message")
+			log.Printf("Incoming Binary Message from %s", conn.RemoteAddr())
 		case websocket.CloseMessage:
-			log.Println("Close Message received")
+			log.Printf("Close Message received from %s", conn.RemoteAddr())
 			return
 		case websocket.TextMessage:
-			log.Printf("Incoming Text Message: %s", string(msg))
+			log.Printf("Incoming Text Message from %s: %s", conn.RemoteAddr(), string(msg))
 		}
 
 		go executePythonCode(msg, out)
 
 		select {
 		case output := <-out:
-			log.Println("Sending output back to client")
+			log.Printf("Sending output back to client %s", conn.RemoteAddr())
 			if err := conn.WriteMessage(websocket.TextMessage, output); err != nil {
-				log.Printf("Error writing to WebSocket: %v", err)
+				log.Printf("Error writing to WebSocket for %s: %v", conn.RemoteAddr(), err)
 				return
 			}
-			log.Printf("Sent: %s", string(output))
+			log.Printf("Sent to %s: %s", conn.RemoteAddr(), string(output))
 		case <-time.After(30 * time.Second):
-			log.Println("Timeout waiting for Python execution")
+			log.Printf("Timeout waiting for Python execution for %s", conn.RemoteAddr())
 			if err := conn.WriteMessage(websocket.TextMessage, []byte("Execution timed out")); err != nil {
-				log.Printf("Error writing timeout message: %v", err)
+				log.Printf("Error writing timeout message to %s: %v", conn.RemoteAddr(), err)
 				return
 			}
 		}

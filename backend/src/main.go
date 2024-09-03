@@ -33,6 +33,7 @@ func main() {
 	mux.HandleFunc("/ws/codeSocket", logMiddleware(api.WebSocketV1))
 	mux.HandleFunc("/ws/aiSocket", logMiddleware(api.WebSocketChatGPT))
 	mux.HandleFunc("/ws/deploySocket", logMiddleware(api.DeployHandler))
+	mux.HandleFunc("/ws/testSocket", logMiddleware(api.WebSocketTestHandler)) // New WebSocket test endpoint
 
 	// Wrap the mux with the CORS middleware
 	handler := corsMiddleware(mux)
