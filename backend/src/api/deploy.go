@@ -86,11 +86,19 @@ func DeployHandler(w http.ResponseWriter, r *http.Request) {
 
 	logger.Log("Checking and installing prerequisites on the instance...")
 	prereqCmd := `
-        command -v curl >/dev/null 2>&1 || { echo 'curl not found, installing...'; sudo apt-get update && sudo apt-get install -y curl; }
-        command -v wget >/dev/null 2>&1 || { echo 'wget not found, installing...'; sudo apt-get update && sudo apt-get install -y wget; }
-        command -v netstat >/dev/null 2>&1 || { echo 'netstat not found, installing...'; sudo apt-get update && sudo apt-get install -y net-tools; }
-    `
-	if _, err := runSSHCommand(ctx, requestBody.SSHKeyPath, requestBody.SSHUser, instanceIP, prereqCmd, logger); err != nil {
+		command -v curl >/dev/null 2>&1 || { echo 'curl not found, installing...'; sudo apt-get update && sudo apt-get install -y curl; }
+		command -v wget >/dev/null 2>&1 || { echo 'wget not found, installing...'; sudo apt-get update && sudo apt-get install -y wget; }
+		command -v netstat >/dev/null 2>&1 || { echo 'netstat not found, installing...'; sudo apt-get update && sudo apt-get install -y net-tools; }
+		command -v python3 >/dev/null 2>&1 || { echo 'Python3 not found, installing...'; sudo apt-get update && sudo apt-get install -y python3 python3-pip; }
+		sudo ln -sf /usr/bin/python3 /usr/bin/python
+		echo 'export PATH=$PATH:/usr/bin' >> ~/.bashrc
+		source ~/.bashrc
+		python --version
+		which python
+		which python3
+	`
+	if output, err := runSSHCommand(ctx, requestBody.SSHKeyPath, requestBody.SSHUser, instanceIP, prereqCmd, logger); err != nil {
+		logger.Logf("Error output: %s", output)
 		handleError(w, "Error checking/installing prerequisites", err, http.StatusInternalServerError, logger)
 		return
 	}
@@ -98,15 +106,15 @@ func DeployHandler(w http.ResponseWriter, r *http.Request) {
 
 	logger.Log("Killing any existing process running on port 8080 on the remote instance...")
 	killCmd := `
-        pid=$(lsof -ti:8080)
-        if [ ! -z "$pid" ]; then
-            echo "Killing process $pid"
-            kill -9 $pid
-            sleep 2
-        else
-            echo "No process found running on port 8080"
-        fi
-    `
+		pid=$(lsof -ti:8080)
+		if [ ! -z "$pid" ]; then
+			echo "Killing process $pid"
+			kill -9 $pid
+			sleep 2
+		else
+			echo "No process found running on port 8080"
+		fi
+	`
 	output, err := runSSHCommand(ctx, requestBody.SSHKeyPath, requestBody.SSHUser, instanceIP, killCmd, logger)
 	if err != nil {
 		logger.Logf("Error during process killing: %v", err)
@@ -145,19 +153,19 @@ func DeployHandler(w http.ResponseWriter, r *http.Request) {
 
 	for i := 0; i < maxRetries; i++ {
 		livenessCmd := fmt.Sprintf(`
-            if ps -p %s > /dev/null; then
-                echo "Process is running"
-                if netstat -tlnp | grep -q ':%d.*%s'; then
-                    echo "Process is listening on port 8080"
-                    exit 0
-                else
-                    echo "Process is not listening on port 8080"
-                fi
-            else
-                echo "Process is not running"
-            fi
-            exit 1
-        `, pid, 8080, pid)
+			if ps -p %s > /dev/null; then
+				echo "Process is running"
+				if netstat -tlnp | grep -q ':%d.*%s'; then
+					echo "Process is listening on port 8080"
+					exit 0
+				else
+					echo "Process is not listening on port 8080"
+				fi
+			else
+				echo "Process is not running"
+			fi
+			exit 1
+		`, pid, 8080, pid)
 
 		output, err := runSSHCommand(ctx, requestBody.SSHKeyPath, requestBody.SSHUser, instanceIP, livenessCmd, logger)
 		logger.Logf("Liveness check output: %s", output)

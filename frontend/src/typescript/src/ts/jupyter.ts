@@ -38,7 +38,13 @@ const handleCodeSocketOpen = (socket: WebSocket) => {
         console.error('Error during editor initialization/refresh:', error);
     }
 
-    let _add_menu = new AddMenu(objectManager);
+    // Check if AddMenu already exists
+    let addMenu = objectManager.getObject('addMenu');
+    if (!addMenu) {
+        console.log('Creating new AddMenu instance...');
+        addMenu = new AddMenu(objectManager);
+        objectManager.associate('addMenu', addMenu);
+    }
 };
 
 const wsClientCodeCell = new WebSocketCodeCell(
@@ -66,7 +72,4 @@ document.addEventListener("keydown", function (e) {
         e.preventDefault();
         DarkMode.toggle();
     }
-})
-
-
-
+});
