@@ -1,4 +1,4 @@
-import { ObjectManager } from "../../managers/object_manager";  // Adjust the import path as needed
+import { ObjectManager } from "../../managers/object_manager";
 
 class WebSocketCodeCell {
     private url: string;
@@ -7,6 +7,8 @@ class WebSocketCodeCell {
     private reconnectTimer: number | null;
     private objectManager: ObjectManager;
     private socketId: string;
+    private pingInterval: number | null;
+    private lastPongTime: number;
 
     constructor(url: string, socketId: string, onOpenCallback: (socket: WebSocket) => void) {
         this.url = url;
@@ -15,6 +17,8 @@ class WebSocketCodeCell {
         this.reconnectTimer = null;
         this.objectManager = ObjectManager.getInstance();
         this.socketId = socketId;
+        this.pingInterval = null;
+        this.lastPongTime = Date.now();
         this.connect();
 
         // Subscribe to socket updates
@@ -26,6 +30,7 @@ class WebSocketCodeCell {
             this.socket.close();
         }
 
+        console.log(`Attempting to connect to WebSocket at ${this.url}`);
         this.socket = new WebSocket(this.url);
 
         this.socket.addEventListener('open', this.onOpen.bind(this));
@@ -42,23 +47,39 @@ class WebSocketCodeCell {
         if (this.onOpenCallback && this.socket) {
             this.onOpenCallback(this.socket);
         }
+        this.startPingInterval();
     }
 
     private onMessage(event: MessageEvent): void {
         console.log('Received message:', event.data);
-        // Handle incoming messages
+        if (event.data === 'pong') {
+            this.lastPongTime = Date.now();
+            console.log('Received pong from server');
+        } else {
+            console.log('Python executed output:\n', event.data);
+            if (event.data) {
+                const editor = this.objectManager.getObject('editor');
+                if (editor && typeof editor.displayMessage === 'function') {
+                    editor.displayMessage(event.data);
+                } else {
+                    console.warn('Editor not found or displayMessage is not a function');
+                }
+            }
+        }
     }
 
     private onError(event: Event): void {
         console.error('CodeCell WebSocket error:', event);
     }
 
-    private onClose(): void {
-        console.log('CodeCell WebSocket connection closed. Reconnecting in 5 seconds...');
+    private onClose(event: CloseEvent): void {
+        console.log(`CodeCell WebSocket connection closed. Code: ${event.code}, Reason: ${event.reason}`);
+        this.stopPingInterval();
         if (this.reconnectTimer) {
             clearTimeout(this.reconnectTimer);
         }
         this.reconnectTimer = window.setTimeout(() => {
+            console.log('Attempting to reconnect...');
             this.connect();
         }, 5000);
     }
@@ -84,15 +105,40 @@ class WebSocketCodeCell {
         }
     }
 
+    private startPingInterval(): void {
+        this.pingInterval = window.setInterval(() => {
+            if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                this.socket.send('ping');
+                console.log('Sent ping to server');
+                
+                // Check if we've received a pong recently
+                if (Date.now() - this.lastPongTime > 30000) { // 30 seconds
+                    console.warn('No pong received recently. Closing connection.');
+                    this.socket.close();
+                }
+            }
+        }, 15000); // Send a ping every 15 seconds
+    }
+
+    private stopPingInterval(): void {
+        if (this.pingInterval !== null) {
+            clearInterval(this.pingInterval);
+            this.pingInterval = null;
+        }
+    }
+
     public sendMessage(message: string): void {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(message);
+            console.log('Sent message:', message);
         } else {
             console.warn('CodeCell WebSocket is not open. Cannot send message.');
         }
     }
 
     public close(): void {
+        console.log('Closing CodeCell WebSocket connection');
+        this.stopPingInterval();
         if (this.reconnectTimer) {
             clearTimeout(this.reconnectTimer);
         }

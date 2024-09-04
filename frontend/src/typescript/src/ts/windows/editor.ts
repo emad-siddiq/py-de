@@ -4,13 +4,12 @@ import { TextCell } from "../components/editor/text_cell/views/text_cell";
 import { ObjectManager } from "../managers/object_manager";
 import { InputAreaEditor } from "../components/editor/code_cell/ts/controllers/input_area_controller";
 
-class Editor {
+export class Editor {
     div: HTMLElement;
     cc_id: number;
     tc_id: number;
     active_code_cell_id: string;
     id: string;
-    socket: WebSocket;
     objectManager: ObjectManager;
 
     constructor(socket: WebSocket, objectManager: ObjectManager) {
@@ -19,24 +18,17 @@ class Editor {
         this.tc_id = 1;
         this.active_code_cell_id = "";
         this.id = "editor";
-        this.socket = socket;
-        this.socket.addEventListener('message', this.onMessage.bind(this));
+        this.objectManager = objectManager;
 
         document.body.appendChild(this.div);
         document.body.addEventListener("keydown", this.CMD_PLUS_addCodeCell.bind(this)); 
         document.body.addEventListener("keydown", this.CMD_MINUS_removeCodeCell.bind(this)); 
 
-        this.objectManager = objectManager;
         this.objectManager.associate(this.id, this);
     }
 
-    public initializeOrRefresh(newSocket: WebSocket): void {
+    public initializeOrRefresh(socket: WebSocket): void {
         console.log('Initializing or refreshing editor...');
-    
-        if (this.socket !== newSocket) {
-            console.log('Updating WebSocket...');
-            this.updateSocket(newSocket);
-        }
     
         console.log('Refreshing content...');
         this.refreshContent(false); // Pass false to indicate not to add a new cell
@@ -111,12 +103,7 @@ class Editor {
         console.log("refreshContent method completed");
     }
 
-    private updateSocket(newSocket: WebSocket): void {
-        this.socket = newSocket;
-        this.socket.addEventListener('message', this.onMessage.bind(this));
-    }
-
-    createEditorDiv() {
+    private createEditorDiv() {
         let div = document.createElement("div");
         div.setAttribute("id", "editor");
         div.setAttribute("class", "editor");
@@ -135,7 +122,7 @@ class Editor {
         return div;
     }
 
-    createFileNameDiv(): HTMLDivElement {
+    private createFileNameDiv(): HTMLDivElement {
         let fileName: string = "Untitled";
         let fileNameDiv: HTMLDivElement = document.createElement("div");
         fileNameDiv.setAttribute("id", "filename");
@@ -214,10 +201,10 @@ class Editor {
         // Double-click event to enable editing
         fileNameDiv.addEventListener("dblclick", enableEditing);
     
-        return fileNameDiv;
+        return fileNameDiv; // Add this line to return the created HTMLDivElement
     }
 
-    addCodeCell() {
+    public addCodeCell() {
         console.log(`Adding new code cell. Current cc_id: ${this.cc_id}`);
         let code_cell = new CodeCell(this.cc_id, this);
         code_cell.getDiv().classList.add('code-cell'); // Add 'code-cell' class
@@ -244,18 +231,18 @@ class Editor {
         console.log(`Code cell added. New cc_id: ${this.cc_id}`);
     }
 
-    removeCodeCell() {
+    public removeCodeCell() {
         let to_remove = document.getElementById("editor").children[document.getElementById("editor").children.length-1];
         document.getElementById("editor").removeChild(to_remove);
     }
 
-    addTextCell() {
+    public addTextCell() {
         let text_cell = new TextCell(this.tc_id);
         document.getElementById("editor").appendChild(text_cell.getDiv());
         this.tc_id += 1;
     }
 
-    CMD_PLUS_addCodeCell(e) {
+    private CMD_PLUS_addCodeCell(e: KeyboardEvent) {
         let ctrl_cmd = e.metaKey || e.ctrlKey;
         if (ctrl_cmd && e.shiftKey && e.key === "=") {
             e.stopPropagation();
@@ -264,7 +251,7 @@ class Editor {
         }
     }
 
-    CMD_MINUS_removeCodeCell(e) {
+    private CMD_MINUS_removeCodeCell(e: KeyboardEvent) {
         let ctrl_cmd = e.metaKey || e.ctrlKey;
         if (ctrl_cmd && e.shiftKey && e.key === "-") {
             e.stopPropagation();
@@ -273,14 +260,7 @@ class Editor {
         }
     }
 
-    private onMessage(event: MessageEvent): void {
-        console.log('Python executed output:\n', event.data);
-        if (event.data) {
-            this.displayMessage(event.data);
-        }
-    }
-    
-    private displayMessage(message: string, type: 'normal' | 'error' = 'normal'): void {
+    public displayMessage(message: string, type: 'normal' | 'error' = 'normal'): void {
         console.log(`Displaying message: ${message}, type: ${type}`);
         
         try {
@@ -321,5 +301,3 @@ class Editor {
         }
     }
 }
-
-export { Editor };

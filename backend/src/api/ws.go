@@ -1,13 +1,17 @@
 package api
 
 import (
+	"bytes"
+	"context"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
+	"sync"
+	"syscall"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -21,90 +25,122 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func WebSocketV1(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Attempting to upgrade connection to WebSocket for %s", r.RemoteAddr)
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Printf("Error upgrading to WebSocket: %v", err)
-		http.Error(w, "Could not upgrade to WebSocket", http.StatusInternalServerError)
-		return
-	}
-	defer func() {
-		log.Printf("Closing WebSocket connection for %s", conn.RemoteAddr())
-		conn.Close()
-	}()
+const (
+	writeWait      = 10 * time.Second
+	pongWait       = 60 * time.Second
+	pingPeriod     = (pongWait * 9) / 10
+	maxMessageSize = 512 * 1024 // 512 KB
+	execTimeout    = 30 * time.Second
+)
 
-	log.Printf("WebSocket connection established with %s", conn.RemoteAddr())
-
-	conn.SetPingHandler(func(appData string) error {
-		log.Printf("Received ping from %s", conn.RemoteAddr())
-		err := conn.WriteControl(websocket.PongMessage, []byte(appData), time.Now().Add(time.Second))
-		if err != nil {
-			log.Printf("Error sending pong to %s: %v", conn.RemoteAddr(), err)
-		}
-		return err
-	})
-
-	conn.SetPongHandler(func(appData string) error {
-		log.Printf("Received pong from %s", conn.RemoteAddr())
-		return nil
-	})
-
-	conn.SetCloseHandler(func(code int, text string) error {
-		log.Printf("WebSocket connection closed by %s with code %d: %s", conn.RemoteAddr(), code, text)
-		return nil
-	})
-
-	out := make(chan []byte)
-	defer close(out)
-
-	go handleWebSocket(conn, out)
-
-	<-make(chan struct{})
+type Client struct {
+	conn *websocket.Conn
+	send chan []byte
 }
 
-func handleWebSocket(conn *websocket.Conn, out chan []byte) {
+func (c *Client) readPump(cancel context.CancelFunc) {
+	defer func() {
+		cancel()
+		c.conn.Close()
+	}()
+
+	c.conn.SetReadLimit(maxMessageSize)
+	c.conn.SetReadDeadline(time.Now().Add(pongWait))
+	c.conn.SetPongHandler(func(string) error {
+		c.conn.SetReadDeadline(time.Now().Add(pongWait))
+		return nil
+	})
+
 	for {
-		msgType, msg, err := conn.ReadMessage()
+		messageType, message, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("WebSocket read error for %s: %v", conn.RemoteAddr(), err)
-			} else {
-				log.Printf("WebSocket closed for %s: %v", conn.RemoteAddr(), err)
+				log.Printf("Error: %v", err)
 			}
-			return
+			break
 		}
 
-		log.Printf("Received message type %d from %s", msgType, conn.RemoteAddr())
-
-		switch msgType {
-		case websocket.BinaryMessage:
-			log.Printf("Incoming Binary Message from %s", conn.RemoteAddr())
-		case websocket.CloseMessage:
-			log.Printf("Close Message received from %s", conn.RemoteAddr())
-			return
+		switch messageType {
 		case websocket.TextMessage:
-			log.Printf("Incoming Text Message from %s: %s", conn.RemoteAddr(), string(msg))
-		}
-
-		go executePythonCode(msg, out)
-
-		select {
-		case output := <-out:
-			log.Printf("Sending output back to client %s", conn.RemoteAddr())
-			if err := conn.WriteMessage(websocket.TextMessage, output); err != nil {
-				log.Printf("Error writing to WebSocket for %s: %v", conn.RemoteAddr(), err)
+			go executePythonCode(message, c.send)
+		case websocket.PingMessage:
+			if err := c.conn.WriteMessage(websocket.PongMessage, nil); err != nil {
+				log.Printf("Error sending pong: %v", err)
 				return
 			}
-			log.Printf("Sent to %s: %s", conn.RemoteAddr(), string(output))
-		case <-time.After(30 * time.Second):
-			log.Printf("Timeout waiting for Python execution for %s", conn.RemoteAddr())
-			if err := conn.WriteMessage(websocket.TextMessage, []byte("Execution timed out")); err != nil {
-				log.Printf("Error writing timeout message to %s: %v", conn.RemoteAddr(), err)
+		default:
+			log.Printf("Received unsupported message type: %d", messageType)
+		}
+	}
+}
+
+func (c *Client) writePump(cancel context.CancelFunc) {
+	ticker := time.NewTicker(pingPeriod)
+	defer func() {
+		ticker.Stop()
+		c.conn.Close()
+	}()
+
+	for {
+		select {
+		case message, ok := <-c.send:
+			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if !ok {
+				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				return
+			}
+
+			w, err := c.conn.NextWriter(websocket.TextMessage)
+			if err != nil {
+				return
+			}
+			w.Write(message)
+
+			if err := w.Close(); err != nil {
+				return
+			}
+		case <-ticker.C:
+			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
 			}
 		}
 	}
+}
+
+func WebSocketV1(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	client := &Client{conn: conn, send: make(chan []byte, 256)}
+	ctx, cancel := context.WithCancel(context.Background())
+
+	go client.writePump(cancel)
+	go client.readPump(cancel)
+
+	<-ctx.Done()
+}
+
+var (
+	pythonPath     string
+	pythonPathOnce sync.Once
+)
+
+func getPythonPath() string {
+	pythonPathOnce.Do(func() {
+		path, err := exec.LookPath("python3")
+		if err != nil {
+			path, err = exec.LookPath("python")
+			if err != nil {
+				log.Fatal("Python interpreter not found")
+			}
+		}
+		pythonPath = path
+	})
+	return pythonPath
 }
 
 func executePythonCode(code []byte, out chan<- []byte) {
@@ -115,15 +151,21 @@ func executePythonCode(code []byte, out chan<- []byte) {
 		}
 	}()
 
-	execPath, err := os.Executable()
+	// Create a temporary directory
+	tmpDir, err := os.MkdirTemp("", "python_exec_")
 	if err != nil {
-		log.Printf("Error getting executable path: %v", err)
+		log.Printf("Error creating temp directory: %v", err)
 		out <- []byte(fmt.Sprintf("Error: %v", err))
 		return
 	}
-	execDir := filepath.Dir(execPath)
+	defer os.RemoveAll(tmpDir)
 
-	codePath := filepath.Join(execDir, "code.py")
+	// Create a unique filename
+	codePath := filepath.Join(tmpDir, fmt.Sprintf("code_%d.py", time.Now().UnixNano()))
+
+	// Log file content before writing
+	log.Printf("Writing code to file %s: %s", codePath, string(code))
+
 	err = os.WriteFile(codePath, code, 0644)
 	if err != nil {
 		log.Printf("Error writing Python code to file: %v", err)
@@ -132,19 +174,20 @@ func executePythonCode(code []byte, out chan<- []byte) {
 	}
 
 	log.Println("Running Python code")
-	cmd := exec.Command("python", codePath)
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		log.Printf("Error creating stdout pipe: %v", err)
-		out <- []byte(fmt.Sprintf("Error: %v", err))
-		return
-	}
 
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		log.Printf("Error creating stderr pipe: %v", err)
-		out <- []byte(fmt.Sprintf("Error: %v", err))
-		return
+	ctx, cancel := context.WithTimeout(context.Background(), execTimeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, getPythonPath(), codePath)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	// Set resource limits
+	if runtime.GOOS != "windows" {
+		cmd.SysProcAttr = &syscall.SysProcAttr{
+			Setpgid: true,
+		}
 	}
 
 	if err := cmd.Start(); err != nil {
@@ -153,20 +196,33 @@ func executePythonCode(code []byte, out chan<- []byte) {
 		return
 	}
 
-	stdoutData, _ := io.ReadAll(stdout)
-	stderrData, _ := io.ReadAll(stderr)
+	done := make(chan error, 1)
+	go func() {
+		done <- cmd.Wait()
+	}()
 
-	if err := cmd.Wait(); err != nil {
-		log.Printf("Error waiting for Python process: %v", err)
-		out <- []byte(fmt.Sprintf("Error: %v\nStderr: %s", err, stderrData))
-		return
+	select {
+	case <-ctx.Done():
+		if runtime.GOOS != "windows" {
+			syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
+		} else {
+			cmd.Process.Kill()
+		}
+		<-done
+		out <- []byte("Execution timed out")
+	case err := <-done:
+		if err != nil {
+			log.Printf("Error running Python process: %v", err)
+			out <- []byte(fmt.Sprintf("Error: %v\nStderr: %s", err, stderr.String()))
+			return
+		}
 	}
 
-	if len(stderrData) > 0 {
-		log.Printf("Python stderr: %s", stderrData)
+	if stderr.Len() > 0 {
+		log.Printf("Python stderr: %s", stderr.String())
 	}
 
-	log.Printf("Python stdout: %s", stdoutData)
-	out <- stdoutData
+	log.Printf("Python stdout: %s", stdout.String())
+	out <- stdout.Bytes()
 	log.Println("Done with Python code execution")
 }
