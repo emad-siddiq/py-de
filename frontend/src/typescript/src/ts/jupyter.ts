@@ -30,21 +30,19 @@ const handleCodeSocketOpen = (socket: WebSocket) => {
         console.log('Creating new editor instance...');
         editor = new Editor(socket, objectManager);
         objectManager.associate('editor', editor);
-    }
-
-    try {
-        editor.initializeOrRefresh(socket);
-    } catch (error) {
-        console.error('Error during editor initialization/refresh:', error);
-    }
-
-    // Check if AddMenu already exists
+        editor.addCodeCell();
+         // Check if AddMenu already exists
     let addMenu = objectManager.getObject('addMenu');
     if (!addMenu) {
         console.log('Creating new AddMenu instance...');
         addMenu = new AddMenu(objectManager);
         objectManager.associate('addMenu', addMenu);
     }
+
+    }
+
+
+   
 };
 
 const wsClientCodeCell = new WebSocketCodeCell(
