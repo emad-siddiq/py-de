@@ -2,7 +2,7 @@
 
 import { ObjectManager } from "../../../managers/object_manager";
 import { createIconLabel, createImgDiv } from "./utility";
-import { Editor } from "../../../windows/editor";
+import { Editor } from "../../../windows/editor/editor";
 
 class AddTextCellButton {
     id: string;

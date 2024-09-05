@@ -1,7 +1,7 @@
 // Bar in top left of the screen for basic actions like add cell, remove cell
 
 import { ObjectManager } from "../../../managers/object_manager";
-import { Editor } from "../../../windows/editor";
+import { Editor } from "../../../windows/editor/editor";
 import { createIconLabel, createImgDiv } from "./utility";
 
 class AddCodeCellButton {

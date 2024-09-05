@@ -59,10 +59,10 @@ class WebSocketCodeCell {
             console.log('Python executed output:\n', event.data);
             if (event.data) {
                 const editor = this.objectManager.getObject('editor');
-                if (editor && typeof editor.displayMessage === 'function') {
-                    editor.displayMessage(event.data);
+                if (editor && typeof editor.displayOutputCell === 'function') {
+                    editor.displayOutputCell(event.data);
                 } else {
-                    console.warn('Editor not found or displayMessage is not a function');
+                    console.warn('Editor not found or displayOutputCell is not a function');
                 }
             }
         }

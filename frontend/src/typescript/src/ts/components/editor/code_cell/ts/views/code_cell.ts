@@ -1,6 +1,6 @@
 import { InputArea } from "./child_views/input_area";
 import { CodeCellNumber } from "./child_views/cell_number";
-import { Editor } from "../../../../../windows/editor";
+import { Editor } from "../../../../../windows/editor/editor";
 import { DarkMode } from "./../../../../../themes/darkmode/darkmode";
 import { ObjectManager } from "../../../../../managers/object_manager";
 

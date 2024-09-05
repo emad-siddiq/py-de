@@ -1,7 +1,7 @@
 import { Debugger } from "./windows/debugger";
 import { Explorer } from "./windows/explorer";
 import { Terminal } from "./windows/terminal";
-import { Editor } from "./windows/editor";
+import { Editor } from "./windows/editor/editor";
 import { DarkMode } from "./themes/darkmode/darkmode";
 import { AddMenu } from "./components/editor/menu/add_menu";
 import { ObjectManager } from "./managers/object_manager";
