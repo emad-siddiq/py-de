@@ -25,12 +25,15 @@ class InputArea {
         this.grid = {};
         this.cc_id = cc_id;
         this.socket = null;
-        this.caretX = -1;
-        this.caretY = -1;
+        this.caretX = 0;
+        this.caretY = 0;
         this.allSelected = false;
 
         // Subscribe to socket updates
         ObjectManager.getInstance().subscribeToSocket("codeSocket", this.updateSocket.bind(this));
+
+        // Add the first line
+        this.addLineAfter(-1);
     }
 
     public updateSocket(newSocket: WebSocket) {
@@ -46,16 +49,15 @@ class InputArea {
         console.log(`addLineAfter called with afterLineNumber: ${afterLineNumber}, text: ${text}`);
         console.log(`Current state - caretY: ${this.caretY}, total_lines: ${this.total_lines}`);
         
-        if (afterLineNumber < 0 || afterLineNumber > this.total_lines) {
-            console.error(`Invalid 'afterLineNumber' value: ${afterLineNumber}. Total lines: ${this.total_lines}`);
-            afterLineNumber = Math.max(0, Math.min(afterLineNumber, this.total_lines));
+        const newLineNumber = afterLineNumber + 1;
+        
+        if (newLineNumber < 0 || newLineNumber > this.total_lines) {
+            console.error(`Invalid new line number: ${newLineNumber}. Total lines: ${this.total_lines}`);
+            return;
         }
 
-        this.caretY += 1;
-        this.caretX = 0;
-
-        let line_number = this.caretY + 1;
-        let line = InputAreaEditor.createLine(this.id, line_number, text);
+        this.total_lines += 1;
+        let line = InputAreaEditor.createLine(this.id, newLineNumber + 1, text);
 
         try {
             let input_area = document.getElementById(this.id);
@@ -63,26 +65,50 @@ class InputArea {
                 throw new Error(`Input area with id ${this.id} not found`);
             }
 
-            if (input_area.children.length !== 0) {
-                let line_to_add_after_id = InputAreaEditor.generateLineContainerId(this.id, afterLineNumber);
-                let line_to_add_after = document.getElementById(line_to_add_after_id);
+            if (input_area.children.length === 0) {
+                input_area.appendChild(line);
+            } else if (newLineNumber === 0) {
+                input_area.insertBefore(line, input_area.firstChild);
+            } else {
+                let line_before_id = InputAreaEditor.generateLineContainerId(this.id, newLineNumber);
+                let line_before = document.getElementById(line_before_id);
                 
-                if (!line_to_add_after) {
-                    console.warn(`Line to add after (id: ${line_to_add_after_id}) not found. Appending to the end.`);
+                if (!line_before) {
+                    console.warn(`Line before (id: ${line_before_id}) not found. Appending to the end.`);
                     input_area.appendChild(line);
                 } else {
-                    let node = line_to_add_after.nextSibling;
-                    input_area.insertBefore(line, node || null);
+                    input_area.insertBefore(line, line_before.nextSibling);
                 }
-            } else {
-                input_area.appendChild(line);
             }
 
-            this.total_lines += 1;
-            console.log(`Line added. New total_lines: ${this.total_lines}`);
+            // Update line numbers for all lines
+            this.updateLineNumbers();
+
+            this.caretY = newLineNumber;
+            this.caretX = 0;
+
+            // Ensure the grid is updated
+            if (!this.grid[this.caretY]) {
+                this.grid[this.caretY] = [];
+            }
+
+            console.log(`Line added. New total_lines: ${this.total_lines}, New caretY: ${this.caretY}`);
         } catch (error) {
             console.error(`Error in addLineAfter: ${error.message}`);
             console.error(`Stack trace: ${error.stack}`);
+        }
+    }
+
+    updateLineNumbers(): void {
+        let input_area = document.getElementById(this.id);
+        if (!input_area) return;
+
+        let lines = input_area.children;
+        for (let i = 0; i < lines.length; i++) {
+            let line_number_div = lines[i].querySelector('div');
+            if (line_number_div) {
+                line_number_div.textContent = (i + 1) + '.';
+            }
         }
     }
 
@@ -102,6 +128,7 @@ class InputArea {
         }
 
         this.total_lines -= 1;
+        this.updateLineNumbers();
     }
 
     addEventListeners(div: HTMLElement): HTMLElement {
@@ -171,10 +198,10 @@ class InputArea {
 
     handleClick(e) {
         let first_line_code_area = this.getCodeAreaByLine(this.caretY + 1);
-        if (first_line_code_area.textContent.length > 0) {
+        if (first_line_code_area && first_line_code_area.textContent.length > 0) {
             return true;
         }
-        console.log(e.clientX, e.clientY, first_line_code_area.getBoundingClientRect());
+        console.log(e.clientX, e.clientY, first_line_code_area?.getBoundingClientRect());
 
         if (first_line_code_area) {
             InputAreaEditor.moveCaretToEndOfCodeArea(first_line_code_area);
@@ -243,7 +270,7 @@ class InputArea {
         console.log(this.grid);
         let out = "";
         for (let i = 0; i < Object.keys(this.grid).length; i++) {
-            for (let j = 1; j < this.grid[i].length; j++) {
+            for (let j = 0; j < this.grid[i].length; j++) {
                 out += this.grid[i][j];
             }
             out += "\n";
