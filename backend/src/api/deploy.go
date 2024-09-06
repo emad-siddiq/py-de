@@ -41,7 +41,7 @@ func DeployHandler(w http.ResponseWriter, r *http.Request) {
 	logger := NewLogger(os.Stdout)
 	logger.Log("Starting deployment process...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
 	cfg, err := config.LoadDefaultConfig(ctx,
@@ -83,113 +83,91 @@ func DeployHandler(w http.ResponseWriter, r *http.Request) {
 	execDir := filepath.Dir(execPath)
 
 	backendUbuntuBinaryPath := filepath.Join(execDir, "backend_ubuntu_aarch64")
+	remoteBinaryPath := fmt.Sprintf("/home/%s/backend_ubuntu_aarch64", requestBody.SSHUser)
 
-	logger.Log("Checking and installing prerequisites on the instance...")
-	prereqCmd := `
-		command -v curl >/dev/null 2>&1 || { echo 'curl not found, installing...'; sudo apt-get update && sudo apt-get install -y curl; }
-		command -v wget >/dev/null 2>&1 || { echo 'wget not found, installing...'; sudo apt-get update && sudo apt-get install -y wget; }
-		command -v netstat >/dev/null 2>&1 || { echo 'netstat not found, installing...'; sudo apt-get update && sudo apt-get install -y net-tools; }
-		command -v python3 >/dev/null 2>&1 || { echo 'Python3 not found, installing...'; sudo apt-get update && sudo apt-get install -y python3 python3-pip; }
-		sudo ln -sf /usr/bin/python3 /usr/bin/python
-		echo 'export PATH=$PATH:/usr/bin' >> ~/.bashrc
-		source ~/.bashrc
-		python --version
-		which python
-		which python3
-	`
-	if output, err := runSSHCommand(ctx, requestBody.SSHKeyPath, requestBody.SSHUser, instanceIP, prereqCmd, logger); err != nil {
-		logger.Logf("Error output: %s", output)
-		handleError(w, "Error checking/installing prerequisites", err, http.StatusInternalServerError, logger)
-		return
-	}
-	logger.Log("Prerequisites checked and installed successfully.")
-
-	logger.Log("Killing any existing process running on port 8080 on the remote instance...")
-	killCmd := `
-		pid=$(lsof -ti:8080)
-		if [ ! -z "$pid" ]; then
-			echo "Killing process $pid"
-			kill -9 $pid
-			sleep 2
+	// Check if binary exists and copy only if necessary
+	checkAndCopyBinary := fmt.Sprintf(`
+		if [ ! -f %s ]; then
+			echo "Binary not found, copying..."
+			exit 1
 		else
-			echo "No process found running on port 8080"
+			echo "Binary already exists"
+			exit 0
 		fi
-	`
-	output, err := runSSHCommand(ctx, requestBody.SSHKeyPath, requestBody.SSHUser, instanceIP, killCmd, logger)
+	`, remoteBinaryPath)
+
+	output, err := runSSHCommand(ctx, requestBody.SSHKeyPath, requestBody.SSHUser, instanceIP, checkAndCopyBinary, logger)
 	if err != nil {
-		logger.Logf("Error during process killing: %v", err)
-		logger.Logf("Kill command output: %s", output)
+		logger.Log("Copying backend binary to the instance...")
+		if err := runSCPCommand(ctx, requestBody.SSHKeyPath, backendUbuntuBinaryPath, requestBody.SSHUser, instanceIP, remoteBinaryPath, logger); err != nil {
+			handleError(w, "Error copying backend binary", err, http.StatusInternalServerError, logger)
+			return
+		}
+		logger.Log("Backend binary copied successfully.")
+
+		chmodCmd := fmt.Sprintf("chmod +x %s", remoteBinaryPath)
+		if _, err := runSSHCommand(ctx, requestBody.SSHKeyPath, requestBody.SSHUser, instanceIP, chmodCmd, logger); err != nil {
+			handleError(w, "Error making backend binary executable", err, http.StatusInternalServerError, logger)
+			return
+		}
 	} else {
-		logger.Logf("Kill command output: %s", output)
+		logger.Log(output)
 	}
 
-	logger.Log("Copying backend binary to the instance...")
-	if err := runSCPCommand(ctx, requestBody.SSHKeyPath, backendUbuntuBinaryPath, requestBody.SSHUser, instanceIP,
-		fmt.Sprintf("/home/%s/backend_ubuntu_aarch64", requestBody.SSHUser), logger); err != nil {
-		handleError(w, "Error copying backend binary", err, http.StatusInternalServerError, logger)
-		return
-	}
-	logger.Log("Backend binary copied successfully.")
+	// Check if the process is already running, if not, start it
+	checkAndStartProcess := fmt.Sprintf(`
+		if pgrep -f %s > /dev/null; then
+			echo "Process is already running"
+		else
+			echo "Starting the process"
+			nohup %s > %s.log 2>&1 & echo $!
+		fi
+	`, remoteBinaryPath, remoteBinaryPath, remoteBinaryPath)
 
-	chmodCmd := fmt.Sprintf("chmod +x /home/%s/backend_ubuntu_aarch64", requestBody.SSHUser)
-	if _, err := runSSHCommand(ctx, requestBody.SSHKeyPath, requestBody.SSHUser, instanceIP, chmodCmd, logger); err != nil {
-		handleError(w, "Error making backend binary executable", err, http.StatusInternalServerError, logger)
-		return
-	}
-
-	runBinaryCmd := fmt.Sprintf("nohup /home/%s/backend_ubuntu_aarch64 > /home/%s/backend_ubuntu_aarch64.log 2>&1 & echo $!", requestBody.SSHUser, requestBody.SSHUser)
-	output, err = runSSHCommand(ctx, requestBody.SSHKeyPath, requestBody.SSHUser, instanceIP, runBinaryCmd, logger)
+	output, err = runSSHCommand(ctx, requestBody.SSHKeyPath, requestBody.SSHUser, instanceIP, checkAndStartProcess, logger)
 	if err != nil {
-		handleError(w, "Error starting backend binary", err, http.StatusInternalServerError, logger)
+		handleError(w, "Error checking/starting backend process", err, http.StatusInternalServerError, logger)
 		return
 	}
-	pid := strings.TrimSpace(output)
-	logger.Logf("Backend process started with PID: %s", pid)
+	logger.Log(output)
 
-	time.Sleep(5 * time.Second)
-
+	// Wait for the process to start listening
 	maxRetries := 6
-	retryInterval := 10 * time.Second
+	retryInterval := 5 * time.Second
 
 	for i := 0; i < maxRetries; i++ {
-		livenessCmd := fmt.Sprintf(`
-			if ps -p %s > /dev/null; then
-				echo "Process is running"
-				if netstat -tlnp | grep -q ':%d.*%s'; then
-					echo "Process is listening on port 8080"
-					exit 0
-				else
-					echo "Process is not listening on port 8080"
-				fi
-			else
-				echo "Process is not running"
-			fi
-			exit 1
-		`, pid, 8080, pid)
+		livenessCmd := `netstat -tlnp | grep -q ':8080' && echo "Process is listening on port 8080" || echo "Process is not listening on port 8080"`
 
 		output, err := runSSHCommand(ctx, requestBody.SSHKeyPath, requestBody.SSHUser, instanceIP, livenessCmd, logger)
-		logger.Logf("Liveness check output: %s", output)
-
-		if err == nil {
-			logger.Log("Backend service is running and listening on port 8080")
-
-			// Perform WebSocket connection test
-			wsURL := fmt.Sprintf("ws://%s:8080/ws/testSocket", instanceIP)
-			if err := testWebSocketConnection(wsURL, logger); err != nil {
-				logger.Logf("WebSocket connection test failed: %v", err)
-				handleError(w, "WebSocket connection test failed", err, http.StatusInternalServerError, logger)
+		if err != nil {
+			logger.Logf("Error checking process status: %v", err)
+			if i == maxRetries-1 {
+				handleError(w, "Failed to check process status after maximum retries", err, http.StatusInternalServerError, logger)
 				return
 			}
-			logger.Log("WebSocket connection test passed successfully")
-			break
+		} else {
+			logger.Log(output)
+			if strings.Contains(output, "Process is listening on port 8080") {
+				logger.Log("Backend service is running and listening on port 8080")
+
+				// Perform WebSocket connection test
+				wsURL := fmt.Sprintf("ws://%s:8080/ws/testSocket", instanceIP)
+				if err := testWebSocketConnection(wsURL, logger); err != nil {
+					logger.Logf("WebSocket connection test failed: %v", err)
+					handleError(w, "WebSocket connection test failed", err, http.StatusInternalServerError, logger)
+					return
+				}
+				logger.Log("WebSocket connection test passed successfully")
+				break
+			}
 		}
 
 		if i == maxRetries-1 {
-			handleError(w, "Backend service is not running or not listening on port 8080 after maximum retries", nil, http.StatusInternalServerError, logger)
+			handleError(w, "Backend service is not listening on port 8080 after maximum retries", nil, http.StatusInternalServerError, logger)
 			return
 		}
 
-		logger.Logf("Backend service not yet running or listening. Retrying in %v...", retryInterval)
+		logger.Logf("Backend service not yet listening. Retrying in %v...", retryInterval)
 		time.Sleep(retryInterval)
 	}
 

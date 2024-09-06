@@ -16,6 +16,7 @@ class AddMenu {
         new AddCodeCellButton(this.objectManager);
         new AddTextCellButton(this.objectManager);
         new DarkModeButton();
+        this.objectManager.associate('addMenu', this);
     }
 
 

@@ -14,7 +14,7 @@ export class Editor {
     objectManager: ObjectManager;
     fileName: FileName;
 
-    constructor(socket: WebSocket, objectManager: ObjectManager) {
+    constructor(objectManager: ObjectManager) {
         this.fileName = new FileName();
         this.div = this.createEditorDiv();
         this.cc_id = 1;

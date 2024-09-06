@@ -1,3 +1,4 @@
+import { ObjectManager } from "./../../../../managers/object_manager";
 import { AWSForm } from "./aws_form";
 
 class DropdownComputeSelectionMenu {
@@ -43,6 +44,8 @@ class DropdownComputeSelectionMenu {
             console.log("Connecting to AWS selected");
             const awsForm = new AWSForm();
             awsForm.show();  // Show the AWS form when AWS is selected
+        } else if (selectedValue === "local") {
+            ObjectManager.getInstance().updateWebSocketConnections("http://localhost:8080/ws");
         }
     }
 }

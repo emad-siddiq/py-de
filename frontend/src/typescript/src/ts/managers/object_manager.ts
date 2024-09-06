@@ -61,13 +61,6 @@ class ObjectManager {
             this.notifySubscribers(key, newSocket);
         });
 
-        // Notify the editor to refresh
-        const editor = this.getObject('editor');
-        if (editor && typeof editor.refreshContent === 'function') {
-            editor.refreshContent();
-        } else {
-            console.error('Editor not found or refreshContent method not available');
-        }
     }
 
     public getAllWebSockets(): Map<string, WebSocket> {

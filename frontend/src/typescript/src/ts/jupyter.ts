@@ -20,30 +20,14 @@ const aiSocket = 'aiSocket';
 let _debugger = new Debugger(objectManager);
 let _explorer = new Explorer();
 let _terminal = new Terminal();
+let _editor = new Editor(objectManager);
+_editor.addCodeCell();
+let _addMenu = new AddMenu(objectManager);
 
 const handleCodeSocketOpen = (socket: WebSocket) => {
     console.log('Running custom code after WebSocket connection is established.');
     objectManager.addWebSocket(codeSocket, socket);
-
-    let editor = objectManager.getObject('editor');
-    if (!editor) {
-        console.log('Creating new editor instance...');
-        editor = new Editor(socket, objectManager);
-        objectManager.associate('editor', editor);
-        editor.addCodeCell();
-         // Check if AddMenu already exists
-    let addMenu = objectManager.getObject('addMenu');
-    if (!addMenu) {
-        console.log('Creating new AddMenu instance...');
-        addMenu = new AddMenu(objectManager);
-        objectManager.associate('addMenu', addMenu);
-    }
-
-    }
-
-
-   
-};
+    };
 
 const wsClientCodeCell = new WebSocketCodeCell(
     `${localWebSocketURL}/${codeSocket}`,

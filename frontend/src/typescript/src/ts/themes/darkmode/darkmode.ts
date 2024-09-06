@@ -1,5 +1,6 @@
 class DarkMode {
     static enabled = false;
+    static originalShadows = new Map<HTMLElement, string>();
 
     static toggle() {
         DarkMode.enabled = !DarkMode.enabled;
@@ -22,8 +23,12 @@ class DarkMode {
             htmlDiv.style.backgroundColor = "rgb(10, 15, 22)";
             htmlDiv.style.color = "#FCF5F5";
             
-            // Only apply box shadow if the div originally has one
-            if (window.getComputedStyle(htmlDiv).boxShadow !== 'none') {
+            const computedStyle = window.getComputedStyle(htmlDiv);
+            if (computedStyle.boxShadow !== 'none') {
+                // Store the original shadow if not already stored
+                if (!DarkMode.originalShadows.has(htmlDiv)) {
+                    DarkMode.originalShadows.set(htmlDiv, computedStyle.boxShadow);
+                }
                 htmlDiv.style.boxShadow = "0px 3px 10px 3px rgba(20, 255, 60, 0.1)";
             }
         });
@@ -69,6 +74,14 @@ class DarkMode {
                 textarea.style.borderColor = "rgb(50, 50, 50)";
             }
         });
+
+        // Update input areas and line numbers
+        let inputAreas = document.querySelectorAll('div[contenteditable][id$="-input-area"], div[id$="-line-number-1"], div[id*="-line-number-"]');
+        inputAreas.forEach(inputArea => {
+            const htmlInputArea = inputArea as HTMLElement;
+            htmlInputArea.style.backgroundColor = "rgb(20, 10, 20)"; // Slightly darker shade of black
+            htmlInputArea.style.color = "#FCF5F5";
+        });
     }
 
     static disable() {
@@ -83,9 +96,12 @@ class DarkMode {
             htmlDiv.style.backgroundColor = "white";
             htmlDiv.style.color = "black";
             
-            // Only revert box shadow if the div originally has one
-            if (window.getComputedStyle(htmlDiv).boxShadow !== 'none') {
-                htmlDiv.style.boxShadow = "0px 10px 15px 5px rgba(20, 255, 60, 0.2)";
+            if (DarkMode.originalShadows.has(htmlDiv)) {
+                // Restore the original shadow
+                htmlDiv.style.boxShadow = DarkMode.originalShadows.get(htmlDiv) || '';
+            } else if (window.getComputedStyle(htmlDiv).boxShadow !== 'none') {
+                // If we don't have the original, set a default dark shadow
+                htmlDiv.style.boxShadow = "0px 10px 15px 5px rgba(0, 0, 0, 0.2)";
             }
         });
 
@@ -129,6 +145,14 @@ class DarkMode {
                 textarea.style.color = "black";
                 textarea.style.borderColor = "rgb(200, 200, 200)";
             }
+        });
+
+        // Revert input areas and line numbers
+        let inputAreas = document.querySelectorAll('div[contenteditable][id$="-input-area"], div[id$="-line-number-1"], div[id*="-line-number-"]');
+        inputAreas.forEach(inputArea => {
+            const htmlInputArea = inputArea as HTMLElement;
+            htmlInputArea.style.backgroundColor = "white";
+            htmlInputArea.style.color = "black";
         });
     }
 }

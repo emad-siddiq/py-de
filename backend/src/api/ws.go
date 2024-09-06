@@ -62,7 +62,14 @@ func (c *Client) readPump(cancel context.CancelFunc) {
 
 		switch messageType {
 		case websocket.TextMessage:
-			go executePythonCode(message, c.send)
+			if string(message) == "ping" {
+				if err := c.conn.WriteMessage(websocket.TextMessage, []byte("pong")); err != nil {
+					log.Printf("Error sending pong: %v", err)
+					return
+				}
+			} else {
+				go executePythonCode(message, c.send)
+			}
 		case websocket.PingMessage:
 			if err := c.conn.WriteMessage(websocket.PongMessage, nil); err != nil {
 				log.Printf("Error sending pong: %v", err)
