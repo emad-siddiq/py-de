@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -e
 
 # Function to install Go on Ubuntu
@@ -75,10 +74,8 @@ echo "Go, Node.js, and npm are installed."
 
 # Define output directory and binary names
 OUTPUT_DIR="dist"
-BACKEND_MAC_ARM_BINARY="backend_mac_arm64"
-BACKEND_UBUNTU_ARM_BINARY="backend_ubuntu_aarch64"
-FRONTEND_MAC_ARM_BINARY="frontend_mac_arm64"
-FRONTEND_UBUNTU_ARM_BINARY="frontend_ubuntu_aarch64"
+BACKEND_BINARY="backend"
+FRONTEND_BINARY="frontend"
 
 # Ensure the output directory exists
 mkdir -p "$OUTPUT_DIR"
@@ -87,32 +84,50 @@ mkdir -p "$OUTPUT_DIR"
 cd frontend/src/typescript/src || exit
 npm install
 npm run build
-
 cd ../../../../ || exit
+
+# Determine the local processor architecture
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    ARCH=$(uname -m)
+    if [[ "$ARCH" == "arm64" ]]; then
+        GOARCH="arm64"
+        SUFFIX="_mac_arm64"
+    elif [[ "$ARCH" == "x86_64" ]]; then
+        GOARCH="amd64"
+        SUFFIX="_mac_amd64"
+    else
+        echo "Unsupported Mac architecture: $ARCH"
+        exit 1
+    fi
+elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    ARCH=$(uname -m)
+    if [[ "$ARCH" == "aarch64" ]]; then
+        GOARCH="arm64"
+        SUFFIX="_ubuntu_aarch64"
+    elif [[ "$ARCH" == "x86_64" ]]; then
+        GOARCH="amd64"
+        SUFFIX="_ubuntu_amd64"
+    else
+        echo "Unsupported Linux architecture: $ARCH"
+        exit 1
+    fi
+else
+    echo "Unsupported operating system: $OSTYPE"
+    exit 1
+fi
 
 # Change to backend
 cd backend/src || exit
-
 echo $(pwd)
 
 # Build for backend project
 echo "Building backend project..."
-
-# Cross-compile for macOS (ARM64)
-GOOS=darwin GOARCH=arm64 go build -o "../../$OUTPUT_DIR/$BACKEND_MAC_ARM_BINARY" 
-
-# Cross-compile for Ubuntu (ARM64)
-GOOS=linux GOARCH=arm64 go build -o "../../$OUTPUT_DIR/$BACKEND_UBUNTU_ARM_BINARY" 
+GOOS=$([[ "$OSTYPE" == "darwin"* ]] && echo "darwin" || echo "linux") GOARCH=$GOARCH go build -o "../../$OUTPUT_DIR/$BACKEND_BINARY$SUFFIX"
 
 cd ../../frontend/src || exit
 
 # Build for frontend project
 echo "Building frontend project..."
-
-# Cross-compile for macOS (ARM64)
-GOOS=darwin GOARCH=arm64 go build -o "../../$OUTPUT_DIR/$FRONTEND_MAC_ARM_BINARY" 
-
-# Cross-compile for Ubuntu (ARM64)
-GOOS=linux GOARCH=arm64 go build -o "../../$OUTPUT_DIR/$FRONTEND_UBUNTU_ARM_BINARY"
+GOOS=$([[ "$OSTYPE" == "darwin"* ]] && echo "darwin" || echo "linux") GOARCH=$GOARCH go build -o "../../$OUTPUT_DIR/$FRONTEND_BINARY$SUFFIX"
 
 echo "Build completed. Binaries are located in $OUTPUT_DIR."

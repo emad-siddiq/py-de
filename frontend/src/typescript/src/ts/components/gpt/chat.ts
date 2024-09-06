@@ -11,16 +11,24 @@ class Chat {
     private sendButton: HTMLButtonElement;
     socket: WebSocket;
 
-    constructor(webSocket: WebSocket) {
+    constructor() {
         this.id = "chat-gpt";
         this.div = this.createDiv();
         this.toggle = false;
-        this.socket = webSocket;
+        this.socket = null;
 
         document.body.appendChild(this.div);
         document.body.appendChild(this.createChatWindow());
         this.addEventListeners();
+        ObjectManager.getInstance().subscribeToSocket("codeSocket", this.updateSocket.bind(this));
+
     }
+
+    private updateSocket(newSocket: WebSocket) {
+        this.socket = newSocket;
+        console.log(`CodeCell ${this.id} updated with new WebSocket`);
+    }
+    
 
     static displayMessage(message: string, type: 'normal' | 'error' = 'normal'): void {
         const chatMessageContainer = document.getElementById("message-container");

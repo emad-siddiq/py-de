@@ -10,6 +10,8 @@ import { WebSocketCodeCell } from "./components/ws_client/ws_code_cell";
 import { WebSocketChatGPT } from "./components/ws_client/ws_chatgpt";
 
 // Instantiate the ObjectManager
+// An object manager helps us avoid passing around classes
+// Instead we map the object with an id 
 const objectManager = ObjectManager.getInstance();
 
 // Define your WebSocket instances
@@ -23,11 +25,12 @@ let _terminal = new Terminal();
 let _editor = new Editor(objectManager);
 _editor.addCodeCell();
 let _addMenu = new AddMenu(objectManager);
+let _chat = new Chat();
 
-const handleCodeSocketOpen = (socket: WebSocket) => {
-    console.log('Running custom code after WebSocket connection is established.');
+
+const handleCodeSocketOpen =  (socket: WebSocket) => {
     objectManager.addWebSocket(codeSocket, socket);
-    };
+};
 
 const wsClientCodeCell = new WebSocketCodeCell(
     `${localWebSocketURL}/${codeSocket}`,
@@ -37,8 +40,6 @@ const wsClientCodeCell = new WebSocketCodeCell(
 
 const handleChatGPTSocketOpen = (socket: WebSocket) => {
     objectManager.addWebSocket(aiSocket, socket);
-    console.log('Running custom code after WebSocket connection is established.');
-    let _chat = new Chat(socket);
 };
 
 const wsClientChatGPT = new WebSocketChatGPT(
