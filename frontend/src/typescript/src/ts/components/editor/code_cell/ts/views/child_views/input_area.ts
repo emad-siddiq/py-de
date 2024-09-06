@@ -11,7 +11,7 @@ class InputArea {
     caretY: number;
     total_lines: number;
     div: HTMLElement;
-    grid: Object;
+    grid: {[key: number]: string[]};
     line_number: string;
     allSelected: boolean;
     cc_id: number;
@@ -89,7 +89,7 @@ class InputArea {
 
             // Ensure the grid is updated
             if (!this.grid[this.caretY]) {
-                this.grid[this.caretY] = [];
+                this.grid[this.caretY] = text ? text.split('') : [];
             }
 
             console.log(`Line added. New total_lines: ${this.total_lines}, New caretY: ${this.caretY}`);
@@ -143,24 +143,24 @@ class InputArea {
     }
 
     addToGrid(char: string) {
-        if (this.grid[this.caretY]) {
-            this.grid[this.caretY][this.caretX] = char;
-        } else {
-            this.grid[this.caretY] = []
-            this.grid[this.caretY][this.caretX] = char;
+        if (!this.grid[this.caretY]) {
+            this.grid[this.caretY] = [];
         }
+        this.grid[this.caretY][this.caretX] = char;
         this.renderLine(this.caretY + 1);
     }
 
     removeCharFromLine(): void {
         let line = this.grid[this.caretY];
-        let before_char = line.slice(0, this.caretX);
-        let after_char = line.slice(this.caretX + 1, line.length);
-        this.grid[this.caretY] = before_char.concat(after_char);
-        this.renderLine(this.caretY + 1);
-        let code_area = this.getCodeAreaByLine(this.caretY + 1);
-        InputAreaEditor.moveCaretToIndexOfCodeArea(code_area, this.caretX - 1);
-        this.caretX -= 1;
+        if (line) {
+            let before_char = line.slice(0, this.caretX);
+            let after_char = line.slice(this.caretX + 1);
+            this.grid[this.caretY] = before_char.concat(after_char);
+            this.renderLine(this.caretY + 1);
+            let code_area = this.getCodeAreaByLine(this.caretY + 1);
+            InputAreaEditor.moveCaretToIndexOfCodeArea(code_area, this.caretX - 1);
+            this.caretX = Math.max(0, this.caretX - 1);
+        }
     }
 
     addString(str: string, numOfTimes: number) {
@@ -178,7 +178,7 @@ class InputArea {
     renderLine(line_number: number) {
         let code_area = this.getCodeAreaByLine(line_number);
         if (code_area) {
-            let code_area_text = this.grid[line_number - 1]?.join('');
+            let code_area_text = this.grid[line_number - 1]?.join('') || '';
             code_area.textContent = code_area_text;
         }
     }
@@ -267,14 +267,17 @@ class InputArea {
     }
 
     exportCode(): string {
-        console.log(this.grid);
+        console.log("Exporting code, current grid:", this.grid);
         let out = "";
-        for (let i = 0; i < Object.keys(this.grid).length; i++) {
-            for (let j = 0; j < this.grid[i].length; j++) {
-                out += this.grid[i][j];
+        const gridKeys = Object.keys(this.grid).map(Number).sort((a, b) => a - b);
+        for (let i of gridKeys) {
+            if (this.grid[i] && Array.isArray(this.grid[i])) {
+                out += this.grid[i].join('') + "\n";
+            } else {
+                out += "\n";
             }
-            out += "\n";
         }
+        console.log("Exported code:", out);
         return out;
     }
 }
