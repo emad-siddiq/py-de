@@ -104,7 +104,7 @@ class InputAreaKeyDown {
             let selection = window.getSelection();
             selection?.removeAllRanges()
 
-            for (let i=1; i <= Object.keys(input_area.grid).length; i++) {
+            for (let i=2; i <= Object.keys(input_area.grid).length+1; i++) {
                 let range = document.createRange();
                 let code_area = input_area.getCodeAreaByLine(i);
                 let text_area = code_area?.childNodes[0];

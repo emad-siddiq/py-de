@@ -65,7 +65,7 @@ class TextCell {
             const markdownContent = this.textareaElement.value;
             const renderedHTML = await this.convertMarkdownToHTML(markdownContent); // Wait for the promise to resolve
             this.div.innerHTML = renderedHTML; // Replace the div content with the rendered HTML
-            this.socket.send(renderedHTML);
+            //this.socket.send(renderedHTML);
         }
     }
 
