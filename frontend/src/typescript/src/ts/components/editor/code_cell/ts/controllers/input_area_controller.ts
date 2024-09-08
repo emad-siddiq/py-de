@@ -137,7 +137,7 @@ class InputAreaEditor {
 
         document.addEventListener("selectionchange", event=>{
             let selection: any = document.getSelection();
-            //console.log(selection.anchorNode, selection.anchorOffset, selection.focusNode, selection.focusOffset, selection.direction);
+            console.log(selection.anchorNode, selection.anchorOffset, selection.focusNode, selection.focusOffset, selection.direction);
             
             if (selection.anchorNode !== selection.focusNode) {
 

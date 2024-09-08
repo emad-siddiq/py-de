@@ -60,10 +60,7 @@ class InputArea {
         let line = InputAreaEditor.createLine(this.id, newLineNumber + 1, text);
 
         try {
-            let input_area = document.getElementById(this.id);
-            if (!input_area) {
-                throw new Error(`Input area with id ${this.id} not found`);
-            }
+            let input_area = this.div;
 
             if (input_area.children.length === 0) {
                 input_area.appendChild(line);

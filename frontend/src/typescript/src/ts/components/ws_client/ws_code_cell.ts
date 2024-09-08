@@ -1,4 +1,5 @@
 import { ObjectManager } from "../../managers/object_manager";
+import { OutputCell } from "../editor/output_cell/output_cell";
 
 class WebSocketCodeCell {
     private url: string;
@@ -59,8 +60,9 @@ class WebSocketCodeCell {
             console.log('Python executed output:\n', event.data);
             if (event.data) {
                 const editor = this.objectManager.getObject('editor');
-                if (editor && typeof editor.displayOutputCell === 'function') {
-                    editor.displayOutputCell(event.data);
+                if (editor) {
+                    let code_cell = document.getElementById(editor.active_code_cell_id);
+                    new OutputCell(code_cell, event.data);
                 } else {
                     console.warn('Editor not found or displayOutputCell is not a function');
                 }

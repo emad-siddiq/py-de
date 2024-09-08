@@ -2,6 +2,7 @@
 
 import { ObjectManager } from "../../../managers/object_manager";
 import { Editor } from "../../../windows/editor/editor";
+import { CodeCell } from "../code_cell/ts/views/code_cell";
 import { createIconLabel, createImgDiv } from "./utility";
 
 class AddCodeCellButton {
@@ -58,7 +59,7 @@ class AddCodeCellButton {
     addEventListeners() {
         this.div.addEventListener('click', () => {
             let _editor = this.objectManager.getObject("editor") as Editor;
-            _editor.addCodeCell();
+            CodeCell.addCodeCell(_editor.cc_id, _editor.active_code_cell_id);
         })
             
     }

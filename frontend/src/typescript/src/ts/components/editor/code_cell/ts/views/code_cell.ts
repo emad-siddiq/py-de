@@ -1,8 +1,9 @@
 import { InputArea } from "./child_views/input_area";
 import { CodeCellNumber } from "./child_views/cell_number";
-import { Editor } from "../../../../../windows/editor/editor";
 import { DarkMode } from "./../../../../../themes/darkmode/darkmode";
 import { ObjectManager } from "../../../../../managers/object_manager";
+import { DOM } from "./../../../../../utility/dom";
+import { OutputCell } from "./../../../output_cell/output_cell";
 
 class CodeCell {
     private socket: WebSocket | null;
@@ -12,16 +13,16 @@ class CodeCell {
     input_area_id: string;
     div: HTMLElement;
     input_area: InputArea;
-    editor: Editor;
+    
 
-    constructor(id: number, editor: Editor) {
-        this.editor = editor;
+    constructor(id: number) {
         this.socket = null;
 
         this.name = "code-cell";
         this.id = "code-cell-" + id.toString();
         this.cc_id = id;
         this.input_area_id = this.id + "-input-area";
+        this.input_area = new InputArea(this.input_area_id, this.cc_id);
 
         this.div = this.createCodeCellDiv();
         this.applyInitialStyles();
@@ -58,12 +59,51 @@ class CodeCell {
         code_cell.style.position = "relative";
 
         let code_cell_number = new CodeCellNumber(this.cc_id);
-        this.input_area = new InputArea(this.input_area_id, this.cc_id);
 
         code_cell.appendChild(code_cell_number.getDiv());
         code_cell.appendChild(this.input_area.getDiv());
 
         return code_cell;
+    }
+
+    /*
+
+        This should add a code cell after the currently active cell. 
+        A currently active cell is one that has been clicked on.
+        Clicking on another code cell should switch active code cell.
+        Click anywhere besides a code cell should switch active code cell to none.
+
+    */
+    static addCodeCell(cc_id: number, after_cell_id: string) {
+
+        // Create a new Code Cell
+        console.log(`Adding new code cell with cc_id: ${cc_id}`);
+        let code_cell = new CodeCell(cc_id);
+
+        // If there is no currently active cell or the currently active cell is the last one in the editor
+        // Then we just append the child to the end of the editor
+        if (after_cell_id === "" || after_cell_id == null)  {
+            console.log(`Appending new code cell to editor`);
+            DOM.addElement("editor", code_cell.getDiv()); 
+        } else {  //Insert it after the id specified
+            console.log(`Inserting new code cell after ${after_cell_id}`);
+            // Since we confirmed above that there is a nextSibling, we want to make sure it's not this code's output cell.
+            let nextCellId = DOM.getNextSiblingId(after_cell_id);
+            // While the next cell is an output cell 
+            if (DOM.getNextSiblingId(nextCellId) !== null && OutputCell.isOutputCellId(nextCellId)) {
+                nextCellId = DOM.getNextSiblingId(nextCellId);
+            }
+            let editorDiv = document.getElementById("editor");
+            editorDiv.insertBefore(code_cell.getDiv(), document.getElementById(nextCellId));
+        }
+
+       
+        
+        let editorObj = ObjectManager.getInstance().getObject("editor");
+        editorObj.cc_id += 1;
+        editorObj.active_code_cell_id = code_cell.id;
+
+        console.log(`Code cell added. New cc_id: ${editorObj.cc_id }`);
     }
 
     applyInitialStyles() {
