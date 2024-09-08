@@ -18,11 +18,11 @@ class InputAreaEditor {
         //let randColor = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
         input_area.style.backgroundColor = "white"; //TODO extract to theme
         input_area.style.zIndex = "2";
-        input_area.style.position = "absolute";
-        input_area.style.top = "10px";
-        input_area.style.left = "3%";
+
         input_area.style.boxSizing = "border-box";
+        input_area.style.marginTop = "10px";
         input_area.style.paddingTop = "10px";
+
         input_area.style.textIndent = "0.5%";
         input_area.style.boxShadow = "0px 2px 15px 0px rgba(0, 0, 0, .1)";
         input_area.style.width = "94.5%";

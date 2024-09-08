@@ -61,8 +61,8 @@ class WebSocketCodeCell {
             if (event.data) {
                 const editor = this.objectManager.getObject('editor');
                 if (editor) {
-                    let code_cell = document.getElementById(editor.active_code_cell_id);
-                    new OutputCell(code_cell, event.data);
+                    let code_cell_id = editor.active_code_cell_id;
+                    new OutputCell(code_cell_id, event.data);
                 } else {
                     console.warn('Editor not found or displayOutputCell is not a function');
                 }

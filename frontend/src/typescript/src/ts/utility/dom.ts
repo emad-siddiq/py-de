@@ -44,6 +44,15 @@ class DOM {
           parentElement.appendChild(newElement);
         }
       }
+
+      static appendAfter(newNode: HTMLElement, referenceNodeId: string): void {
+        let referenceNode = document.getElementById(referenceNodeId);
+        if (referenceNode.parentNode) {
+          referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+        } else {
+          throw new Error("Reference node has no parent");
+        }
+      }
     
 }
 

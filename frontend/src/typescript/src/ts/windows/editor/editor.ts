@@ -13,10 +13,11 @@ export class Editor {
     cc_id: number;     // The code cell id
     tc_id: number;     // The text cell id. 
     // 
-    active_code_cell_id: string;
+    active_code_cell_id: string; //TODO: fix this so that even if a code cell is not highlighted, the correct code cell gets output
     id: string;        // The name to call this class: editor
     objectManager: ObjectManager; // The objectManager shared between all our classes
     fileName: FileName;           // The FileName to assign this notebook. TODO: Add a feature that saves the notebook to file
+
 
     constructor(objectManager: ObjectManager) {
         this.id = "editor";                      
@@ -57,8 +58,10 @@ export class Editor {
         div.style.left = "0%";
         div.style.backgroundColor = "white";
         div.style.width = "100%";
-        div.style.height = "100%";
+        div.style.height = "auto";
         div.style.boxSizing = "border-box";
+        div.style.display = "flex";
+        div.style.flexDirection = "column";
 
         div.appendChild(this.fileName.getDiv());
 

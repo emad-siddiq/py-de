@@ -1,5 +1,4 @@
-import { ObjectManager } from "../../../managers/object_manager.js";
-import {DOM} from "./../../../utility/dom.js";
+import { DOM } from "./../../../utility/dom";
 
 // Class to represent the output from execution in the corresponding code cell
 // Or by clicking the top menu icon
@@ -12,19 +11,19 @@ class OutputCell {
     name: string;
     input_area_id: string;
     div: HTMLElement;
-    objectManager: ObjectManager;
-    codeCell: HTMLElement;
+    code_cell_id: string;
 
-    constructor(code_cell: HTMLElement, content: string) 
+    constructor(code_cell_id: string, content: string) 
     {
-        this.codeCell = code_cell;
         this.name = "output-cell";
-        this.id = this.codeCell.id + "-output-cell";
-        this.input_area_id = this.codeCell.id + "-input-area";
+        this.code_cell_id = code_cell_id;
+        this.id = code_cell_id + "-output-cell";
+        this.input_area_id = code_cell_id + "-input-area";
 
         this.div = this.createOutputCellDiv();
         this.renderText(content);
-        this.appendToCodeCell();
+        DOM.appendAfter(this.div, this.code_cell_id)
+
     }
 
     getDiv() 
@@ -41,14 +40,10 @@ class OutputCell {
         output_cell.setAttribute("id", this.id);
         output_cell.setAttribute("class", this.name);
         
-        // Absolute positioning
-        output_cell.style.position = "absolute";
-        output_cell.style.left = "0";
-        output_cell.style.right = "0";
-        output_cell.style.top = "100%"; // Position it right after the code cell
+        
         
         // Add margin to the top
-        output_cell.style.marginTop = "10px"; // You can adjust this value as needed
+        output_cell.style.paddingTop = "10px"; // You can adjust this value as needed
         
         // Maintain existing styles
         output_cell.style.width = "100%";
@@ -57,8 +52,8 @@ class OutputCell {
         output_cell.style.backgroundColor = "#eeeeee";
         output_cell.style.textIndent = "0.8vw";
         output_cell.style.fontFamily = "Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New";
-        output_cell.style.paddingTop = "1.2vh";
-        output_cell.style.paddingBottom = "1.2vh";
+        //output_cell.style.paddingTop = "1.2vh";
+        //output_cell.style.paddingBottom = "1.2vh";
         output_cell.style.boxShadow = "0px 2px 15px 0px rgba(0, 0, 0, .1)";
         output_cell.style.overflowY = 'auto';
 
@@ -85,13 +80,9 @@ class OutputCell {
         });
     }
 
-    appendToCodeCell() {
-        // Append the output cell directly to the code cell
-        this.codeCell.appendChild(this.div);
 
-        // Adjust the code cell's padding to make room for the output cell
-        this.codeCell.style.paddingBottom = this.div.offsetHeight + "px";
-    }
+
+    
 }
 
 export { OutputCell };

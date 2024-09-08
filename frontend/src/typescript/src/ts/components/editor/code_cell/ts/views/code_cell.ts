@@ -30,6 +30,7 @@ class CodeCell {
 
         // Subscribe to socket updates
         ObjectManager.getInstance().subscribeToSocket("codeSocket", this.updateSocket.bind(this));
+        ObjectManager.getInstance().associate(this.id, this);
     }
 
     private updateSocket(newSocket: WebSocket) {
@@ -51,12 +52,16 @@ class CodeCell {
         code_cell.setAttribute("class", this.id);
         code_cell.setAttribute("cc_id", this.cc_id.toString());
 
-        code_cell.style.left = "0%";
-        code_cell.style.top = "0%";
         code_cell.style.width = "100%";
         code_cell.style.height = "70px";
         code_cell.style.boxSizing = "border-box";
-        code_cell.style.position = "relative";
+        code_cell.style.marginLeft = "5px";
+        code_cell.style.marginTop = "10px";
+
+        code_cell.style.display = "flex";
+        code_cell.style.flexDirection = "row";
+
+
 
         let code_cell_number = new CodeCellNumber(this.cc_id);
 
@@ -90,7 +95,7 @@ class CodeCell {
             // Since we confirmed above that there is a nextSibling, we want to make sure it's not this code's output cell.
             let nextCellId = DOM.getNextSiblingId(after_cell_id);
             // While the next cell is an output cell 
-            if (DOM.getNextSiblingId(nextCellId) !== null && OutputCell.isOutputCellId(nextCellId)) {
+            if (nextCellId !== null && OutputCell.isOutputCellId(nextCellId)) {
                 nextCellId = DOM.getNextSiblingId(nextCellId);
             }
             let editorDiv = document.getElementById("editor");
