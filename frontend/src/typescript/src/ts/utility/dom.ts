@@ -53,6 +53,22 @@ class DOM {
           throw new Error("Reference node has no parent");
         }
       }
+
+      static replaceElseAddAfter(newNode: HTMLElement, referenceNodeId: string): void {
+        const referenceNode = document.getElementById(referenceNodeId);
+        if (!referenceNode) {
+          throw new Error(`Reference node with id '${referenceNodeId}' not found`);
+        }
+      
+        const existingNode = document.getElementById(newNode.id);
+        if (existingNode) {
+          // Replace the existing node
+          existingNode.parentNode?.replaceChild(newNode, existingNode);
+        } else {
+          // Append after the reference node
+          this.appendAfter(newNode, referenceNodeId);
+        }
+      }
     
 }
 

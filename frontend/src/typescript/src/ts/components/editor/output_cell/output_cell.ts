@@ -22,8 +22,7 @@ class OutputCell {
 
         this.div = this.createOutputCellDiv();
         this.renderText(content);
-        DOM.appendAfter(this.div, this.code_cell_id)
-
+        this.addOutputCell();
     }
 
     getDiv() 
@@ -78,6 +77,10 @@ class OutputCell {
                 this.div.style.height = `${contentHeight}px`;
             }
         });
+    }
+
+    addOutputCell() {
+        DOM.replaceElseAddAfter(this.div, this.code_cell_id);
     }
 
 

@@ -29,12 +29,10 @@ class TextCell {
         let text_cell = document.createElement("div");
         text_cell.setAttribute("id", this.id);
         text_cell.setAttribute("class", this.id);
-        text_cell.style.left = "2.5%";
-        text_cell.style.top = "0%";
+      
         text_cell.style.width = "95.2%";
         text_cell.style.height = "60px";
         text_cell.style.boxSizing = "border-box";
-        text_cell.style.position = "relative";
         text_cell.style.boxShadow = "0px 5px 15px 5px rgba(20, 255, 60, 0.2)";
 
 
