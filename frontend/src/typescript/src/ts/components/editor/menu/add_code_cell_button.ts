@@ -59,7 +59,7 @@ class AddCodeCellButton {
     addEventListeners() {
         this.div.addEventListener('click', () => {
             let _editor = this.objectManager.getObject("editor") as Editor;
-            CodeCell.addCodeCell(_editor.cc_id, _editor.active_code_cell_id);
+            _editor.addCodeCell();
         })
             
     }

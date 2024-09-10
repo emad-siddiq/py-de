@@ -15,7 +15,7 @@ class DOM {
         return null;
       }
 
-    static addElement(
+    static addElementAfter(
         parentId: string,
         newElement: HTMLElement,
         targetId?: string

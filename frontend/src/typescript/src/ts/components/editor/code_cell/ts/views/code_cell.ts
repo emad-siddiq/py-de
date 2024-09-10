@@ -7,22 +7,22 @@ import { OutputCell } from "./../../../output_cell/output_cell";
 
 class CodeCell {
     private socket: WebSocket | null;
-    id: string;
-    cc_id: number;
+    instance_id: string;
+    code_cell_id: number;
     name: string;
     input_area_id: string;
     div: HTMLElement;
     input_area: InputArea;
-    
 
-    constructor(id: number) {
+    constructor(code_cell_id: number) {
         this.socket = null;
 
         this.name = "code-cell";
-        this.id = "code-cell-" + id.toString();
-        this.cc_id = id;
-        this.input_area_id = this.id + "-input-area";
-        this.input_area = new InputArea(this.input_area_id, this.cc_id);
+        this.instance_id = "code-cell-" + code_cell_id.toString();
+
+        this.input_area_id = this.instance_id + "-input-area";
+        this.code_cell_id = code_cell_id;
+        this.input_area = new InputArea(this.input_area_id, this.code_cell_id);
 
         this.div = this.createCodeCellDiv();
         this.applyInitialStyles();
@@ -30,12 +30,12 @@ class CodeCell {
 
         // Subscribe to socket updates
         ObjectManager.getInstance().subscribeToSocket("codeSocket", this.updateSocket.bind(this));
-        ObjectManager.getInstance().associate(this.id, this);
+        ObjectManager.getInstance().associate(this.instance_id, this);
     }
 
     private updateSocket(newSocket: WebSocket) {
         this.socket = newSocket;
-        console.log(`CodeCell ${this.id} updated with new WebSocket`);
+        console.log(`CodeCell ${this.instance_id} updated with new WebSocket`);
     }
 
     getDiv() {
@@ -48,9 +48,8 @@ class CodeCell {
 
     createCodeCellDiv() {
         let code_cell = document.createElement("div");
-        code_cell.setAttribute("id", this.id);
-        code_cell.setAttribute("class", this.id);
-        code_cell.setAttribute("cc_id", this.cc_id.toString());
+        code_cell.setAttribute("id", this.instance_id);
+        code_cell.setAttribute("class", this.instance_id);
 
         code_cell.style.width = "100%";
         code_cell.style.height = "70px";
@@ -61,55 +60,18 @@ class CodeCell {
         code_cell.style.display = "flex";
         code_cell.style.flexDirection = "row";
 
-
-
-        let code_cell_number = new CodeCellNumber(this.cc_id);
-
-        code_cell.appendChild(code_cell_number.getDiv());
+        code_cell.appendChild(this.createCodeCellNumberDiv());
         code_cell.appendChild(this.input_area.getDiv());
 
         return code_cell;
     }
 
-    /*
-
-        This should add a code cell after the currently active cell. 
-        A currently active cell is one that has been clicked on.
-        Clicking on another code cell should switch active code cell.
-        Click anywhere besides a code cell should switch active code cell to none.
-
-    */
-    static addCodeCell(cc_id: number, after_cell_id: string) {
-
-        // Create a new Code Cell
-        console.log(`Adding new code cell with cc_id: ${cc_id}`);
-        let code_cell = new CodeCell(cc_id);
-
-        // If there is no currently active cell or the currently active cell is the last one in the editor
-        // Then we just append the child to the end of the editor
-        if (after_cell_id === "" || after_cell_id == null)  {
-            console.log(`Appending new code cell to editor`);
-            DOM.addElement("editor", code_cell.getDiv()); 
-        } else {  //Insert it after the id specified
-            console.log(`Inserting new code cell after ${after_cell_id}`);
-            // Since we confirmed above that there is a nextSibling, we want to make sure it's not this code's output cell.
-            let nextCellId = DOM.getNextSiblingId(after_cell_id);
-            // While the next cell is an output cell 
-            if (nextCellId !== null && OutputCell.isOutputCellId(nextCellId)) {
-                nextCellId = DOM.getNextSiblingId(nextCellId);
-            }
-            let editorDiv = document.getElementById("editor");
-            editorDiv.insertBefore(code_cell.getDiv(), document.getElementById(nextCellId));
-        }
-
-       
-        
-        let editorObj = ObjectManager.getInstance().getObject("editor");
-        editorObj.cc_id += 1;
-        editorObj.active_code_cell_id = code_cell.id;
-
-        console.log(`Code cell added. New cc_id: ${editorObj.cc_id }`);
+    createCodeCellNumberDiv() {
+        let run_order = ObjectManager.getInstance().getObject("editor").run_order;
+        let code_cell_number = new CodeCellNumber(run_order);
+        return code_cell_number.getDiv();
     }
+    
 
     applyInitialStyles() {
         if (DarkMode.enabled) {
@@ -125,6 +87,9 @@ class CodeCell {
 
     clickHandler() {
         this.div.style.boxShadow = "0px 5px 15px 5px rgba(20, 255, 60, .2)";
+        ObjectManager.getInstance().getObject("editor").updateActiveCell("code-cell", this.code_cell_id);
+
+
     }
 }
 

@@ -22,7 +22,7 @@ const aiSocket = 'aiSocket';
 let _debugger = new Debugger(objectManager);
 let _explorer = new Explorer();
 let _terminal = new Terminal();
-let _editor = new Editor(objectManager);
+let _editor = new Editor();
 
 let _addMenu = new AddMenu(objectManager);
 let _chat = new Chat();

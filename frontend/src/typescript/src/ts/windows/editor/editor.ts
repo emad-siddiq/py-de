@@ -1,37 +1,61 @@
+import { DOM } from "./../../utility/dom";
 import { CodeCell } from "../../components/editor/code_cell/ts/views/code_cell";
-import { OutputCell } from "../../components/editor/output_cell/output_cell";
 import { TextCell } from "../../components/editor/text_cell/views/text_cell";
 import { ObjectManager } from "../../managers/object_manager";
 import { FileName } from "./filename";
+import { OutputCell } from "./../../components/editor/output_cell/output_cell";
 
 // The editor class represents the combination of code cells, text cells, output cells
 // and any other kind of cells that might be required to enhance a Python coder's experience
+// This all occures in a 2d editor that takes up the entire screen
 
 export class Editor {
+
     div: HTMLElement;  // The HTML div to append to document.body
-    // Cell Id: These are assigned linearly and don't change
-    cc_id: number;     // The code cell id
-    tc_id: number;     // The text cell id. 
-    // 
-    active_code_cell_id: string; //TODO: fix this so that even if a code cell is not highlighted, the correct code cell gets output
-    id: string;        // The name to call this class: editor
+    
+    instance_id: string;                   // instance_id
     objectManager: ObjectManager; // The objectManager shared between all our classes
     fileName: FileName;           // The FileName to assign this notebook. TODO: Add a feature that saves the notebook to file
+    code_cell_counter: number;         // This is the code cell number found in corresponding div id e.g. code-cell-1 
+    text_cell_counter: number;         // This is the text cell number                               e.g. text-cell-1
+    run_order: number;            // order a cell is run in
+    active_cell_type: string;     // [code_cell, text_cell]
+    active_cell_number: number;   // the code_cell_id or text_cell-id e.g code-cell-1 or text-cell-10
 
 
-    constructor(objectManager: ObjectManager) {
-        this.id = "editor";                      
+    constructor() {  // 
+
+        this.instance_id = "editor";             // We plan on having one editor for now                 
         this.fileName = new FileName();          // Defaults to Untitled
         this.div = this.createEditorDiv();       // absolute positioned div
-        this.cc_id = 1;                          // first code cell id [1]
-        this.tc_id = 1;                          // - no UI rep, keeps tracks of text cells on backend
-        this.active_code_cell_id = "";           // TODO: Check what purpose this serves
-        this.objectManager = objectManager;      // Passed down in jupyter.ts
 
-        this.objectManager.associate(this.id, this); // Save a copy in our Object Manager
+        // We want the different cell types added in a certain order. 
+        
+        // The editor space is initialized with just the code cell in the editor. This is Code Cell 1.
+        // We mark this as the active_cell
+
+        // Here we can branch three ways:
+        //                                  1) Append code cell after the current active text or code cell
+        //                               2) Append an output cell to whichever code cell ran some code
+        //                               3) Append a text cell after the current active text or code cell
+
+        //                              
+        this.active_cell_type = "code_cell";       //  
+        this.active_cell_number = 0;               // switches between text and code
+
+        // Code Cell specific
+        this.code_cell_counter = 0;                     // corresponds to div
+        this.run_order = 1;                        // order code cells are run in, same cell can be run multiple times
+        
+        // Text Cell specific                        
+        this.text_cell_counter = 0;                     // 
+
+        ObjectManager.getInstance().associate(this.instance_id, this); // Save a copy in our Object Manager
+
         //Append as child to document.body and activate event listeners
         document.body.appendChild(this.div);
-        CodeCell.addCodeCell(this.cc_id, this.active_code_cell_id);
+
+        this.addCodeCell();
 
         this.addEventListeners();
 
@@ -46,7 +70,7 @@ export class Editor {
 
     private createEditorDiv() {
         // Creates an editor div that takes up the entire visible screen.
-        // Inserts the FileName div which by virtue of being the first child gets the top left pos:
+        // Inserts the FileName div which by virtue of being the first child gets the top left pos
         // TODO: Fix this to make object placement on the screen always use absolute placement.
 
         let div = document.createElement("div");
@@ -75,9 +99,52 @@ export class Editor {
     }
 
     public addTextCell() {
-        let text_cell = new TextCell(this.tc_id);
+        // TODO: Modify this so that a new code cell gets added after the current active code cell
+        //       Modify editor so that it keeps track of current active code or text cell
+        this.text_cell_counter += 1;
+        let text_cell = new TextCell(this.text_cell_counter);
         document.getElementById("editor").appendChild(text_cell.getDiv());
-        this.tc_id += 1;
+    }
+
+    /*
+
+        This should add a code cell after the currently active cell. 
+        A currently active cell is one that has been clicked on.
+        Clicking on another code cell should switch active code cell.
+        Click anywhere besides a code cell should switch active code cell to none.
+
+    */
+    public addCodeCell() {
+        // Create a new Code Cell
+        
+        //Increment code_cell_counter counter by one
+        this.code_cell_counter += 1
+        let code_cell = new CodeCell(this.code_cell_counter);
+
+        if (this.active_cell_type === "text-cell") {
+            DOM.addElementAfter("editor", code_cell.getDiv(), "text-cell-" + this.active_cell_number.toString());
+        }
+    
+
+        // First Code Cell
+        if (this.active_cell_number === 0)  {
+            DOM.addElementAfter("editor", code_cell.getDiv()); 
+        } else {  //Insert it after the id specified
+            if (this.active_cell_type == "code-cell") {
+                let instance_id = "code-cell-" + this.active_cell_number;
+                let nextCellId = DOM.getNextSiblingId(instance_id);
+                if (nextCellId !== null && OutputCell.isOutputCellId(nextCellId)) {
+                    nextCellId = DOM.getNextSiblingId(nextCellId);
+                }
+                let editorDiv = document.getElementById("editor");
+                editorDiv.insertBefore(code_cell.getDiv(), document.getElementById(nextCellId));
+            }
+            
+        }
+
+        this.updateActiveCell("code-cell", this.code_cell_counter);
+
+
     }
 
     private CMD_PLUS_addCodeCell(e: KeyboardEvent) {
@@ -85,7 +152,7 @@ export class Editor {
         if (ctrl_cmd && e.shiftKey && e.key === "=") {
             e.stopPropagation();
             e.preventDefault();
-            CodeCell.addCodeCell(this.cc_id, this.active_code_cell_id);
+            this.addCodeCell();
         }
     }
 
@@ -96,6 +163,13 @@ export class Editor {
             e.preventDefault();
             this.removeCodeCell();
         }
+    }
+
+
+    updateActiveCell(type: string, counter: number) {
+        console.log("Active cell ", type, counter);
+        this.active_cell_type = type;
+        this.active_cell_number = counter;
     }
 
     

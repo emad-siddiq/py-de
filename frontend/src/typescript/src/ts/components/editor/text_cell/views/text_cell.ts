@@ -1,17 +1,18 @@
 import { marked } from 'marked';
+import { ObjectManager } from './../../../../managers/object_manager';
 
 class TextCell {
     socket: WebSocket;
-    id: string;
-    name: string;
+    text_cell_id: number;
     input_area_id: string;
+    instance_id: string;
     div: HTMLElement;
     textareaElement: HTMLTextAreaElement;
 
     constructor(id: number) {
-        this.name = "text-cell";
-        this.id = "text-cell-" + id.toString();
-        this.input_area_id = this.id + "-input-area";
+        this.text_cell_id = id;
+        this.instance_id = "text-cell-" + this.text_cell_id.toString();
+        this.input_area_id = this.instance_id + "-input-area";
 
         this.div = this.createTextCellDiv();
         this.addEventListeners(this.div);
@@ -23,12 +24,19 @@ class TextCell {
 
     addEventListeners(div: HTMLElement): void {
         div.addEventListener("keydown", this.saveOnShiftEnter.bind(this));
+        div.addEventListener("click", this.clickHandler.bind(this));
+
+    }
+
+    clickHandler() {
+        ObjectManager.getInstance().getObject("editor").updateActiveCell("text-cell", this.text_cell_id);
+
     }
 
     createTextCellDiv(): HTMLElement {
         let text_cell = document.createElement("div");
-        text_cell.setAttribute("id", this.id);
-        text_cell.setAttribute("class", this.id);
+        text_cell.setAttribute("id", this.instance_id);
+        text_cell.setAttribute("class", this.instance_id);
       
         text_cell.style.width = "95.2%";
         text_cell.style.height = "60px";
