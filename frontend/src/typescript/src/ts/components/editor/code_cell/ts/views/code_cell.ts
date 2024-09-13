@@ -2,8 +2,15 @@ import { InputArea } from "./child_views/input_area";
 import { CodeCellNumber } from "./child_views/cell_number";
 import { DarkMode } from "./../../../../../themes/darkmode/darkmode";
 import { ObjectManager } from "../../../../../managers/object_manager";
-import { DOM } from "./../../../../../utility/dom";
-import { OutputCell } from "./../../../output_cell/output_cell";
+
+
+// Code Cell is where python code gets written to 
+// It has a [35] marking when it was run, the numbers 
+// are incremented every time a block of code is run
+// 
+// It has an input area, optionally numbered
+// And on the backend it has a socket it can send code over
+// 
 
 class CodeCell {
     private socket: WebSocket | null;
@@ -17,16 +24,15 @@ class CodeCell {
     constructor(code_cell_id: number) {
         this.socket = null;
 
-        this.name = "code-cell";
-        this.instance_id = "code-cell-" + code_cell_id.toString();
+        this.code_cell_id = code_cell_id; // This is the number passed down from editor to track code cells
+        this.instance_id = "code-cell-" + code_cell_id.toString(); 
 
         this.input_area_id = this.instance_id + "-input-area";
-        this.code_cell_id = code_cell_id;
         this.input_area = new InputArea(this.input_area_id, this.code_cell_id);
 
-        this.div = this.createCodeCellDiv();
+        this.createCodeCellDiv();
         this.applyInitialStyles();
-        this.addEventListeners(this.div);
+        this.addEventListeners();
 
         // Subscribe to socket updates
         ObjectManager.getInstance().subscribeToSocket("codeSocket", this.updateSocket.bind(this));
@@ -42,28 +48,27 @@ class CodeCell {
         return this.div;
     }
 
-    addEventListeners(div: HTMLElement) {
-        div.addEventListener("click", this.clickHandler.bind(this));
+    addEventListeners() {
+        this.div.addEventListener("click", this.clickHandler.bind(this));
     }
 
     createCodeCellDiv() {
-        let code_cell = document.createElement("div");
-        code_cell.setAttribute("id", this.instance_id);
-        code_cell.setAttribute("class", this.instance_id);
+        this.div = document.createElement("div");
+        this.div.setAttribute("id", this.instance_id);
+        this.div.setAttribute("class", this.instance_id);
 
-        code_cell.style.width = "100%";
-        code_cell.style.height = "70px";
-        code_cell.style.boxSizing = "border-box";
-        code_cell.style.marginLeft = "5px";
-        code_cell.style.marginTop = "10px";
+        this.div.style.width = "100%";
+        this.div.style.height = "70px";
+        this.div.style.boxSizing = "border-box";
+        this.div.style.marginLeft = "5px";
+        this.div.style.marginTop = "10px";
 
-        code_cell.style.display = "flex";
-        code_cell.style.flexDirection = "row";
+        this.div.style.display = "flex";
+        this.div.style.flexDirection = "row";
 
-        code_cell.appendChild(this.createCodeCellNumberDiv());
-        code_cell.appendChild(this.input_area.getDiv());
+        this.div.appendChild(this.createCodeCellNumberDiv());
+        this.div.appendChild(this.input_area.getDiv());
 
-        return code_cell;
     }
 
     createCodeCellNumberDiv() {
