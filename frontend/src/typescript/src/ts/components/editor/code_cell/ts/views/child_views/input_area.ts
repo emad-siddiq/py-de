@@ -26,9 +26,9 @@ export class InputArea {
         this.containerElement = document.createElement('div');
         this.containerElement.id = this.id;
         this.containerElement.style.width = '100%';
-        this.containerElement.style.height = '100%';
+        this.containerElement.style.minHeight = '70px';
+        this.containerElement.style.height = 'auto';
 
-        // Subscribe to socket updates
         ObjectManager.getInstance().subscribeToSocket("codeSocket", this.updateSocket.bind(this));
     }
 
@@ -53,30 +53,26 @@ export class InputArea {
             ".cm-activeLineGutter": {
                 backgroundColor: "#e2e2e2"
             },
-            // New styles for centering line numbers
             ".cm-lineNumbers .cm-gutterElement": {
                 display: "flex",
                 alignItems: "center",
-                height: "1.4em", // Adjust this value to match your line height
-                padding: "0 2px 0 5px" // Add some right padding for the colon
+                height: "1.4em",
+                padding: "0 2px 0 5px"
             }
         });
     }
 
     private configureLineNumbers(): Extension {
         return lineNumbers({
-            formatNumber: (lineNo: number) => lineNo.toString(), // Adds a colon after each number
+            formatNumber: (lineNo: number) => lineNo.toString(),
             domEventHandlers: {
                 click: (view, line, event) => {
-                    // Custom click handler for line numbers
                     console.log(`Clicked on line number ${line} in InputArea ${this.id}`);
-                    // You can add more complex logic here if needed
                     return true;
                 }
             }
         });
     }
-
 
     public initializeCodeMirror() {
         console.log(`Initializing CodeMirror for InputArea ${this.id}`);
@@ -89,19 +85,19 @@ export class InputArea {
             const theme = DarkMode.enabled ? oneDark : [];
 
             const myHighlightStyle = HighlightStyle.define([
-                { tag: tags.keyword, color: "#0000FF" },          // Blue for keywords
-                { tag: tags.operator, color: "#000000" },         // Black for operators
-                { tag: tags.variableName, color: "#000000" },     // Black for variable names
-                { tag: tags.function(tags.variableName), color: "#0000FF" }, // Blue for function names
-                { tag: tags.string, color: "#BA2121" },           // Dark red for strings
-                { tag: tags.number, color: "#008000" },           // Green for numbers
-                { tag: tags.comment, color: "#408080", fontStyle: "italic" }, // Cyan for comments
-                { tag: tags.className, color: "#0000FF" },        // Blue for class names
-                { tag: tags.definition(tags.variableName), color: "#00A000" }, // Green for variable definitions
-                { tag: tags.atom, color: "#008000" },             // Green for booleans and null/None
-                { tag: tags.propertyName, color: "#0000FF" },     // Blue for property names
-                { tag: tags.typeName, color: "#0000FF" },         // Blue for type names
-                { tag: tags.meta, color: "#AA22FF" },             // Purple for decorators
+                { tag: tags.keyword, color: "#0000FF" },
+                { tag: tags.operator, color: "#000000" },
+                { tag: tags.variableName, color: "#000000" },
+                { tag: tags.function(tags.variableName), color: "#0000FF" },
+                { tag: tags.string, color: "#BA2121" },
+                { tag: tags.number, color: "#008000" },
+                { tag: tags.comment, color: "#408080", fontStyle: "italic" },
+                { tag: tags.className, color: "#0000FF" },
+                { tag: tags.definition(tags.variableName), color: "#00A000" },
+                { tag: tags.atom, color: "#008000" },
+                { tag: tags.propertyName, color: "#0000FF" },
+                { tag: tags.typeName, color: "#0000FF" },
+                { tag: tags.meta, color: "#AA22FF" },
             ]);
 
             this.editor = new EditorView({
@@ -118,13 +114,16 @@ export class InputArea {
                         theme,
                         EditorView.lineWrapping,
                         EditorView.updateListener.of(this.handleDocumentChange.bind(this)),
-                        this.customKeymap()
+                        this.customKeymap(),
+                        EditorView.theme({
+                            "&": { minHeight: "70px" }
+                        })
                     ]
                 }),
                 parent: this.containerElement
             });
 
-            this.editor.dom.style.height = "70px";
+            this.updateContainerHeight();
 
             console.log(`CodeMirror initialized for InputArea ${this.id}`);
         } catch (error) {
@@ -152,7 +151,26 @@ export class InputArea {
     private handleDocumentChange(update: ViewUpdate) {
         if (update.docChanged) {
             console.log("Document changed");
-            // Add any custom logic for document changes here
+            this.updateContainerHeight();
+        }
+    }
+
+    private updateContainerHeight() {
+        if (this.editor) {
+            const height = this.editor.contentHeight;
+            console.log(`Updating container height to ${height}px`);
+            this.containerElement.style.height = `${height}px`;
+            this.updateParentHeight(height);
+        }
+    }
+
+    private updateParentHeight(height: number) {
+        const parentCodeCell = ObjectManager.getInstance().getObject(`code-cell-${this.cc_id}`);
+        if (parentCodeCell && parentCodeCell.updateHeight) {
+            console.log(`Updating parent CodeCell height to ${height}px`);
+            parentCodeCell.updateHeight(height);
+        } else {
+            console.error(`Failed to update parent CodeCell height`);
         }
     }
 
@@ -216,13 +234,10 @@ export class InputArea {
             console.error(`Cannot handle click: Editor not initialized for InputArea ${this.id}`);
             return;
         }
-        // CodeMirror handles clicks internally, so we don't need to do anything here
         console.log("Click handled by CodeMirror");
     }
 
     handleInput(e: KeyboardEvent) {
-        // Most keyboard input is handled by CodeMirror internally
-        // We only need to handle special cases here
         if (e.shiftKey && e.key === 'Enter') {
             e.preventDefault();
             e.stopPropagation();

@@ -1,3 +1,5 @@
+// File: src/ts/components/editor/code_cell/ts/views/code_cell.ts
+
 import { InputArea } from "./child_views/input_area";
 import { CodeCellNumber } from "./child_views/cell_number";
 import { DarkMode } from "./../../../../../themes/darkmode/darkmode";
@@ -24,7 +26,6 @@ export class CodeCell {
         const inputAreaDiv = this.input_area.getDiv();
         this.div.appendChild(inputAreaDiv);
 
-        // Initialize CodeMirror after the div is appended to the DOM
         setTimeout(() => {
             this.input_area.initializeCodeMirror();
         }, 0);
@@ -55,7 +56,8 @@ export class CodeCell {
         this.div.setAttribute("class", this.instance_id);
 
         this.div.style.width = "100%";
-        this.div.style.height = "70px";
+        this.div.style.minHeight = "70px";
+        this.div.style.height = "auto";
         this.div.style.boxSizing = "border-box";
         this.div.style.marginLeft = "5px";
         this.div.style.marginTop = "10px";
@@ -88,5 +90,11 @@ export class CodeCell {
     clickHandler() {
         this.div.style.boxShadow = "0px 5px 15px 5px rgba(20, 255, 60, .2)";
         ObjectManager.getInstance().getObject("editor").updateActiveCell("code-cell", this.code_cell_id);
+    }
+
+    updateHeight(height: number) {
+        console.log(`Updating CodeCell ${this.instance_id} height to ${height}px`);
+        this.div.style.height = `${height}px`;
+        this.div.offsetHeight; // Trigger a layout update
     }
 }
