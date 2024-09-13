@@ -4,11 +4,11 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   mode: 'development',
-  entry: './src/ts/jupyter.ts', // Updated entry point for TypeScript
+  entry: './src/ts/jupyter.ts',
   output: {
-    filename: 'jupyter.js', // Output filename
-    path: path.resolve(__dirname, 'dist/js'), // Output directory for JS
-    publicPath: '/js/', // Public path for serving JS files
+    filename: 'jupyter.js',
+    path: path.resolve(__dirname, 'dist/js'),
+    publicPath: '/js/',
   },
   module: {
     rules: [
@@ -19,44 +19,55 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader'], // Handle CSS files
+        use: [
+          MiniCssExtractPlugin.loader,
+          {
+            loader: 'css-loader',
+            options: {
+              modules: {
+                auto: true,
+                localIdentName: '[name]__[local]--[hash:base64:5]',
+              },
+            },
+          },
+        ],
       },
       {
         test: /\.html$/,
-        use: ['html-loader'], // Handle HTML files
+        use: ['html-loader'],
       },
     ],
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: '../css/styles.css', // Output CSS to 'dist/css'
+      filename: '../css/[name].css',
     }),
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: path.resolve(__dirname, 'src/html'), // Source folder for HTML files
-          to: path.resolve(__dirname, 'dist/html'), // Destination folder for HTML files
+          from: path.resolve(__dirname, 'src/html'),
+          to: path.resolve(__dirname, 'dist/html'),
         },
         {
-          from: path.resolve(__dirname, 'src/css'), // Source folder for CSS files
-          to: path.resolve(__dirname, 'dist/css'), // Destination folder for CSS files
+          from: path.resolve(__dirname, 'src/css'),
+          to: path.resolve(__dirname, 'dist/css'),
         },
         {
-          from: path.resolve(__dirname, 'src/img'), // Source folder for img files
-          to: path.resolve(__dirname, 'dist/img'), // Destination folder for img files
+          from: path.resolve(__dirname, 'src/img'),
+          to: path.resolve(__dirname, 'dist/img'),
         },
       ],
     }),
   ],
   devServer: {
     static: {
-      directory: path.join(__dirname, 'dist'), // Serve from 'dist'
+      directory: path.join(__dirname, 'dist'),
     },
     compress: true,
     port: 8081,
     hot: true,
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'], // Resolve these extensions
+    extensions: ['.tsx', '.ts', '.js'],
   },
 };

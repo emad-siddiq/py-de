@@ -3,38 +3,35 @@ import { CodeCellNumber } from "./child_views/cell_number";
 import { DarkMode } from "./../../../../../themes/darkmode/darkmode";
 import { ObjectManager } from "../../../../../managers/object_manager";
 
-
-// Code Cell is where python code gets written to 
-// It has a [35] marking when it was run, the numbers 
-// are incremented every time a block of code is run
-// 
-// It has an input area, optionally numbered
-// And on the backend it has a socket it can send code over
-// 
-
-class CodeCell {
+export class CodeCell {
     private socket: WebSocket | null;
     instance_id: string;
     code_cell_id: number;
-    name: string;
     input_area_id: string;
     div: HTMLElement;
     input_area: InputArea;
 
     constructor(code_cell_id: number) {
+        console.log(`Initializing CodeCell with id: ${code_cell_id}`);
         this.socket = null;
-
-        this.code_cell_id = code_cell_id; // This is the number passed down from editor to track code cells
+        this.code_cell_id = code_cell_id;
         this.instance_id = "code-cell-" + code_cell_id.toString(); 
-
         this.input_area_id = this.instance_id + "-input-area";
-        this.input_area = new InputArea(this.input_area_id, this.code_cell_id);
-
+        
         this.createCodeCellDiv();
+        this.input_area = new InputArea(this.input_area_id, this.code_cell_id);
+        
+        const inputAreaDiv = this.input_area.getDiv();
+        this.div.appendChild(inputAreaDiv);
+
+        // Initialize CodeMirror after the div is appended to the DOM
+        setTimeout(() => {
+            this.input_area.initializeCodeMirror();
+        }, 0);
+
         this.applyInitialStyles();
         this.addEventListeners();
 
-        // Subscribe to socket updates
         ObjectManager.getInstance().subscribeToSocket("codeSocket", this.updateSocket.bind(this));
         ObjectManager.getInstance().associate(this.instance_id, this);
     }
@@ -66,9 +63,8 @@ class CodeCell {
         this.div.style.display = "flex";
         this.div.style.flexDirection = "row";
 
-        this.div.appendChild(this.createCodeCellNumberDiv());
-        this.div.appendChild(this.input_area.getDiv());
-
+        const codeCellNumberDiv = this.createCodeCellNumberDiv();
+        this.div.appendChild(codeCellNumberDiv);
     }
 
     createCodeCellNumberDiv() {
@@ -76,7 +72,6 @@ class CodeCell {
         let code_cell_number = new CodeCellNumber(run_order);
         return code_cell_number.getDiv();
     }
-    
 
     applyInitialStyles() {
         if (DarkMode.enabled) {
@@ -93,9 +88,5 @@ class CodeCell {
     clickHandler() {
         this.div.style.boxShadow = "0px 5px 15px 5px rgba(20, 255, 60, .2)";
         ObjectManager.getInstance().getObject("editor").updateActiveCell("code-cell", this.code_cell_id);
-
-
     }
 }
-
-export { CodeCell };

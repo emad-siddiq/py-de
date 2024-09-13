@@ -25,12 +25,10 @@ class TextCell {
     addEventListeners(div: HTMLElement): void {
         div.addEventListener("keydown", this.saveOnShiftEnter.bind(this));
         div.addEventListener("click", this.clickHandler.bind(this));
-
     }
 
     clickHandler() {
         ObjectManager.getInstance().getObject("editor").updateActiveCell("text-cell", this.text_cell_id);
-
     }
 
     createTextCellDiv(): HTMLElement {
@@ -38,18 +36,17 @@ class TextCell {
         text_cell.setAttribute("id", this.instance_id);
         text_cell.setAttribute("class", this.instance_id);
       
-        text_cell.style.width = "95.2%";
-        text_cell.style.height = "60px";
+        text_cell.style.width = "100%"; // Changed to 100%
+        text_cell.style.minHeight = "60px"; // Changed height to minHeight
         text_cell.style.boxSizing = "border-box";
         text_cell.style.boxShadow = "0px 5px 15px 5px rgba(20, 255, 60, 0.2)";
 
-
         this.textareaElement = document.createElement('textarea');
         this.textareaElement.style.width = '100%';
-        this.textareaElement.style.height = '100%';
+        this.textareaElement.style.minHeight = '60px'; // Changed height to minHeight
         this.textareaElement.style.boxSizing = 'border-box';
-        this.textareaElement.style.textIndent = '0.5%';
-        this.textareaElement.style.resize = 'none';
+        this.textareaElement.style.padding = '10px'; // Added padding instead of text-indent
+        this.textareaElement.style.resize = 'none'; // Changed to vertical to allow vertical resizing
         this.textareaElement.style.overflowY = 'hidden';
         this.textareaElement.placeholder = 'Enter your text here...';
 
@@ -78,7 +75,7 @@ class TextCell {
     convertMarkdownToHTML(markdown: string): string {
         // Using marked.js to convert markdown to HTML
         const html = marked(markdown);
-        return `<div style="background-color: #F0F0F0; padding: 10px; border-radius: 5px;">${html}</div>`;
+        return `<div style="background-color: #F0F0F0; padding: 10px; border-radius: 5px; width: 100%; box-sizing: border-box;">${html}</div>`;
     }
 }
 

@@ -1,39 +1,159 @@
 // File: src/ts/components/editor/code_cell/ts/views/child_views/input_area.ts
 
-import {InputAreaEditor} from "../../controllers/input_area_controller";
-import { DarkMode } from "../../../../../../themes/darkmode/darkmode";
-import { InputAreaKeyDown } from "../../handlers/keydown_handler";
+import { EditorState, Extension } from "@codemirror/state"
+import { EditorView, keymap, ViewUpdate, lineNumbers } from "@codemirror/view"
+import { defaultKeymap, indentWithTab } from "@codemirror/commands"
+import { python } from "@codemirror/lang-python"
+import { oneDark } from "@codemirror/theme-one-dark"
+import { syntaxHighlighting, defaultHighlightStyle, HighlightStyle, indentUnit} from "@codemirror/language"
+import { tags } from "@lezer/highlight"
 import { ObjectManager } from "../../../../../../managers/object_manager";
+import { DarkMode } from "../../../../../../themes/darkmode/darkmode";
 
-class InputArea {
+export class InputArea {
     id: string;
-    caretX: number;
-    caretY: number;
-    total_lines: number;
-    div: HTMLElement;
-    grid: {[key: number]: string[]};
-    line_number: string;
-    allSelected: boolean;
     cc_id: number;
+    private editor: EditorView | null = null;
     private socket: WebSocket | null;
+    private containerElement: HTMLElement;
 
     constructor(id: string, cc_id: number) {
+        console.log(`Initializing InputArea with id: ${id}, cc_id: ${cc_id}`);
         this.id = id;
-        this.div = InputAreaEditor.createInputArea(this.id);
-        this.div = this.addEventListeners(this.div);
-        this.total_lines = 0;
-        this.grid = {};
         this.cc_id = cc_id;
         this.socket = null;
-        this.caretX = 0;
-        this.caretY = 0;
-        this.allSelected = false;
+
+        this.containerElement = document.createElement('div');
+        this.containerElement.id = this.id;
+        this.containerElement.style.width = '100%';
+        this.containerElement.style.height = '100%';
 
         // Subscribe to socket updates
         ObjectManager.getInstance().subscribeToSocket("codeSocket", this.updateSocket.bind(this));
+    }
 
-        // Add the first line
-        this.addLineAfter(-1);
+    private createEditorTheme() {
+        return EditorView.theme({
+            "&": {
+                height: "100%",
+                fontSize: "14px"
+            },
+            ".cm-content": {
+                fontFamily: "monospace",
+                padding: "15px 0"
+            },
+            ".cm-line": {
+                padding: "0 5px"
+            },
+            ".cm-gutters": {
+                backgroundColor: "#f0f0f0",
+                color: "#999",
+                border: "none"
+            },
+            ".cm-activeLineGutter": {
+                backgroundColor: "#e2e2e2"
+            },
+            // New styles for centering line numbers
+            ".cm-lineNumbers .cm-gutterElement": {
+                display: "flex",
+                alignItems: "center",
+                height: "1.4em", // Adjust this value to match your line height
+                padding: "0 2px 0 5px" // Add some right padding for the colon
+            }
+        });
+    }
+
+    private configureLineNumbers(): Extension {
+        return lineNumbers({
+            formatNumber: (lineNo: number) => lineNo.toString(), // Adds a colon after each number
+            domEventHandlers: {
+                click: (view, line, event) => {
+                    // Custom click handler for line numbers
+                    console.log(`Clicked on line number ${line} in InputArea ${this.id}`);
+                    // You can add more complex logic here if needed
+                    return true;
+                }
+            }
+        });
+    }
+
+
+    public initializeCodeMirror() {
+        console.log(`Initializing CodeMirror for InputArea ${this.id}`);
+        if (this.editor) {
+            console.log(`CodeMirror already initialized for InputArea ${this.id}`);
+            return;
+        }
+
+        try {
+            const theme = DarkMode.enabled ? oneDark : [];
+
+            const myHighlightStyle = HighlightStyle.define([
+                { tag: tags.keyword, color: "#0000FF" },          // Blue for keywords
+                { tag: tags.operator, color: "#000000" },         // Black for operators
+                { tag: tags.variableName, color: "#000000" },     // Black for variable names
+                { tag: tags.function(tags.variableName), color: "#0000FF" }, // Blue for function names
+                { tag: tags.string, color: "#BA2121" },           // Dark red for strings
+                { tag: tags.number, color: "#008000" },           // Green for numbers
+                { tag: tags.comment, color: "#408080", fontStyle: "italic" }, // Cyan for comments
+                { tag: tags.className, color: "#0000FF" },        // Blue for class names
+                { tag: tags.definition(tags.variableName), color: "#00A000" }, // Green for variable definitions
+                { tag: tags.atom, color: "#008000" },             // Green for booleans and null/None
+                { tag: tags.propertyName, color: "#0000FF" },     // Blue for property names
+                { tag: tags.typeName, color: "#0000FF" },         // Blue for type names
+                { tag: tags.meta, color: "#AA22FF" },             // Purple for decorators
+            ]);
+
+            this.editor = new EditorView({
+                state: EditorState.create({
+                    doc: "",
+                    extensions: [
+                        keymap.of([...defaultKeymap, indentWithTab]),
+                        python(),
+                        syntaxHighlighting(defaultHighlightStyle),
+                        syntaxHighlighting(myHighlightStyle),
+                        lineNumbers(),
+                        this.createEditorTheme(),
+                        indentUnit.of("    "),
+                        theme,
+                        EditorView.lineWrapping,
+                        EditorView.updateListener.of(this.handleDocumentChange.bind(this)),
+                        this.customKeymap()
+                    ]
+                }),
+                parent: this.containerElement
+            });
+
+            this.editor.dom.style.height = "70px";
+
+            console.log(`CodeMirror initialized for InputArea ${this.id}`);
+        } catch (error) {
+            console.error(`Failed to initialize CodeMirror: ${error}`);
+        }
+    }
+
+    private customKeymap(): Extension {
+        return keymap.of([
+            {
+                key: "Shift-Enter",
+                run: () => {
+                    if (this.socket) {
+                        this.socket.send(this.exportCode());
+                        console.log("Sending", this.exportCode());
+                    } else {
+                        console.error("WebSocket is not available");
+                    }
+                    return true;
+                }
+            }
+        ]);
+    }
+
+    private handleDocumentChange(update: ViewUpdate) {
+        if (update.docChanged) {
+            console.log("Document changed");
+            // Add any custom logic for document changes here
+        }
     }
 
     public updateSocket(newSocket: WebSocket) {
@@ -41,177 +161,69 @@ class InputArea {
         console.log(`InputArea ${this.id} updated with new WebSocket`);
     }
 
-    getDiv() {
-        return this.div;
-    }
-
-    addLineAfter(afterLineNumber: number, text?: string): void {
-        console.log(`addLineAfter called with afterLineNumber: ${afterLineNumber}, text: ${text}`);
-        console.log(`Current state - caretY: ${this.caretY}, total_lines: ${this.total_lines}`);
-        
-        const newLineNumber = afterLineNumber + 1;
-        
-        if (newLineNumber < 0 || newLineNumber > this.total_lines) {
-            console.error(`Invalid new line number: ${newLineNumber}. Total lines: ${this.total_lines}`);
-            return;
-        }
-
-        this.total_lines += 1;
-        let line = InputAreaEditor.createLine(this.id, newLineNumber + 1, text);
-
-        try {
-            let input_area = this.div;
-
-            if (input_area.children.length === 0) {
-                input_area.appendChild(line);
-            } else if (newLineNumber === 0) {
-                input_area.insertBefore(line, input_area.firstChild);
-            } else {
-                let line_before_id = InputAreaEditor.generateLineContainerId(this.id, newLineNumber);
-                let line_before = document.getElementById(line_before_id);
-                
-                if (!line_before) {
-                    console.warn(`Line before (id: ${line_before_id}) not found. Appending to the end.`);
-                    input_area.appendChild(line);
-                } else {
-                    input_area.insertBefore(line, line_before.nextSibling);
-                }
-            }
-
-            // Update line numbers for all lines
-            this.updateLineNumbers();
-
-            this.caretY = newLineNumber;
-            this.caretX = 0;
-
-            // Ensure the grid is updated
-            if (!this.grid[this.caretY]) {
-                this.grid[this.caretY] = text ? text.split('') : [];
-            }
-
-            console.log(`Line added. New total_lines: ${this.total_lines}, New caretY: ${this.caretY}`);
-        } catch (error) {
-            console.error(`Error in addLineAfter: ${error.message}`);
-            console.error(`Stack trace: ${error.stack}`);
-        }
-    }
-
-    updateLineNumbers(): void {
-        let input_area = document.getElementById(this.id);
-        if (!input_area) return;
-
-        let lines = input_area.children;
-        for (let i = 0; i < lines.length; i++) {
-            let line_number_div = lines[i].querySelector('div');
-            if (line_number_div) {
-                line_number_div.textContent = (i + 1) + '.';
-            }
-        }
-    }
-
-    removeLine(caretY: number) {
-        let line_number = caretY + 1;
-        delete this.grid[line_number];
-
-        let line_container_id = InputAreaEditor.generateLineContainerId(this.id, line_number);
-        removeElement(line_container_id);
-        this.decreaseHeight();
-
-        if (this.caretY !== 0) {
-            let prev_code_area = this.getCodeAreaByLine(line_number - 1);
-            InputAreaEditor.moveCaretToIndexOfCodeArea(prev_code_area, prev_code_area.textContent.length);    
-            this.caretY -= 1;  
-            this.caretX = this.grid[this.caretY] ? this.grid[this.caretY].length - 1 : 0; 
-        }
-
-        this.total_lines -= 1;
-        this.updateLineNumbers();
-    }
-
-    addEventListeners(div: HTMLElement): HTMLElement {
-        div.addEventListener("keydown", this.handleInput.bind(this));
-        div.addEventListener("click", this.handleClick.bind(this));
-        return div;
-    }
-
-    getCodeAreaByLine(line_number: number): HTMLElement | null {
-        let code_area_id = InputAreaEditor.getCodeAreaId(this.id, line_number);
-        return document.getElementById(code_area_id);
-    }
-
-    addToGrid(char: string) {
-        if (!this.grid[this.caretY]) {
-            this.grid[this.caretY] = [];
-        }
-        this.grid[this.caretY][this.caretX] = char;
-        this.renderLine(this.caretY + 1);
-    }
-
-    removeCharFromLine(): void {
-        let line = this.grid[this.caretY];
-        if (line) {
-            let before_char = line.slice(0, this.caretX);
-            let after_char = line.slice(this.caretX + 1);
-            this.grid[this.caretY] = before_char.concat(after_char);
-            this.renderLine(this.caretY + 1);
-            let code_area = this.getCodeAreaByLine(this.caretY + 1);
-            InputAreaEditor.moveCaretToIndexOfCodeArea(code_area, this.caretX - 1);
-            this.caretX = Math.max(0, this.caretX - 1);
-        }
+    getDiv(): HTMLElement {
+        return this.containerElement;
     }
 
     addString(str: string, numOfTimes: number) {
-        let code_area = this.getCodeAreaByLine(this.caretY + 1);
-
-        for (let i = 0; i < numOfTimes; i++) {
-            for (let j = 0; j < str.length; j++) {
-                this.caretX += 1;
-                this.addToGrid(str[j]);
-            }
+        if (!this.editor) {
+            console.error(`Cannot add string: Editor not initialized for InputArea ${this.id}`);
+            return;
         }
-        InputAreaEditor.moveCaretToIndexOfCodeArea(code_area, this.caretX);
+        const insertion = str.repeat(numOfTimes);
+        const currentPos = this.editor.state.selection.main.head;
+        this.editor.dispatch({
+            changes: {from: currentPos, insert: insertion},
+            selection: {anchor: currentPos + insertion.length}
+        });
     }
 
-    renderLine(line_number: number) {
-        let code_area = this.getCodeAreaByLine(line_number);
-        if (code_area) {
-            let code_area_text = this.grid[line_number - 1]?.join('') || '';
-            code_area.textContent = code_area_text;
+    exportCode(): string {
+        if (!this.editor) {
+            console.error(`Cannot export code: Editor not initialized for InputArea ${this.id}`);
+            return "";
+        }
+        return this.editor.state.doc.toString();
+    }
+
+    removeLine(caretY: number) {
+        if (!this.editor) {
+            console.error(`Cannot remove line: Editor not initialized for InputArea ${this.id}`);
+            return;
+        }
+        const doc = this.editor.state.doc;
+        const line = doc.line(caretY + 1);
+        this.editor.dispatch({
+            changes: {from: line.from, to: line.to + 1}
+        });
+    }
+
+    removeCharFromLine() {
+        if (!this.editor) {
+            console.error(`Cannot remove char: Editor not initialized for InputArea ${this.id}`);
+            return;
+        }
+        const currentPos = this.editor.state.selection.main.head;
+        if (currentPos > 0) {
+            this.editor.dispatch({
+                changes: {from: currentPos - 1, to: currentPos}
+            });
         }
     }
 
-    removeDefaultBr() {
-        let br = document.querySelector('br');
-        br?.remove();
-    }
-
-    increaseHeight() {
-        InputAreaEditor.increaseCodeCellHeight(this.div);
-    }
-
-    decreaseHeight() {
-        InputAreaEditor.decreaseCodeCellHeight(this.div);
-    }
-
-    handleClick(e) {
-        let first_line_code_area = this.getCodeAreaByLine(this.caretY + 1);
-        if (first_line_code_area && first_line_code_area.textContent.length > 0) {
-            return true;
+    handleClick(e: MouseEvent) {
+        if (!this.editor) {
+            console.error(`Cannot handle click: Editor not initialized for InputArea ${this.id}`);
+            return;
         }
-        console.log(e.clientX, e.clientY, first_line_code_area?.getBoundingClientRect());
-
-        if (first_line_code_area) {
-            InputAreaEditor.moveCaretToEndOfCodeArea(first_line_code_area);
-        } else {
-            // TODO implement logic to handle click on earlier line in code area
-        }
+        // CodeMirror handles clicks internally, so we don't need to do anything here
+        console.log("Click handled by CodeMirror");
     }
 
-    handleInput(e: KeyboardEvent): void {
-        console.log("INPUT", e.code, e.key, e.shiftKey, e.ctrlKey, e.altKey);
-                        
+    handleInput(e: KeyboardEvent) {
+        // Most keyboard input is handled by CodeMirror internally
+        // We only need to handle special cases here
         if (e.shiftKey && e.key === 'Enter') {
-            console.log("Input received");
             e.preventDefault();
             e.stopPropagation();
             if (this.socket) {
@@ -220,68 +232,6 @@ class InputArea {
             } else {
                 console.error("WebSocket is not available");
             }
-            return;
-        }
-    
-        else if (e.code === "Enter") {
-            InputAreaKeyDown.Enter(e, this);
-        }
-        else if (e.key === "F1") {
-            InputAreaKeyDown.F1(e, this);
-        }
-        else if (e.shiftKey && e.code === "Tab") {
-            InputAreaKeyDown.ShiftTab(e, this);
-        }
-        else if (e.code === "Tab") {
-            InputAreaKeyDown.Tab(e, this);
-        }
-        else if (e.code === "Backspace" || e.code === "Delete") {
-            InputAreaKeyDown.Backspace(e, this);
-        } 
-        else if (e.code === "Space") {
-            InputAreaKeyDown.Space(e, this);
-        }
-        else if (e.metaKey || e.ctrlKey) {
-            InputAreaKeyDown.Ctrl(e, this);
-        }
-        else if (e.shiftKey) {
-            if (InputAreaEditor.isAlphaNumericChar(e.key) || InputAreaEditor.isSpecialChar(e.key)) { 
-                InputAreaKeyDown.AlphaNumericSpecial(e, this);
-            }
-        }
-        else {
-            console.log("Not caught code:", e.code, " key " , e.key);
-            
-            e.preventDefault();
-            e.stopPropagation();
-            this.caretX += 1;
-            this.addToGrid(e.key);
-            let curr_code_area = this.getCodeAreaByLine(this.caretY + 1);
-            if (curr_code_area) {
-                InputAreaEditor.moveCaretToIndexOfCodeArea(curr_code_area, this.caretX);
-            }
         }
     }
-
-    exportCode(): string {
-        console.log("Exporting code, current grid:", this.grid);
-        let out = "";
-        const gridKeys = Object.keys(this.grid).map(Number).sort((a, b) => a - b);
-        for (let i of gridKeys) {
-            if (this.grid[i] && Array.isArray(this.grid[i])) {
-                out += this.grid[i].join('') + "\n";
-            } else {
-                out += "\n";
-            }
-        }
-        console.log("Exported code:", out);
-        return out;
-    }
 }
-
-function removeElement(id: string) {
-    var elem = document.getElementById(id);
-    return elem?.parentNode?.removeChild(elem);
-}
-
-export { InputArea };
