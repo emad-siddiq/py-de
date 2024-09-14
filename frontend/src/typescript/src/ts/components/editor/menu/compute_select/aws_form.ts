@@ -1,15 +1,16 @@
 import { ObjectManager } from "../../../../managers/object_manager";
-
+import '@material/web/textfield/filled-text-field';
+import '@material/web/textfield/outlined-text-field';
+import '@material/web/button/filled-button';
+import '@material/web/icon/icon';
 
 const localWebSocketURL = `http://localhost:8080/ws`; //TODO: Change this to be a websocket
 const deploySocket = 'deploySocket';
 
-
-
 class AWSForm {
     private form: HTMLFormElement;
     private overlay: HTMLDivElement;
-    private submitButton: HTMLButtonElement | null;
+    private submitButton: HTMLElement | null;
     private errorMessage: HTMLDivElement | null;
     private inProgressCircle: HTMLDivElement | null;
     private userInitiatedSubmit: boolean;
@@ -18,7 +19,7 @@ class AWSForm {
         this.userInitiatedSubmit = false;
         this.form = this.createForm();
         this.overlay = this.createOverlay();
-        this.submitButton = this.form.querySelector("button[type='submit']");
+        this.submitButton = this.form.querySelector("md-filled-button");
         this.errorMessage = document.createElement('div');
         this.inProgressCircle = document.createElement('div');
 
@@ -41,110 +42,48 @@ class AWSForm {
         form.style.transform = "translate(-50%, -50%)";
         form.style.backgroundColor = "#fff";
         form.style.padding = "20px";
-        form.style.border = "1px solid #ccc";
-        form.style.boxShadow = "0px 4px 10px rgba(0, 0, 0, 0.2)";
         form.style.borderRadius = "8px";
         form.style.zIndex = "1001";
         form.style.visibility = 'hidden';
         form.style.opacity = '0';
         form.style.transition = 'visibility 0.3s, opacity 0.3s';
-        form.style.fontFamily = "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace";
+        form.style.fontFamily = "Roboto, sans-serif";
         form.style.fontSize = "16px";
+        form.style.width = "300px";
 
         const title = document.createElement("h2");
         title.textContent = "Connect to AWS";
-        title.style.margin = "0 0 10px 0";
-        title.style.fontSize = "20px";
+        title.style.margin = "0 0 20px 0";
+        title.style.fontSize = "24px";
         title.style.color = "#333";
 
-        const accessKeyInput = document.createElement("input");
-        accessKeyInput.type = "text";
-        accessKeyInput.name = "accessKeyID";
-        accessKeyInput.placeholder = "Access Key ID";
-        accessKeyInput.required = true;
-        accessKeyInput.style.width = "100%";
-        accessKeyInput.style.marginBottom = "10px";
-        accessKeyInput.style.padding = "8px";
-        accessKeyInput.style.border = "1px solid #ccc";
-        accessKeyInput.style.borderRadius = "4px";
+        const createTextField = (name: string, label: string, type: string = "text") => {
+            const field = document.createElement("md-outlined-text-field") as HTMLElement & {
+                label: string;
+                type: string;
+                name: string;
+            };
+            field.label = label;
+            field.type = type;
+            field.name = name;
+            field.style.width = "100%";
+            field.style.marginBottom = "16px";
+            return field;
+        };
 
-        const secretKeyInput = document.createElement("input");
-        secretKeyInput.type = "password";
-        secretKeyInput.name = "secretAccessKey";
-        secretKeyInput.placeholder = "Secret Access Key";
-        secretKeyInput.required = true;
-        secretKeyInput.style.width = "100%";
-        secretKeyInput.style.marginBottom = "10px";
-        secretKeyInput.style.padding = "8px";
-        secretKeyInput.style.border = "1px solid #ccc";
-        secretKeyInput.style.borderRadius = "4px";
+        const accessKeyInput = createTextField("accessKeyID", "Access Key ID");
+        const secretKeyInput = createTextField("secretAccessKey", "Secret Access Key", "password");
+        const instanceIdInput = createTextField("instanceID", "Instance ID");
+        const regionInput = createTextField("region", "AWS Region");
+        const sshUserInput = createTextField("sshUser", "SSH User");
+        const sshKeyPathInput = createTextField("sshKeyPath", "SSH Key Path");
 
-        const instanceIdInput = document.createElement("input");
-        instanceIdInput.type = "text";
-        instanceIdInput.name = "instanceID";
-        instanceIdInput.placeholder = "Instance ID";
-        instanceIdInput.required = true;
-        instanceIdInput.style.width = "100%";
-        instanceIdInput.style.marginBottom = "10px";
-        instanceIdInput.style.padding = "8px";
-        instanceIdInput.style.border = "1px solid #ccc";
-        instanceIdInput.style.borderRadius = "4px";
-
-        const regionInput = document.createElement("input");
-        regionInput.type = "text";
-        regionInput.name = "region";
-        regionInput.placeholder = "AWS Region";
-        regionInput.required = true;
-        regionInput.style.width = "100%";
-        regionInput.style.marginBottom = "10px";
-        regionInput.style.padding = "8px";
-        regionInput.style.border = "1px solid #ccc";
-        regionInput.style.borderRadius = "4px";
-
-        const sshUserInput = document.createElement("input");
-        sshUserInput.type = "text";
-        sshUserInput.name = "sshUser";
-        sshUserInput.placeholder = "SSH User";
-        sshUserInput.style.width = "100%";
-        sshUserInput.style.marginBottom = "10px";
-        sshUserInput.style.padding = "8px";
-        sshUserInput.style.border = "1px solid #ccc";
-        sshUserInput.style.borderRadius = "4px";
-
-        const sshKeyPathInput = document.createElement("input");
-        sshKeyPathInput.type = "text";
-        sshKeyPathInput.name = "sshKeyPath";
-        sshKeyPathInput.placeholder = "SSH Key Path";
-        sshKeyPathInput.style.width = "100%";
-        sshKeyPathInput.style.marginBottom = "10px";
-        sshKeyPathInput.style.padding = "8px";
-        sshKeyPathInput.style.border = "1px solid #ccc";
-        sshKeyPathInput.style.borderRadius = "4px";
-
-        const submitButton = document.createElement("button");
-        submitButton.type = "submit";
+        const submitButton = document.createElement("md-filled-button") as HTMLElement & {
+            type: string;
+        };
         submitButton.textContent = "Submit";
-        submitButton.style.backgroundColor = "#007bff";
-        submitButton.style.color = "#fff";
-        submitButton.style.border = "none";
-        submitButton.style.padding = "10px 20px";
-        submitButton.style.borderRadius = "4px";
-        submitButton.style.cursor = "pointer";
-        submitButton.style.fontSize = "16px";
-        submitButton.style.transition = "background-color 0.3s";
-
-        submitButton.addEventListener("mouseover", () => {
-            submitButton.style.backgroundColor = "#0056b3";
-        });
-
-        submitButton.addEventListener("mouseout", () => {
-            submitButton.style.backgroundColor = "#007bff";
-        });
-
-        // Track user-initiated clicks on the submit button
-        submitButton.addEventListener("pointerdown", () => {
-            this.userInitiatedSubmit = true;
-        });
+        submitButton.type = "submit";
+        submitButton.style.width = "100%";
 
         form.appendChild(title);
         form.appendChild(accessKeyInput);
@@ -200,12 +139,6 @@ class AWSForm {
     private handleSubmit(event: Event): void {
         event.preventDefault();
 
-        // Only proceed if the submit was user-initiated
-        if (!this.userInitiatedSubmit) {
-            console.log('Form submission blocked because it was not user-initiated.');
-            return;
-        }
-
         if (this.inProgressCircle) {
             this.inProgressCircle.style.display = 'block';
         }
@@ -231,7 +164,7 @@ class AWSForm {
             if (data.success) {
                 this.showSuccessBanner();
                 this.hide();
-                this.updateWebSocketConnections(data.wsBaseURL); // Updated field name
+                this.updateWebSocketConnections(data.wsBaseURL);
             } else {
                 this.showError(data.errorMessage || 'An error occurred');
             }
@@ -241,7 +174,6 @@ class AWSForm {
             this.showError('Failed to connect to the backend');
         })
         .finally(() => {
-            this.userInitiatedSubmit = false; // Reset the flag after submission
             if (this.inProgressCircle) {
                 this.inProgressCircle.style.display = 'none';
             }
@@ -262,8 +194,6 @@ class AWSForm {
     private updateWebSocketConnections(wsBaseURL: string) {
         const objectManager = ObjectManager.getInstance();
         console.log("Updating WebSocket connections with:", wsBaseURL);
-
-        // Update WebSocket connections with the new IP
         objectManager.updateWebSocketConnections(wsBaseURL);
     }
 
