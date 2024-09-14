@@ -1,92 +1,68 @@
-// Bar in top left of the screen for basic actions like add cell, remove cell
-
+import { MdFilledButton } from '@material/web/button/filled-button.js';
 import { ObjectManager } from "../../../managers/object_manager";
 import { Editor } from "../../../windows/editor/editor";
-import { CodeCell } from "../code_cell/ts/views/code_cell";
-import { createIconLabel, createImgDiv } from "./utility";
 
 class AddCodeCellButton {
-
     id: string;
-    div: HTMLElement;
+    button: MdFilledButton;
     objectManager: ObjectManager;
 
     constructor(objectManager: ObjectManager) {
         this.objectManager = objectManager;
         this.id = "add-code-cell";
-        this.div = this.createDiv();
+        this.button = this.createButton();
         objectManager.associate(this.id, this);
         this.addEventListeners();
-        document.body.appendChild(this.div);        // Add Code Cell + button to top hovering menu
-
+        document.body.appendChild(this.button);
     }
 
-    createDiv():HTMLElement {
-        // Create div node
-        let div = document.createElement("div");
-        div.setAttribute("id", this.id);
-        div.setAttribute("class", this.id);
-        div.style.boxSizing = "border-box";
-
-        // Set location in browser window
-        div.style.position = "sticky";
-        //div position from top-left term corner in terms of view-width and view-height
-        div.style.top = "1.5vh";
-        div.style.left = "85vw";
-        div.style.zIndex = "1000";
-
-        //div size
-        div.style.width = "5vw";
-        div.style.height = "3.5vh";
-
-        //temp styling
-        div.style.borderRadius = "10%";
-        div.style.backgroundColor = "white";
-        div.style.boxShadow = "0px 2px 15px 0px rgba(0, 0, 0, .2)";
-
-        div.style.display = "flex";
-
-        //Add child nodes
-        div.appendChild(this.addCodeCellButton());
-
-        //Return div with styling set
-        div.style.justifyContent = "start";
-        div.style.alignItems = "center";
-        return div;
+    createButton(): MdFilledButton {
+        const button = new MdFilledButton();
+        button.id = this.id;
         
+        // Create a container for icon and text
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.alignItems = 'center';
+        container.style.justifyContent = 'center';
+        container.style.width = '100%';
+
+        // Create icon and text elements
+        const icon = document.createElement('span');
+        icon.textContent = '+';
+        icon.style.fontSize = '35px';
+        icon.style.marginRight = '6px';
+        icon.style.lineHeight = '1';
+
+        const text = document.createElement('span');
+        text.textContent = 'Code';
+        text.style.fontSize = '18px';
+
+        // Append icon and text to the container
+        container.appendChild(icon);
+        container.appendChild(text);
+
+        // Append the container to the button
+        button.appendChild(container);
+        
+        // Styling
+        button.style.position = 'fixed';
+        button.style.top = '1.5vh';
+        button.style.right = '15vw';
+        button.style.zIndex = '1000';
+        button.style.height = '32px';
+        button.style.minWidth = 'auto';
+        button.style.padding = '0 12px';
+        
+        return button;
     }
 
     addEventListeners() {
-        this.div.addEventListener('click', () => {
-            let _editor = this.objectManager.getObject("editor") as Editor;
-            _editor.addCodeCell();
-        })
-            
+        this.button.addEventListener('click', () => {
+            const editor = this.objectManager.getObject("editor") as Editor;
+            editor.addCodeCell();
+        });
     }
-
-
-    addCodeCell() {
-        document.getElementById("editor");
-    }
-    
-
-    addCodeCellButton(): HTMLElement {
-        let div = document.createElement("div");
-
-        div.appendChild(createImgDiv("add-code-cell-icon", "./../img/svg/plus.svg"));
-        div.appendChild(createIconLabel("code-cell-label", "Code"));
-
-        div.style.display = "flex";
-        div.style.fontSize = "18px";
-        div.style.justifyContent = "center";
-        div.style.alignItems = "center";
-        div.style.width = "5vw";
-
-        return div;
-    }
-
-
-
 }
 
-export {AddCodeCellButton}
+export { AddCodeCellButton }
