@@ -103,7 +103,12 @@ export class Editor {
         //       Modify editor so that it keeps track of current active code or text cell
         this.text_cell_counter += 1;
         let text_cell = new TextCell(this.text_cell_counter);
-        document.getElementById("editor").appendChild(text_cell.getDiv());
+
+        DOM.addElementAfter("editor", text_cell.getDiv(), this.active_cell_type + "-" + this.active_cell_number.toString());
+        
+       
+        this.updateActiveCell("text-cell", this.text_cell_counter);
+
     }
 
     /*
