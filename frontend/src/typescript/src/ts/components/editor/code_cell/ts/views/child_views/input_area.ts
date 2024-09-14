@@ -28,6 +28,7 @@ export class InputArea {
         this.containerElement.style.width = '100%';
         this.containerElement.style.minHeight = '70px';
         this.containerElement.style.height = 'auto';
+        this.containerElement.style.marginTop = '20px';
 
         ObjectManager.getInstance().subscribeToSocket("codeSocket", this.updateSocket.bind(this));
     }
@@ -40,7 +41,7 @@ export class InputArea {
             },
             ".cm-content": {
                 fontFamily: "monospace",
-                padding: "15px 0"
+                padding: "15px 10px"
             },
             ".cm-line": {
                 padding: "0 5px"
@@ -113,10 +114,14 @@ export class InputArea {
                         indentUnit.of("    "),
                         theme,
                         EditorView.lineWrapping,
-                        EditorView.updateListener.of(this.handleDocumentChange.bind(this)),
+                        EditorView.updateListener.of((update) => {
+                            if (update.docChanged || update.viewportChanged) {
+                                this.updateContainerHeight();
+                            }
+                        }),
                         this.customKeymap(),
                         EditorView.theme({
-                            "&": { minHeight: "70px" }
+                            "&": { height: "100%" }
                         })
                     ]
                 }),
@@ -148,16 +153,9 @@ export class InputArea {
         ]);
     }
 
-    private handleDocumentChange(update: ViewUpdate) {
-        if (update.docChanged) {
-            console.log("Document changed");
-            this.updateContainerHeight();
-        }
-    }
-
     private updateContainerHeight() {
         if (this.editor) {
-            const height = this.editor.contentHeight;
+            const height = Math.max(this.editor.contentHeight, 70);
             console.log(`Updating container height to ${height}px`);
             this.containerElement.style.height = `${height}px`;
             this.updateParentHeight(height);
@@ -167,8 +165,8 @@ export class InputArea {
     private updateParentHeight(height: number) {
         const parentCodeCell = ObjectManager.getInstance().getObject(`code-cell-${this.cc_id}`);
         if (parentCodeCell && parentCodeCell.updateHeight) {
-            console.log(`Updating parent CodeCell height to ${height}px`);
-            parentCodeCell.updateHeight(height);
+            console.log(`Updating parent CodeCell height to ${height + 20}px`);
+            parentCodeCell.updateHeight(height + 20);
         } else {
             console.error(`Failed to update parent CodeCell height`);
         }
