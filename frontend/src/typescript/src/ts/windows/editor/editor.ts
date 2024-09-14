@@ -81,7 +81,9 @@ export class Editor {
         div.style.top = "0%";
         div.style.left = "0%";
         div.style.backgroundColor = "white";
-        div.style.width = "100%";
+        div.style.width = "auto";
+        div.style.minWidth = "97.75vw";
+
         div.style.height = "auto";
         div.style.boxSizing = "border-box";
         div.style.display = "flex";

@@ -24,7 +24,7 @@ class CodeCellNumber {
         //code_cell_number.style.position = "relative";
         code_cell_number.style.zIndex = "5";
         code_cell_number.style.boxSizing = "border-box";
-        code_cell_number.style.marginTop = "20px";
+        code_cell_number.style.marginTop = "30px";
         code_cell_number.style.paddingRight = "5px";
         code_cell_number.style.fontFamily = "ui-monospace,SFMono-Regular,\"SF Mono\",Menlo,Consolas,\"Liberation Mono\",monospace";
     

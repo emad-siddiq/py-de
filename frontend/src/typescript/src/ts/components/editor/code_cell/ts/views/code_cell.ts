@@ -59,7 +59,9 @@ export class CodeCell {
         this.div.style.minHeight = "70px";
         this.div.style.height = "auto";
         this.div.style.boxSizing = "border-box";
-        this.div.style.marginLeft = "5px";
+        this.div.style.marginLeft = "1vw";
+        this.div.style.paddingLeft = "5px";
+
         this.div.style.marginTop = "10px";
 
         this.div.style.display = "flex";
