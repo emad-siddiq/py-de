@@ -8,6 +8,7 @@ import { ObjectManager } from "./managers/object_manager";
 import { Chat } from "./components/gpt/chat";
 import { WebSocketCodeCell } from "./components/ws_client/ws_code_cell";
 import { WebSocketChatGPT } from "./components/ws_client/ws_chatgpt";
+import 'xterm/css/xterm.css';
 
 // Instantiate the ObjectManager
 // An object manager helps us avoid passing around classes
