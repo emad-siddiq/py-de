@@ -47,12 +47,17 @@ class AddCodeCellButton {
         
         // Styling
         button.style.position = 'fixed';
-        button.style.top = '1.5vh';
-        button.style.right = '15vw';
+        button.style.top = '1vh';
+        button.style.right = '10vw';
         button.style.zIndex = '1000';
-        button.style.height = '32px';
+        button.style.height = '28px';
         button.style.minWidth = 'auto';
         button.style.padding = '0 12px';
+
+         // Set custom color
+         button.style.setProperty('--md-sys-color-primary', '#CE93D8');
+         button.style.setProperty('--md-sys-color-on-primary', '#FFFFFF'); // Set text color to black for better contrast
+ 
         
         return button;
     }
