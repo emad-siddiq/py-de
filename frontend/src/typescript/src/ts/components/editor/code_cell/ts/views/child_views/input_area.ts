@@ -26,9 +26,12 @@ export class InputArea {
         this.containerElement = document.createElement('div');
         this.containerElement.id = this.id;
         this.containerElement.style.width = '100%';
-        this.containerElement.style.minHeight = '70px';
+        this.containerElement.style.minHeight = '60px';
         this.containerElement.style.height = 'auto';
-        this.containerElement.style.marginTop = '20px';
+
+        this.containerElement.style.marginTop = '10px';
+        this.containerElement.style.marginBottom = '50px';
+
 
         ObjectManager.getInstance().subscribeToSocket("codeSocket", this.updateSocket.bind(this));
     }
@@ -41,7 +44,7 @@ export class InputArea {
             },
             ".cm-content": {
                 fontFamily: "monospace",
-                padding: "15px 10px"
+                padding: "15px 0px"
             },
             ".cm-line": {
                 padding: "0 5px"
@@ -59,6 +62,13 @@ export class InputArea {
                 alignItems: "center",
                 height: "1.4em",
                 padding: "0 2px 0 5px"
+            },
+            "&.cm-focused": {
+                outline: "2px solid #0a84ff", // Mozilla blue color
+                outlineOffset: "1px"
+            },
+            "&:not(.cm-focused) .cm-selectionBackground": {
+                backgroundColor: "#d9d9d9"
             }
         });
     }
