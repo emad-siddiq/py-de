@@ -56,7 +56,7 @@ export class CodeCell {
         this.div.setAttribute("class", this.instance_id);
 
         this.div.style.width = "100%";
-        this.div.style.minHeight = "70px";
+        this.div.style.minHeight = "50px";
         this.div.style.height = "auto";
         this.div.style.boxSizing = "border-box";
         this.div.style.marginLeft = "1vw";
@@ -81,16 +81,16 @@ export class CodeCell {
         if (DarkMode.enabled) {
             this.div.style.backgroundColor = "rgb(10, 15, 22)";
             this.div.style.color = "#FCF5F5";
-            this.div.style.boxShadow = "0px 5px 15px 5px rgba(20, 255, 60, 0.2)";
+            this.div.style.boxShadow = "0px 5px 15px 5px #bbdefb";
         } else {
             this.div.style.backgroundColor = "white";
             this.div.style.color = "black";
-            this.div.style.boxShadow = "0px 2px 15px 0px rgba(0, 0, 0, 0.1)";
+            this.div.style.boxShadow = "0px 2px 15px 0px #bbdefb";
         }
     }
 
     clickHandler() {
-        this.div.style.boxShadow = "0px 5px 15px 5px rgba(20, 255, 60, .2)";
+        //this.div.style.boxShadow = "0px 2px 2px 2px #64b5f6";
         ObjectManager.getInstance().getObject("editor").updateActiveCell("code-cell", this.code_cell_id);
     }
 

@@ -1,5 +1,6 @@
 import { Terminal as XtermTerminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
+import { ObjectManager } from '../managers/object_manager';
 import 'xterm/css/xterm.css';
 
 export class Terminal {
@@ -9,6 +10,8 @@ export class Terminal {
     private isOpen: boolean = false;
     private currentLine: string = '';
     private cursorPosition: number = 0;
+    private objectManager: ObjectManager;
+    private socket: WebSocket | null;
 
     constructor() {
         this.div = this.createTerminalDiv();
@@ -24,19 +27,28 @@ export class Terminal {
             rows: 24,
             cols: 80,
             convertEol: true,
-            disableStdin: true,
+            disableStdin: false,
             letterSpacing: 0,
             lineHeight: 1,
         });
         this.fitAddon = new FitAddon();
         this.xterm.loadAddon(this.fitAddon);
+        this.objectManager = ObjectManager.getInstance();
+        this.socket = null;
         
         document.addEventListener("keydown", this.toggleBinding.bind(this));
         window.addEventListener('resize', this.handleResize.bind(this));
 
         this.addGlobalStyles();
+        this.objectManager.associate('terminal', this);
+        this.objectManager.subscribeToSocket("codeSocket", this.updateSocket.bind(this));
 
         console.log('Xterm.js version:', XtermTerminal.toString());
+    }
+
+    private updateSocket(newSocket: WebSocket) {
+        this.socket = newSocket;
+        console.log(`Terminal updated with new WebSocket`);
     }
 
     private createTerminalDiv(): HTMLElement {
@@ -52,7 +64,7 @@ export class Terminal {
         div.style.backgroundColor = "#000000";
         div.style.overflow = "hidden";
         div.style.boxSizing = "border-box";
-        div.style.borderTop = "1px solid #555"; // Added top gray border
+        div.style.borderTop = "1px solid #555";
         div.style.padding = "5px";
         return div;
     }
@@ -102,11 +114,7 @@ export class Terminal {
     }
 
     private initializeTerminal(): void {
-        this.xterm.write('\x1b[?25l'); // Hide cursor
-        this.xterm.write('\x1b[1S');   // Scroll up one line
-        this.xterm.write('\x1b[1A');   // Move cursor up one line
         this.xterm.writeln('Welcome to the terminal! Type "clear" to clear the screen.');
-        this.xterm.write('\x1b[?25h'); // Show cursor
         this.promptUser();
 
         this.xterm.onKey(({ key, domEvent }) => {
@@ -149,16 +157,32 @@ export class Terminal {
             if (this.currentLine.trim().toLowerCase() === 'clear') {
                 this.clearTerminal();
             } else {
-                this.xterm.writeln(`Echo: ${this.currentLine}`);
+                this.sendCommand(this.currentLine.trim());
             }
-            console.log('Command entered:', this.currentLine);
         }
         this.promptUser();
+    }
+
+    private sendCommand(command: string): void {
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+            const message = JSON.stringify({ type: 'shell', content: command });
+            this.socket.send(message);
+            console.log('Sent command:', command);
+        } else {
+            console.warn('WebSocket is not open. Cannot send command.');
+            this.xterm.writeln('Error: WebSocket is not connected.');
+        }
+    }
+
+    public write(content: string): void {
+        this.xterm.writeln(content);
+        this.promptUser();  // Show the prompt after writing output
     }
 
     private clearTerminal(): void {
         this.xterm.clear();
         this.xterm.reset();
+        this.initializeTerminal();
     }
 
     private handleResize(): void {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
 // CORS Middleware
@@ -26,6 +27,14 @@ func corsMiddleware(next http.Handler) http.Handler {
 }
 
 func main() {
+	// Set up file logging
+	logFile, err := os.OpenFile("server.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("Failed to open log file: %v", err)
+	}
+	defer logFile.Close()
+
+	log.SetOutput(logFile)
 	// Create a new ServeMux
 	mux := http.NewServeMux()
 

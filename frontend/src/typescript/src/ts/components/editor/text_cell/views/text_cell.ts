@@ -1,82 +1,154 @@
 import { marked } from 'marked';
 import { ObjectManager } from './../../../../managers/object_manager';
+import { DarkMode } from './../../../../themes/darkmode/darkmode';
 
-class TextCell {
-    socket: WebSocket;
-    text_cell_id: number;
-    input_area_id: string;
-    instance_id: string;
-    div: HTMLElement;
-    textareaElement: HTMLTextAreaElement;
+class TextInput {
+    private textarea: HTMLTextAreaElement;
 
-    constructor(id: number) {
-        this.text_cell_id = id;
-        this.instance_id = "text-cell-" + this.text_cell_id.toString();
-        this.input_area_id = this.instance_id + "-input-area";
+    constructor(private parentElement: HTMLElement, private cellId: number) {
+        this.textarea = document.createElement('textarea');
+        this.textarea.style.width = '100%';
+        this.textarea.style.border = 'none';
+        this.textarea.style.outline = 'none';
+        this.textarea.style.resize = 'none';
+        this.textarea.style.overflow = 'hidden';
+        this.textarea.style.backgroundColor = 'transparent';
+        this.textarea.style.color = 'inherit';
+        this.textarea.style.fontFamily = 'inherit';
+        this.textarea.style.fontSize = 'inherit';
+        this.textarea.style.lineHeight = '1.5';
+        this.textarea.placeholder = 'Enter your text here...';
 
-        this.div = this.createTextCellDiv();
-        this.addEventListeners(this.div);
+        this.parentElement.appendChild(this.textarea);
+
+        this.addEventListeners();
     }
 
-    getDiv(): HTMLElement {
-        return this.div;
+    private addEventListeners(): void {
+        this.textarea.addEventListener('input', this.autoResize.bind(this));
+        this.textarea.addEventListener('keydown', this.handleKeyDown.bind(this));
     }
 
-    addEventListeners(div: HTMLElement): void {
-        div.addEventListener("keydown", this.saveOnShiftEnter.bind(this));
-        div.addEventListener("click", this.clickHandler.bind(this));
+    private autoResize(): void {
+        this.textarea.style.height = 'auto';
+        this.textarea.style.height = this.textarea.scrollHeight + 'px';
+        this.updateCellHeight();
     }
 
-    clickHandler() {
-        ObjectManager.getInstance().getObject("editor").updateActiveCell("text-cell", this.text_cell_id);
-    }
-
-    createTextCellDiv(): HTMLElement {
-        let text_cell = document.createElement("div");
-        text_cell.setAttribute("id", this.instance_id);
-        text_cell.setAttribute("class", this.instance_id);
-      
-        text_cell.style.width = "100%"; // Changed to 100%
-        text_cell.style.minHeight = "60px"; // Changed height to minHeight
-        text_cell.style.boxSizing = "border-box";
-        text_cell.style.boxShadow = "0px 5px 15px 5px rgba(20, 255, 60, 0.2)";
-
-        this.textareaElement = document.createElement('textarea');
-        this.textareaElement.style.width = '100%';
-        this.textareaElement.style.minHeight = '60px'; // Changed height to minHeight
-        this.textareaElement.style.boxSizing = 'border-box';
-        this.textareaElement.style.padding = '10px'; // Added padding instead of text-indent
-        this.textareaElement.style.resize = 'none'; // Changed to vertical to allow vertical resizing
-        this.textareaElement.style.overflowY = 'hidden';
-        this.textareaElement.placeholder = 'Enter your text here...';
-
-        const autoResize = () => {
-            this.textareaElement.style.height = 'auto';
-            this.textareaElement.style.height = Math.max(60, this.textareaElement.scrollHeight) + 'px';
-            text_cell.style.height = this.textareaElement.style.height;
-        };
-    
-        this.textareaElement.addEventListener('input', autoResize);
-        text_cell.appendChild(this.textareaElement);
-
-        return text_cell;
-    }
-
-    async saveOnShiftEnter(e: KeyboardEvent): Promise<void> {
-        if (e.shiftKey && e.key === 'Enter') {
-            e.preventDefault(); // Prevent the default newline behavior
-            const markdownContent = this.textareaElement.value;
-            const renderedHTML = await this.convertMarkdownToHTML(markdownContent); // Wait for the promise to resolve
-            this.div.innerHTML = renderedHTML; // Replace the div content with the rendered HTML
-            //this.socket.send(renderedHTML);
+    private updateCellHeight(): void {
+        const cell = ObjectManager.getInstance().getObject(`text-cell-${this.cellId}`) as TextCell;
+        if (cell) {
+            cell.updateHeight(this.textarea.scrollHeight);
         }
     }
 
-    convertMarkdownToHTML(markdown: string): string {
-        // Using marked.js to convert markdown to HTML
-        const html = marked(markdown);
-        return `<div style="background-color: #F0F0F0; padding: 10px; border-radius: 5px; width: 100%; box-sizing: border-box;">${html}</div>`;
+    private handleKeyDown(e: KeyboardEvent): void {
+        if (e.key === 'Enter' || e.key === 'Backspace' || e.key === 'Delete') {
+            setTimeout(() => this.autoResize(), 0);
+        }
+    }
+
+    public getValue(): string {
+        return this.textarea.value;
+    }
+
+    public setValue(value: string): void {
+        this.textarea.value = value;
+        this.autoResize();
+    }
+
+    public focus(): void {
+        this.textarea.focus();
+    }
+
+    public initializeTextArea(): void {
+        this.autoResize();
     }
 }
 
-export { TextCell };
+export class TextCell {
+    private socket: WebSocket | null;
+    instance_id: string;
+    text_cell_id: number;
+    input_area_id: string;
+    div: HTMLElement;
+    input_area: TextInput;
+
+    constructor(text_cell_id: number) {
+        console.log(`Initializing TextCell with id: ${text_cell_id}`);
+        this.socket = null;
+        this.text_cell_id = text_cell_id;
+        this.instance_id = "text-cell-" + text_cell_id.toString();
+        this.input_area_id = this.instance_id + "-input-area";
+        
+        this.createTextCellDiv();
+        this.input_area = new TextInput(this.div, this.text_cell_id);
+        
+        this.applyInitialStyles();
+        this.addEventListeners();
+
+        ObjectManager.getInstance().associate(this.instance_id, this);
+
+        // Initialize the text area after a short delay
+        setTimeout(() => {
+            this.input_area.initializeTextArea();
+        }, 0);
+    }
+
+    getDiv() {
+        return this.div;
+    }
+
+    addEventListeners() {
+        this.div.addEventListener("click", this.clickHandler.bind(this));
+    }
+
+    createTextCellDiv() {
+        this.div = document.createElement("div");
+        this.div.setAttribute("id", this.instance_id);
+        this.div.setAttribute("class", this.instance_id);
+
+        this.div.style.width = "100%";
+        this.div.style.minHeight = "70px";
+        this.div.style.height = "auto";
+        this.div.style.boxSizing = "border-box";
+        this.div.style.marginLeft = "1vw";
+        this.div.style.paddingLeft = "5px";
+        this.div.style.marginTop = "10px";
+        this.div.style.position = "relative";
+    }
+
+    applyInitialStyles() {
+        if (DarkMode.enabled) {
+            this.div.style.backgroundColor = "rgb(10, 15, 22)";
+            this.div.style.color = "#FCF5F5";
+            this.div.style.boxShadow = "0px 5px 15px 5px rgba(20, 255, 60, 0.2)";
+        } else {
+            this.div.style.backgroundColor = "white";
+            this.div.style.color = "black";
+            this.div.style.boxShadow = "0px 2px 15px 0px rgba(0, 0, 0, 0.1)";
+        }
+    }
+
+    clickHandler() {
+        this.div.style.boxShadow = "0px 5px 15px 5px rgba(20, 255, 60, .2)";
+        ObjectManager.getInstance().getObject("editor").updateActiveCell("text-cell", this.text_cell_id);
+    }
+
+    updateHeight(height: number) {
+        console.log(`Updating TextCell ${this.instance_id} height to ${height}px`);
+        this.div.style.height = `${height}px`;
+        this.div.offsetHeight; // Trigger a layout update
+    }
+
+    saveContent(): void {
+        const markdownContent = this.input_area.getValue();
+        const renderedHTML = this.convertMarkdownToHTML(markdownContent);
+        this.div.innerHTML = renderedHTML;
+    }
+
+    convertMarkdownToHTML(markdown: string): string {
+        const html = marked(markdown);
+        return `<div style="padding: 10px; width: 100%; box-sizing: border-box;">${html}</div>`;
+    }
+}

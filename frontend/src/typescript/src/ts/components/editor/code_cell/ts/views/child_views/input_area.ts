@@ -26,7 +26,7 @@ export class InputArea {
         this.containerElement = document.createElement('div');
         this.containerElement.id = this.id;
         this.containerElement.style.width = '100%';
-        this.containerElement.style.minHeight = '60px';
+        this.containerElement.style.minHeight = '50px';
         this.containerElement.style.height = 'auto';
 
         this.containerElement.style.marginTop = '10px';

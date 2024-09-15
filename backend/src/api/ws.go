@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -38,6 +40,11 @@ type Client struct {
 	send chan []byte
 }
 
+type WebSocketMessage struct {
+	Type    string `json:"type"`
+	Content string `json:"content"`
+}
+
 func (c *Client) readPump(cancel context.CancelFunc) {
 	defer func() {
 		cancel()
@@ -52,7 +59,7 @@ func (c *Client) readPump(cancel context.CancelFunc) {
 	})
 
 	for {
-		messageType, message, err := c.conn.ReadMessage()
+		_, message, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("Error: %v", err)
@@ -60,23 +67,30 @@ func (c *Client) readPump(cancel context.CancelFunc) {
 			break
 		}
 
-		switch messageType {
-		case websocket.TextMessage:
-			if string(message) == "ping" {
-				if err := c.conn.WriteMessage(websocket.TextMessage, []byte("pong")); err != nil {
-					log.Printf("Error sending pong: %v", err)
-					return
-				}
-			} else {
-				go executePythonCode(message, c.send)
+		// Handle ping messages
+		if string(message) == "ping" {
+			c.conn.WriteMessage(websocket.TextMessage, []byte("pong"))
+			continue
+		}
+
+		// Try to parse as JSON
+		var msg WebSocketMessage
+		if err := json.Unmarshal(message, &msg); err != nil {
+			// If it's not JSON, assume it's Python code
+			msg = WebSocketMessage{
+				Type:    "python",
+				Content: string(message),
 			}
-		case websocket.PingMessage:
-			if err := c.conn.WriteMessage(websocket.PongMessage, nil); err != nil {
-				log.Printf("Error sending pong: %v", err)
-				return
-			}
+			log.Printf("Received non-JSON message, treating as Python code: %s", string(message))
+		}
+
+		switch msg.Type {
+		case "python":
+			go executePythonCode([]byte(msg.Content), c.send)
+		case "shell":
+			go executeShellCommand(msg.Content, c.send)
 		default:
-			log.Printf("Received unsupported message type: %d", messageType)
+			log.Printf("Unsupported message type: %s", msg.Type)
 		}
 	}
 }
@@ -154,29 +168,26 @@ func executePythonCode(code []byte, out chan<- []byte) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Printf("Recovered from panic in executePythonCode: %v", r)
-			out <- []byte(fmt.Sprintf("Error: %v", r))
+			sendOutput(out, "python_output", fmt.Sprintf("Error: %v", r))
 		}
 	}()
 
-	// Create a temporary directory
 	tmpDir, err := os.MkdirTemp("", "python_exec_")
 	if err != nil {
 		log.Printf("Error creating temp directory: %v", err)
-		out <- []byte(fmt.Sprintf("Error: %v", err))
+		sendOutput(out, "python_output", fmt.Sprintf("Error: %v", err))
 		return
 	}
 	defer os.RemoveAll(tmpDir)
 
-	// Create a unique filename
 	codePath := filepath.Join(tmpDir, fmt.Sprintf("code_%d.py", time.Now().UnixNano()))
 
-	// Log file content before writing
 	log.Printf("Writing code to file %s: %s", codePath, string(code))
 
 	err = os.WriteFile(codePath, code, 0644)
 	if err != nil {
 		log.Printf("Error writing Python code to file: %v", err)
-		out <- []byte(fmt.Sprintf("Error writing code: %v", err))
+		sendOutput(out, "python_output", fmt.Sprintf("Error writing code: %v", err))
 		return
 	}
 
@@ -190,7 +201,6 @@ func executePythonCode(code []byte, out chan<- []byte) {
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	// Set resource limits
 	if runtime.GOOS != "windows" {
 		cmd.SysProcAttr = &syscall.SysProcAttr{
 			Setpgid: true,
@@ -199,7 +209,7 @@ func executePythonCode(code []byte, out chan<- []byte) {
 
 	if err := cmd.Start(); err != nil {
 		log.Printf("Error starting Python process: %v", err)
-		out <- []byte(fmt.Sprintf("Error: %v", err))
+		sendOutput(out, "python_output", fmt.Sprintf("Error: %v", err))
 		return
 	}
 
@@ -216,20 +226,64 @@ func executePythonCode(code []byte, out chan<- []byte) {
 			cmd.Process.Kill()
 		}
 		<-done
-		out <- []byte("Execution timed out")
+		sendOutput(out, "python_output", "Execution timed out")
 	case err := <-done:
 		if err != nil {
 			log.Printf("Error running Python process: %v", err)
-			out <- []byte(fmt.Sprintf("Error: %v\nStderr: %s", err, stderr.String()))
+			sendOutput(out, "python_output", fmt.Sprintf("Error: %v\nStderr: %s", err, stderr.String()))
 			return
 		}
 	}
 
+	output := strings.TrimSpace(stdout.String())
 	if stderr.Len() > 0 {
 		log.Printf("Python stderr: %s", stderr.String())
+		if output != "" {
+			output += "\n"
+		}
+		output += "Stderr: " + strings.TrimSpace(stderr.String())
 	}
 
-	log.Printf("Python stdout: %s", stdout.String())
-	out <- stdout.Bytes()
+	log.Printf("Python output: %s", output)
+	sendOutput(out, "python_output", output)
 	log.Println("Done with Python code execution")
+}
+
+func executeShellCommand(command string, out chan<- []byte) {
+	ctx, cancel := context.WithTimeout(context.Background(), execTimeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, "sh", "-c", command)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+	if err != nil {
+		log.Printf("Error executing shell command: %v", err)
+		sendOutput(out, "shell_output", fmt.Sprintf("Error: %v\nStderr: %s", err, stderr.String()))
+		return
+	}
+
+	output := strings.TrimSpace(stdout.String())
+	if stderr.Len() > 0 {
+		if output != "" {
+			output += "\n"
+		}
+		output += "Stderr: " + strings.TrimSpace(stderr.String())
+	}
+
+	log.Printf("Shell command output: %s", output)
+	sendOutput(out, "shell_output", output)
+	log.Println("Done with shell command execution")
+}
+
+func sendOutput(out chan<- []byte, outputType string, content string) {
+	output := WebSocketMessage{Type: outputType, Content: content}
+	jsonOutput, err := json.Marshal(output)
+	if err != nil {
+		log.Printf("Error marshaling output: %v", err)
+		return
+	}
+	out <- jsonOutput
 }

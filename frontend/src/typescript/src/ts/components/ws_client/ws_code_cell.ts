@@ -1,5 +1,6 @@
 import { ObjectManager } from "../../managers/object_manager";
 import { OutputCell } from "../editor/output_cell/output_cell";
+import { Terminal } from "./../../windows/terminal";
 
 class WebSocketCodeCell {
     private url: string;
@@ -10,6 +11,9 @@ class WebSocketCodeCell {
     private socketId: string;
     private pingInterval: number | null;
     private lastPongTime: number;
+    private terminal: Terminal;
+    private executionQueue: { type: 'python' | 'shell'; content: string }[] = [];
+    private isExecuting: boolean = false;
 
     constructor(url: string, socketId: string, onOpenCallback: (socket: WebSocket) => void) {
         this.url = url;
@@ -20,9 +24,9 @@ class WebSocketCodeCell {
         this.socketId = socketId;
         this.pingInterval = null;
         this.lastPongTime = Date.now();
+        this.terminal = this.objectManager.getObject('terminal') as Terminal;
         this.connect();
 
-        // Subscribe to socket updates
         this.objectManager.subscribeToSocket(this.socketId, this.handleSocketUpdate.bind(this));
     }
 
@@ -39,7 +43,6 @@ class WebSocketCodeCell {
         this.socket.addEventListener('error', this.onError.bind(this));
         this.socket.addEventListener('close', this.onClose.bind(this));
 
-        // Add the new socket to ObjectManager
         this.objectManager.addWebSocket(this.socketId, this.socket);
     }
 
@@ -49,6 +52,7 @@ class WebSocketCodeCell {
             this.onOpenCallback(this.socket);
         }
         this.startPingInterval();
+        this.processQueue();
     }
 
     private onMessage(event: MessageEvent): void {
@@ -57,16 +61,28 @@ class WebSocketCodeCell {
             this.lastPongTime = Date.now();
             console.log('Received pong from server');
         } else {
-            console.log('Python executed output:\n', event.data);
-            if (event.data) {
-                const editor = ObjectManager.getInstance().getObject('editor');
-                if (editor) {
-                    let code_cell_id = "code-cell-" + editor.active_cell_number;
-                    new OutputCell(code_cell_id, event.data);
-                } else {
-                    console.warn('Editor not found or displayOutputCell is not a function');
+            try {
+                const data = JSON.parse(event.data);
+                if (data.type === 'python_output') {
+                    console.log('Python executed output:\n', data.content);
+                    if (data.content) {
+                        const editor = this.objectManager.getObject('editor');
+                        if (editor) {
+                            let code_cell_id = "code-cell-" + editor.active_cell_number;
+                            new OutputCell(code_cell_id, data.content);
+                        } else {
+                            console.warn('Editor not found or displayOutputCell is not a function');
+                        }
+                    }
+                } else if (data.type === 'shell_output') {
+                    console.log('Shell command output:\n', data.content);
+                    this.terminal.write(data.content);
                 }
+            } catch (error) {
+                console.error('Error parsing message:', error);
             }
+            this.isExecuting = false;
+            this.processQueue();
         }
     }
 
@@ -95,7 +111,6 @@ class WebSocketCodeCell {
             this.socket = socket;
             this.url = socket.url;
             
-            // Re-attach event listeners to the new socket
             this.socket.addEventListener('open', this.onOpen.bind(this));
             this.socket.addEventListener('message', this.onMessage.bind(this));
             this.socket.addEventListener('error', this.onError.bind(this));
@@ -113,13 +128,12 @@ class WebSocketCodeCell {
                 this.socket.send('ping');
                 console.log('Sent ping to server');
                 
-                // Check if we've received a pong recently
-                if (Date.now() - this.lastPongTime > 30000) { // 30 seconds
+                if (Date.now() - this.lastPongTime > 30000) {
                     console.warn('No pong received recently. Closing connection.');
                     this.socket.close();
                 }
             }
-        }, 15000); // Send a ping every 15 seconds
+        }, 15000);
     }
 
     private stopPingInterval(): void {
@@ -129,12 +143,27 @@ class WebSocketCodeCell {
         }
     }
 
-    public sendMessage(message: string): void {
+    public sendMessage(content: string, type: 'python' | 'shell'): void {
+        const message = JSON.stringify({ type, content });
+        this.executionQueue.push({ type, content: message });
+        this.processQueue();
+    }
+
+    private processQueue(): void {
+        if (this.isExecuting || this.executionQueue.length === 0) {
+            return;
+        }
+
+        this.isExecuting = true;
+        const { content } = this.executionQueue.shift()!;
+
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-            this.socket.send(message);
-            console.log('Sent message:', message);
+            this.socket.send(content);
+            console.log('Sent message:', content);
         } else {
-            console.warn('CodeCell WebSocket is not open. Cannot send message.');
+            console.warn('WebSocket is not open. Cannot send message.');
+            this.isExecuting = false;
+            this.processQueue();
         }
     }
 

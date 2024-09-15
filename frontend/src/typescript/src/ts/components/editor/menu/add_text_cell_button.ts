@@ -1,12 +1,9 @@
-import { MdFilledButton } from '@material/web/button/filled-button.js';
-import '@material/web/button/filled-button.js';
-import '@material/web/icon/icon.js';
 import { ObjectManager } from "../../../managers/object_manager";
 import { Editor } from "../../../windows/editor/editor";
 
 class AddTextCellButton {
     id: string;
-    button: MdFilledButton;
+    button: HTMLButtonElement;
     objectManager: ObjectManager;
 
     constructor(objectManager: ObjectManager) {
@@ -17,8 +14,8 @@ class AddTextCellButton {
         this.addEventListeners();
     }
 
-    createButton(): MdFilledButton {
-        const button = new MdFilledButton();
+    createButton(): HTMLButtonElement {
+        const button = document.createElement('button');
         button.id = this.id;
         
         // Create a container for icon and text
@@ -29,14 +26,15 @@ class AddTextCellButton {
         container.style.width = '100%';
 
         // Create icon and text elements
-        const icon = document.createElement('md-icon');
+        const icon = document.createElement('span');
         icon.textContent = '+';
-        icon.style.fontSize = '40px';
-        icon.style.marginRight = '6px';
+        icon.style.fontSize = '24px';
+        icon.style.marginRight = '4px';
+        icon.style.lineHeight = '1';
 
         const text = document.createElement('span');
         text.textContent = 'Text';
-        text.style.fontSize = '18px';
+        text.style.fontSize = '14px';
 
         // Append icon and text to the container
         container.appendChild(icon);
@@ -47,16 +45,28 @@ class AddTextCellButton {
         
         // Styling
         button.style.position = 'fixed';
-        button.style.top = '1vh';
-        button.style.right = '4vw'; // Changed from left to right
+        button.style.top = '1.5vh';
+        button.style.right = '4vw';
         button.style.zIndex = '1000';
-        button.style.height = '28px';
-        button.style.minWidth = 'auto';
-        button.style.padding = '0 12px';
-        button.style.boxShadow = "0px 2px 15px 0px rgba(0, 0, 0, .2)";
-         // Set custom color
-         button.style.setProperty('--md-sys-color-primary', '#CE93D8');
-         button.style.setProperty('--md-sys-color-on-primary', '#FFFFFF'); // Set text color to black for better contrast
+        button.style.height = '3vh';
+        button.style.minWidth = '4vw';
+        button.style.padding = '0 10px';
+        button.style.backgroundColor = '#1664c0';
+        button.style.color = '#FFFFFF';
+        button.style.border = 'none';
+        button.style.borderRadius = '4px';
+        button.style.cursor = 'pointer';
+        button.style.fontFamily = 'Arial, sans-serif';
+        button.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+
+        // Hover effect
+        button.addEventListener('mouseenter', () => {
+            button.style.backgroundColor = '#1258a8';
+        });
+        button.addEventListener('mouseleave', () => {
+            button.style.backgroundColor = '#1664c0';
+        });
+
         return button;
     }
 

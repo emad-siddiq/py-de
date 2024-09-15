@@ -17,10 +17,10 @@ class DropdownComputeSelectionMenu {
         const dropdown = document.createElement('div');
         dropdown.style.position = 'absolute';
         dropdown.style.top = '1.5vh';
-        dropdown.style.right = '17vw';
-        dropdown.style.width = '150px';
-        dropdown.style.height = '5vh';
-
+        dropdown.style.right = '14vw';
+        dropdown.style.width = 'auto';
+        dropdown.style.minWidth = '80px';
+        dropdown.style.height = '3vh';
         dropdown.style.fontFamily = 'Roboto, sans-serif';
         dropdown.style.fontSize = '14px';
         dropdown.style.zIndex = '1000';
@@ -38,10 +38,13 @@ class DropdownComputeSelectionMenu {
 
         this.selectedOption = document.createElement('div');
         this.selectedOption.textContent = 'Switch OS';
+        this.selectedOption.style.textAlign = 'left';
+        this.selectedOption.style.flexGrow = '1';
 
         const arrow = document.createElement('div');
         arrow.textContent = '▼';
         arrow.style.fontSize = '12px';
+        arrow.style.marginLeft = '8px';
 
         this.select.appendChild(this.selectedOption);
         this.select.appendChild(arrow);
@@ -76,6 +79,7 @@ class DropdownComputeSelectionMenu {
         option.dataset.value = value;
         option.style.padding = '8px 12px';
         option.style.cursor = 'pointer';
+        option.style.textAlign = 'left';
 
         option.addEventListener('mouseover', () => {
             option.style.backgroundColor = '#f0f0f0';
