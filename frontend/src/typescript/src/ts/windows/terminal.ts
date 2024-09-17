@@ -5,6 +5,7 @@ import 'xterm/css/xterm.css';
 
 export class Terminal {
     private div: HTMLElement;
+    private titleBar: HTMLElement;
     private xterm: XtermTerminal;
     private fitAddon: FitAddon;
     private isOpen: boolean = false;
@@ -15,6 +16,10 @@ export class Terminal {
     private environmentInfo: string = '';
     private username: string = 'user';
     private hostname: string = 'macbook-pro';
+    private isFullscreen: boolean = false;
+    private isResizing: boolean = false;
+    private initialHeight: number;
+    private initialY: number;
 
     constructor() {
         this.div = this.createTerminalDiv();
@@ -50,12 +55,6 @@ export class Terminal {
         console.log('Xterm.js version:', XtermTerminal.toString());
     }
 
-    private updateSocket(newSocket: WebSocket) {
-        this.socket = newSocket;
-        console.log(`Terminal updated with new WebSocket`);
-        this.requestEnvironmentInfo();
-    }
-
     private createTerminalDiv(): HTMLElement {
         const div = document.createElement("div");
         div.id = "custom-terminal";
@@ -64,43 +63,108 @@ export class Terminal {
         div.style.left = "0";
         div.style.width = "100%";
         div.style.height = "40%";
-        div.style.zIndex = "1000";
+        div.style.minHeight = "100px";
+        div.style.zIndex = "9998";
         div.style.display = "none";
         div.style.backgroundColor = "#1e1e1e";
         div.style.overflow = "hidden";
         div.style.boxSizing = "border-box";
         div.style.borderTop = "1px solid #555";
-        div.style.borderTopLeftRadius = "10px";
-        div.style.borderTopRightRadius = "10px";
         div.style.boxShadow = "0 -2px 10px rgba(0,0,0,0.3)";
         
-        const titleBar = document.createElement("div");
-        titleBar.style.height = "28px";
-        titleBar.style.backgroundColor = "#323233";
-        titleBar.style.borderTopLeftRadius = "10px";
-        titleBar.style.borderTopRightRadius = "10px";
-        titleBar.style.display = "flex";
-        titleBar.style.alignItems = "center";
-        titleBar.style.padding = "0 10px";
+        this.titleBar = document.createElement("div");
+        this.titleBar.style.height = "28px";
+        this.titleBar.style.backgroundColor = "#323233";
+        this.titleBar.style.display = "flex";
+        this.titleBar.style.alignItems = "center";
+        this.titleBar.style.padding = "0 10px";
+        this.titleBar.style.cursor = "ns-resize";
+
+        this.titleBar.addEventListener('mousedown', this.startResizing.bind(this));
+        document.addEventListener('mousemove', this.resize.bind(this));
+        document.addEventListener('mouseup', this.stopResizing.bind(this));
 
         const trafficLights = document.createElement("div");
         trafficLights.style.display = "flex";
         trafficLights.style.gap = "6px";
 
         const colors = ["#ff5f56", "#ffbd2e", "#27c93f"];
-        colors.forEach(color => {
+        const actions = ["close", "minimize", "maximize"];
+        colors.forEach((color, index) => {
             const light = document.createElement("div");
             light.style.width = "12px";
             light.style.height = "12px";
             light.style.borderRadius = "50%";
             light.style.backgroundColor = color;
+            light.style.cursor = "pointer";
+            light.onclick = (e) => {
+                e.stopPropagation();
+                this[actions[index]]();
+            };
             trafficLights.appendChild(light);
         });
 
-        titleBar.appendChild(trafficLights);
-        div.appendChild(titleBar);
+        this.titleBar.appendChild(trafficLights);
+        div.appendChild(this.titleBar);
 
         return div;
+    }
+
+    private startResizing(e: MouseEvent): void {
+        if (this.isFullscreen) return;
+        this.isResizing = true;
+        this.initialHeight = this.div.offsetHeight;
+        this.initialY = e.clientY;
+    }
+
+    private resize(e: MouseEvent): void {
+        if (!this.isResizing || this.isFullscreen) return;
+        const deltaY = this.initialY - e.clientY;
+        const newHeight = Math.max(100, this.initialHeight + deltaY);
+        this.div.style.height = `${newHeight}px`;
+        this.fitAddon.fit();
+    }
+
+    private stopResizing(): void {
+        this.isResizing = false;
+    }
+
+    private close(): void {
+        this.clearTerminal();
+        this.hide();
+    }
+
+    private minimize(): void {
+        this.hide();
+    }
+
+    private maximize(): void {
+        this.isFullscreen = !this.isFullscreen;
+        if (this.isFullscreen) {
+            this.div.style.top = "0";
+            this.div.style.left = "0";
+            this.div.style.width = "100%";
+            this.div.style.height = "100%";
+        } else {
+            this.div.style.top = "auto";
+            this.div.style.bottom = "0";
+            this.div.style.left = "0";
+            this.div.style.width = "100%";
+            this.div.style.height = "40%";
+        }
+        this.fitAddon.fit();
+    }
+
+    private hide(): void {
+        this.isOpen = false;
+        this.div.style.display = "none";
+    }
+
+    private show(): void {
+        this.isOpen = true;
+        this.div.style.display = "block";
+        this.fitAddon.fit();
+        this.xterm.focus();
     }
 
     private addGlobalStyles(): void {
@@ -144,15 +208,19 @@ export class Terminal {
         this.isOpen = !this.isOpen;
         if (this.isOpen) {
             document.body.appendChild(this.div);
-            this.div.style.display = "block";
+            this.show();
             if (!this.xterm.element) {
                 this.xterm.open(this.div.querySelector("#terminal-content") || this.div);
                 this.initializeTerminal();
+            } else {
+                this.xterm.clear();
+                this.xterm.reset();
+                this.xterm.write('\x1b[H');
+                this.displayLoginInfo();
+                this.promptUser();
             }
-            this.fitAddon.fit();
-            this.xterm.focus();
         } else {
-            this.div.style.display = "none";
+            this.hide();
         }
         console.log('Terminal toggled. Is open:', this.isOpen);
     }
@@ -190,11 +258,21 @@ export class Terminal {
     }
 
     private handleInput(key: string): void {
-        // Only write printable characters
         if (key.length === 1 && key.charCodeAt(0) >= 32 && key.charCodeAt(0) <= 126) {
+            const currentRow = this.xterm.buffer.active.cursorY;
+            const currentCol = this.xterm.buffer.active.cursorX;
+            
+            if (currentCol >= this.xterm.cols - 1) {
+                this.xterm.write('\r\n');
+            }
+
             this.xterm.write(key);
             this.currentLine = this.currentLine.slice(0, this.cursorPosition) + key + this.currentLine.slice(this.cursorPosition);
             this.cursorPosition++;
+
+            if (currentRow >= this.xterm.rows - 1) {
+                this.xterm.scrollLines(1);
+            }
         }
     }
 
@@ -239,16 +317,11 @@ export class Terminal {
     }
 
     private clearTerminal(): void {
-        // Clear the terminal and reset its state
         this.xterm.clear();
         this.xterm.reset();
-
-        // Move cursor to the top-left corner
         this.xterm.write('\x1b[H');
-
         this.promptUser();
     }
-
 
     private handleResize(): void {
         if (this.isOpen) {
@@ -269,6 +342,12 @@ export class Terminal {
         }
     }
 
+    private updateSocket(newSocket: WebSocket) {
+        this.socket = newSocket;
+        console.log(`Terminal updated with new WebSocket`);
+        this.requestEnvironmentInfo();
+    }
+
     private requestEnvironmentInfo(): void {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             const message = JSON.stringify({ type: 'env_info' });
@@ -280,9 +359,20 @@ export class Terminal {
 
     public updateEnvironmentInfo(info: string): void {
         this.environmentInfo = info;
-        // If the terminal is already open, update the display
+        
+        const envLines = info.split('\n');
+        envLines.forEach(line => {
+            if (line.startsWith('USER=')) {
+                this.username = line.split('=')[1].trim();
+            } else if (line.startsWith('HOSTNAME=')) {
+                this.hostname = line.split('=')[1].trim();
+            }
+        });
+
         if (this.isOpen) {
             this.clearTerminal();
+            this.displayLoginInfo();
+            this.promptUser();
         }
     }
 }

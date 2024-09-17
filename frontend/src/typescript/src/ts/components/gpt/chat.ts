@@ -20,7 +20,7 @@ class Chat {
         document.body.appendChild(this.div);
         document.body.appendChild(this.createChatWindow());
         this.addEventListeners();
-        ObjectManager.getInstance().subscribeToSocket("codeSocket", this.updateSocket.bind(this));
+        ObjectManager.getInstance().subscribeToSocket("aiSocket", this.updateSocket.bind(this));
 
     }
 
