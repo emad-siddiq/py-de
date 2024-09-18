@@ -101,16 +101,22 @@ export class Editor {
     }
 
     public addTextCell() {
-        // TODO: Modify this so that a new code cell gets added after the current active code cell
-        //       Modify editor so that it keeps track of current active code or text cell
         this.text_cell_counter += 1;
         let text_cell = new TextCell(this.text_cell_counter);
 
-        DOM.addElementAfter("editor", text_cell.getDiv(), this.active_cell_type + "-" + this.active_cell_number.toString());
-        
-       
-        this.updateActiveCell("text-cell", this.text_cell_counter);
+        let insertAfterElementId = this.active_cell_type + "-" + this.active_cell_number.toString();
 
+        // Check if the active cell is a code cell and has an output cell after it
+        if (this.active_cell_type === "code-cell") {
+            let nextSiblingId = DOM.getNextSiblingId(insertAfterElementId);
+            if (nextSiblingId && OutputCell.isOutputCellId(nextSiblingId)) {
+                insertAfterElementId = nextSiblingId;
+            }
+        }
+
+        DOM.addElementAfter("editor", text_cell.getDiv(), insertAfterElementId);
+        
+        this.updateActiveCell("text-cell", this.text_cell_counter);
     }
 
     /*
