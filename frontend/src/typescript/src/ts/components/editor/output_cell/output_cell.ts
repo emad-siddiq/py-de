@@ -1,11 +1,5 @@
 import { DOM } from "./../../../utility/dom";
 
-// Class to represent the output from execution in the corresponding code cell
-// Or by clicking the top menu icon
-
-// It is added to the DOM right below the code cell 
-// and receives data to show
-
 class OutputCell {
     id: string;
     name: string;
@@ -13,7 +7,7 @@ class OutputCell {
     div: HTMLElement;
     code_cell_id: string;
 
-    constructor(code_cell_id: string, content: string) 
+    constructor(code_cell_id: string, content: string, type: 'text' | 'matplotlib') 
     {
         this.name = "output-cell";
         this.code_cell_id = code_cell_id;
@@ -21,7 +15,11 @@ class OutputCell {
         this.input_area_id = code_cell_id + "-input-area";
 
         this.div = this.createOutputCellDiv();
-        this.renderText(content);
+        if (type === 'text') {
+            this.renderText(content);
+        } else {
+            this.renderMatplotlibFigure(content);
+        }
         this.addOutputCell();
     }
 
@@ -39,20 +37,13 @@ class OutputCell {
         output_cell.setAttribute("id", this.id);
         output_cell.setAttribute("class", this.name);
         
-        
-        
-        // Add margin to the top
-        output_cell.style.paddingTop = "10px"; // You can adjust this value as needed
-        
-        // Maintain existing styles
+        output_cell.style.paddingTop = "10px";
         output_cell.style.width = "100%";
         output_cell.style.boxSizing = "border-box";
         output_cell.style.fontSize = "13px";
         output_cell.style.backgroundColor = "#eeeeee";
         output_cell.style.textIndent = "0.8vw";
         output_cell.style.fontFamily = "Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New";
-        //output_cell.style.paddingTop = "1.2vh";
-        //output_cell.style.paddingBottom = "1.2vh";
         output_cell.style.boxShadow = "0px 2px 15px 0px rgba(0, 0, 0, .1)";
         output_cell.style.overflowY = 'auto';
 
@@ -68,6 +59,20 @@ class OutputCell {
             this.div.appendChild(lineDiv);
         });
 
+        this.adjustHeight(maxHeight);
+    }
+
+    renderMatplotlibFigure(base64Image: string) {
+        const img = document.createElement('img');
+        img.src = `data:image/png;base64,${base64Image}`;
+        img.style.maxWidth = '100%';
+        img.style.height = 'auto';
+        this.div.appendChild(img);
+
+        this.adjustHeight(600); // Increased max height for figures
+    }
+
+    adjustHeight(maxHeight: number) {
         requestAnimationFrame(() => {
             const contentHeight = this.div.scrollHeight;
             if (contentHeight > maxHeight) {
@@ -82,10 +87,6 @@ class OutputCell {
     addOutputCell() {
         DOM.replaceElseAddAfter(this.div, this.code_cell_id);
     }
-
-
-
-    
 }
 
 export { OutputCell };

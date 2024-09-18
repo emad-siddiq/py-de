@@ -22,17 +22,16 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		return true // Allowing all origins for this example
-	},
+	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
 const (
 	writeWait      = 10 * time.Second
 	pongWait       = 60 * time.Second
 	pingPeriod     = (pongWait * 9) / 10
-	maxMessageSize = 512 * 1024 // 512 KB
+	maxMessageSize = 512 * 1024
 	execTimeout    = 30 * time.Second
+	condaEnvName   = "pysync_env"
 )
 
 type Client struct {
@@ -67,21 +66,17 @@ func (c *Client) readPump(cancel context.CancelFunc) {
 			break
 		}
 
-		// Handle ping messages
+		log.Printf("Received message: %s", string(message))
+
 		if string(message) == "ping" {
 			c.conn.WriteMessage(websocket.TextMessage, []byte("pong"))
 			continue
 		}
 
-		// Try to parse as JSON
 		var msg WebSocketMessage
 		if err := json.Unmarshal(message, &msg); err != nil {
-			// If it's not JSON, assume it's Python code
-			msg = WebSocketMessage{
-				Type:    "python",
-				Content: string(message),
-			}
-			log.Printf("Received non-JSON message, treating as Python code: %s", string(message))
+			// If it's not valid JSON, assume it's a plain text Python command
+			msg = WebSocketMessage{Type: "python", Content: string(message)}
 		}
 
 		switch msg.Type {
@@ -89,6 +84,8 @@ func (c *Client) readPump(cancel context.CancelFunc) {
 			go executePythonCode([]byte(msg.Content), c.send)
 		case "shell":
 			go executeShellCommand(msg.Content, c.send)
+		case "env_info":
+			go sendEnvironmentInfo(c.send)
 		default:
 			log.Printf("Unsupported message type: %s", msg.Type)
 		}
@@ -250,6 +247,7 @@ func executePythonCode(code []byte, out chan<- []byte) {
 }
 
 func executeShellCommand(command string, out chan<- []byte) {
+	log.Printf("Executing shell command: %s", command)
 	ctx, cancel := context.WithTimeout(context.Background(), execTimeout)
 	defer cancel()
 
@@ -272,10 +270,13 @@ func executeShellCommand(command string, out chan<- []byte) {
 		}
 		output += "Stderr: " + strings.TrimSpace(stderr.String())
 	}
-
 	log.Printf("Shell command output: %s", output)
-	sendOutput(out, "shell_output", output)
-	log.Println("Done with shell command execution")
+	sendOutput(out, "shell_output", strings.TrimSpace(output))
+}
+
+func sendEnvironmentInfo(out chan<- []byte) {
+	info := fmt.Sprintf("Conda Environment: %s\nPython Path: %s", condaEnvName, getPythonPath())
+	sendOutput(out, "env_info", info)
 }
 
 func sendOutput(out chan<- []byte, outputType string, content string) {
@@ -285,5 +286,6 @@ func sendOutput(out chan<- []byte, outputType string, content string) {
 		log.Printf("Error marshaling output: %v", err)
 		return
 	}
+	log.Printf("Sending output: %s", string(jsonOutput))
 	out <- jsonOutput
 }

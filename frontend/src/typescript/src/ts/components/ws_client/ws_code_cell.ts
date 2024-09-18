@@ -12,7 +12,7 @@ class WebSocketCodeCell {
     private pingInterval: number | null;
     private lastPongTime: number;
     private terminal: Terminal;
-    private executionQueue: { type: 'python' | 'shell'; content: string }[] = [];
+    private executionQueue: { type: 'python' | 'shell' | 'env_info'; content: string }[] = [];
     private isExecuting: boolean = false;
 
     constructor(url: string, socketId: string, onOpenCallback: (socket: WebSocket) => void) {
@@ -66,17 +66,17 @@ class WebSocketCodeCell {
                 if (data.type === 'python_output') {
                     console.log('Python executed output:\n', data.content);
                     if (data.content) {
-                        const editor = this.objectManager.getObject('editor');
-                        if (editor) {
-                            let code_cell_id = "code-cell-" + editor.active_cell_number;
-                            new OutputCell(code_cell_id, data.content);
+                const editor = this.objectManager.getObject('editor');
+                if (editor) {
+                    let code_cell_id = "code-cell-" + editor.active_cell_number;
+                            new OutputCell(code_cell_id, data.content, "text");
                         } else {
                             console.warn('Editor not found or displayOutputCell is not a function');
-                        }
+                            }
                     }
                 } else if (data.type === 'shell_output') {
-                    console.log('Shell command output:\n', data.content);
-                    this.terminal.write(data.content);
+                            console.log('Shell command output:\n', data.content);
+                            this.terminal.write(data.content);
                 }
             } catch (error) {
                 console.error('Error parsing message:', error);
@@ -143,8 +143,15 @@ class WebSocketCodeCell {
         }
     }
 
-    public sendMessage(content: string, type: 'python' | 'shell'): void {
-        const message = JSON.stringify({ type, content });
+    public sendMessage(content: string, type: 'python' | 'shell' | 'env_info'): void {
+        let message: string;
+        if (type === 'python') {
+            // For Python, send the content directly without JSON wrapping
+            message = content;
+        } else {
+            // For other types, use JSON format
+            message = JSON.stringify({ type, content });
+        }
         this.executionQueue.push({ type, content: message });
         this.processQueue();
     }

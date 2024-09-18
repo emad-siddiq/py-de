@@ -81,11 +81,11 @@ export class CodeCell {
         if (DarkMode.enabled) {
             this.div.style.backgroundColor = "rgb(10, 15, 22)";
             this.div.style.color = "#FCF5F5";
-            this.div.style.boxShadow = "0px 5px 15px 5px #bbdefb";
+            this.div.style.boxShadow = "0px 0px 8px rgba(243, 118, 38, 0.4)";            
         } else {
             this.div.style.backgroundColor = "white";
             this.div.style.color = "black";
-            this.div.style.boxShadow = "0px 2px 15px 0px #bbdefb";
+            this.div.style.boxShadow = "0px 0px 8px rgba(243, 118, 38, 0.4)";            
         }
     }
 
