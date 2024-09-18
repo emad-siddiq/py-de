@@ -4,8 +4,9 @@ import { DarkMode } from './../../../../themes/darkmode/darkmode';
 
 class TextInput {
     private textarea: HTMLTextAreaElement;
+    private onShiftEnter: () => void;
 
-    constructor(private parentElement: HTMLElement, private cellId: number) {
+    constructor(private parentElement: HTMLElement, private cellId: number, onShiftEnter: () => void) {
         this.textarea = document.createElement('textarea');
         this.textarea.style.width = '100%';
         this.textarea.style.border = 'none';
@@ -17,9 +18,10 @@ class TextInput {
         this.textarea.style.fontFamily = 'inherit';
         this.textarea.style.fontSize = 'inherit';
         this.textarea.style.lineHeight = '1.5';
-        this.textarea.placeholder = 'Enter your text here...';
+        this.textarea.placeholder = 'Enter your markdown here...';
 
         this.parentElement.appendChild(this.textarea);
+        this.onShiftEnter = onShiftEnter;
 
         this.addEventListeners();
     }
@@ -43,7 +45,18 @@ class TextInput {
     }
 
     private handleKeyDown(e: KeyboardEvent): void {
-        if (e.key === 'Enter' || e.key === 'Backspace' || e.key === 'Delete') {
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            const start = this.textarea.selectionStart;
+            const end = this.textarea.selectionEnd;
+            const value = this.textarea.value;
+            this.textarea.value = value.substring(0, start) + '    ' + value.substring(end);
+            this.textarea.selectionStart = this.textarea.selectionEnd = start + 4;
+            this.autoResize();
+        } else if (e.key === 'Enter' && e.shiftKey) {
+            e.preventDefault();
+            this.onShiftEnter();
+        } else if (e.key === 'Enter') {
             setTimeout(() => this.autoResize(), 0);
         }
     }
@@ -73,6 +86,7 @@ export class TextCell {
     input_area_id: string;
     div: HTMLElement;
     input_area: TextInput;
+    rendered_content: HTMLElement;
 
     constructor(text_cell_id: number) {
         console.log(`Initializing TextCell with id: ${text_cell_id}`);
@@ -82,14 +96,18 @@ export class TextCell {
         this.input_area_id = this.instance_id + "-input-area";
         
         this.createTextCellDiv();
-        this.input_area = new TextInput(this.div, this.text_cell_id);
+        this.input_area = new TextInput(this.div, this.text_cell_id, this.convertAndRender.bind(this));
+        
+        this.rendered_content = document.createElement('div');
+        this.rendered_content.style.display = 'none';
+        this.rendered_content.style.paddingBottom = '10px'; // Keep bottom padding
+        this.div.appendChild(this.rendered_content);
         
         this.applyInitialStyles();
         this.addEventListeners();
 
         ObjectManager.getInstance().associate(this.instance_id, this);
 
-        // Initialize the text area after a short delay
         setTimeout(() => {
             this.input_area.initializeTextArea();
         }, 0);
@@ -101,6 +119,7 @@ export class TextCell {
 
     addEventListeners() {
         this.div.addEventListener("click", this.clickHandler.bind(this));
+        this.div.addEventListener("dblclick", this.doubleClickHandler.bind(this));
     }
 
     createTextCellDiv() {
@@ -114,6 +133,7 @@ export class TextCell {
         this.div.style.boxSizing = "border-box";
         this.div.style.marginLeft = "1vw";
         this.div.style.paddingLeft = "5px";
+        this.div.style.paddingTop = "10px"; // Add top padding to the main div
         this.div.style.marginTop = "10px";
         this.div.style.position = "relative";
     }
@@ -135,20 +155,49 @@ export class TextCell {
         ObjectManager.getInstance().getObject("editor").updateActiveCell("text-cell", this.text_cell_id);
     }
 
+    doubleClickHandler() {
+        this.enterEditMode();
+    }
+
+    enterEditMode() {
+        const textarea = this.div.querySelector('textarea') as HTMLTextAreaElement;
+        textarea.style.display = 'block';
+        textarea.style.marginTop = '0'; // Ensure textarea aligns with the top
+        this.rendered_content.style.display = 'none';
+        textarea.value = this.input_area.getValue();
+        textarea.focus();
+    }
+
     updateHeight(height: number) {
         console.log(`Updating TextCell ${this.instance_id} height to ${height}px`);
-        this.div.style.height = `${height}px`;
+        this.div.style.height = `${height + 20}px`; // Add extra padding
         this.div.offsetHeight; // Trigger a layout update
     }
 
-    saveContent(): void {
+    async convertAndRender(): Promise<void> {
         const markdownContent = this.input_area.getValue();
-        const renderedHTML = this.convertMarkdownToHTML(markdownContent);
-        this.div.innerHTML = renderedHTML;
+        try {
+            const renderedHTML = await this.convertMarkdownToHTML(markdownContent);
+            this.rendered_content.innerHTML = renderedHTML;
+            this.input_area.setValue(markdownContent); // Keep the markdown content
+            (this.div.querySelector('textarea') as HTMLTextAreaElement).style.display = 'none';
+            this.rendered_content.style.display = 'block';
+            
+            // Add margin to the first child of rendered content
+            const firstChild = this.rendered_content.firstElementChild;
+            if (firstChild) {
+                (firstChild as HTMLElement).style.marginTop = '0';
+            }
+            
+            // Adjust the cell height
+            this.updateHeight(this.rendered_content.scrollHeight);
+        } catch (error) {
+            console.error('Error converting markdown to HTML:', error);
+            // Handle the error appropriately, e.g., show an error message to the user
+        }
     }
 
-    convertMarkdownToHTML(markdown: string): string {
-        const html = marked(markdown);
-        return `<div style="padding: 10px; width: 100%; box-sizing: border-box;">${html}</div>`;
+    async convertMarkdownToHTML(markdown: string): Promise<string> {
+        return marked(markdown);
     }
 }
