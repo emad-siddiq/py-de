@@ -15,7 +15,7 @@ export class Terminal {
     private socket: WebSocket | null;
     private environmentInfo: string = '';
     private username: string = 'user';
-    private hostname: string = 'macbook-pro';
+    private hostname: string = 'localhost';
     private isFullscreen: boolean = false;
     private isResizing: boolean = false;
     private initialHeight: number;

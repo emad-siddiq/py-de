@@ -1,0 +1,503 @@
+2024/09/18 21:17:07 Received request: GET /ws/codeSocket from 127.0.0.1:57399
+2024/09/18 21:17:07 Received request: GET /ws/aiSocket from 127.0.0.1:57400
+2024/09/18 21:17:07 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57400
+2024/09/18 21:17:07 WebSocket connection for ChatGPT established with 127.0.0.1:57400
+2024/09/18 21:17:22 Received pong from ChatGPT client: 127.0.0.1:57400
+2024/09/18 21:17:22 Received message: ping
+2024/09/18 21:17:37 Received pong from ChatGPT client: 127.0.0.1:57400
+2024/09/18 21:17:37 Received message: ping
+2024/09/18 21:17:41 WebSocket connection for ChatGPT closed by 127.0.0.1:57400 with code 1001: 
+2024/09/18 21:17:41 ChatGPT WebSocket closed for 127.0.0.1:57400: websocket: close 1001 (going away)
+2024/09/18 21:17:41 Received request: GET /ws/codeSocket from 127.0.0.1:57406
+2024/09/18 21:17:41 Received request: GET /ws/aiSocket from 127.0.0.1:57407
+2024/09/18 21:17:41 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57407
+2024/09/18 21:17:41 WebSocket connection for ChatGPT established with 127.0.0.1:57407
+2024/09/18 21:17:56 Received pong from ChatGPT client: 127.0.0.1:57407
+2024/09/18 21:17:56 Received message: ping
+2024/09/18 21:18:11 Received pong from ChatGPT client: 127.0.0.1:57407
+2024/09/18 21:18:11 Received message: ping
+2024/09/18 21:18:22 Error sending ping to 127.0.0.1:57400: write tcp 127.0.0.1:8080->127.0.0.1:57400: write: broken pipe
+2024/09/18 21:18:26 Received pong from ChatGPT client: 127.0.0.1:57407
+2024/09/18 21:18:26 Received message: ping
+2024/09/18 21:18:41 Received pong from ChatGPT client: 127.0.0.1:57407
+2024/09/18 21:18:41 Received message: ping
+2024/09/18 21:18:56 Received pong from ChatGPT client: 127.0.0.1:57407
+2024/09/18 21:18:56 Received message: ping
+2024/09/18 21:19:11 Received pong from ChatGPT client: 127.0.0.1:57407
+2024/09/18 21:19:11 Received message: ping
+2024/09/18 21:19:11 Error: websocket: close 1005 (no status)
+2024/09/18 21:19:16 Received request: GET /ws/codeSocket from 127.0.0.1:57427
+2024/09/18 21:19:26 Received pong from ChatGPT client: 127.0.0.1:57407
+2024/09/18 21:19:31 Received message: ping
+2024/09/18 21:19:31 Error: websocket: close 1005 (no status)
+2024/09/18 21:19:36 Received request: GET /ws/codeSocket from 127.0.0.1:57428
+2024/09/18 21:19:41 Received pong from ChatGPT client: 127.0.0.1:57407
+2024/09/18 21:19:52 Received message: ping
+2024/09/18 21:19:52 Error: websocket: close 1005 (no status)
+2024/09/18 21:19:56 Received pong from ChatGPT client: 127.0.0.1:57407
+2024/09/18 21:19:57 Received request: GET /ws/codeSocket from 127.0.0.1:57429
+2024/09/18 21:20:11 Received pong from ChatGPT client: 127.0.0.1:57407
+2024/09/18 21:20:12 Received message: ping
+2024/09/18 21:20:12 Error: websocket: close 1005 (no status)
+2024/09/18 21:20:17 Received request: GET /ws/codeSocket from 127.0.0.1:57430
+2024/09/18 21:20:26 Received pong from ChatGPT client: 127.0.0.1:57407
+2024/09/18 21:20:32 Received message: ping
+2024/09/18 21:20:32 Error: websocket: close 1005 (no status)
+2024/09/18 21:20:37 Received request: GET /ws/codeSocket from 127.0.0.1:57431
+2024/09/18 21:20:41 Received pong from ChatGPT client: 127.0.0.1:57407
+2024/09/18 21:20:52 Received message: ping
+2024/09/18 21:20:52 Error: websocket: close 1005 (no status)
+2024/09/18 21:20:55 WebSocket connection for ChatGPT closed by 127.0.0.1:57407 with code 1001: 
+2024/09/18 21:20:55 ChatGPT WebSocket closed for 127.0.0.1:57407: websocket: close 1001 (going away)
+2024/09/18 21:20:55 Received request: GET /ws/codeSocket from 127.0.0.1:57436
+2024/09/18 21:20:55 Received request: GET /ws/aiSocket from 127.0.0.1:57437
+2024/09/18 21:20:55 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57437
+2024/09/18 21:20:55 WebSocket connection for ChatGPT established with 127.0.0.1:57437
+2024/09/18 21:20:55 Received message: {"type":"env_info"}
+2024/09/18 21:20:55 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:20:55 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:21:10 Received pong from ChatGPT client: 127.0.0.1:57437
+2024/09/18 21:21:10 Received message: ping
+2024/09/18 21:21:25 Received pong from ChatGPT client: 127.0.0.1:57437
+2024/09/18 21:21:25 Received message: ping
+2024/09/18 21:21:25 Error: websocket: close 1005 (no status)
+2024/09/18 21:21:30 Received request: GET /ws/codeSocket from 127.0.0.1:57438
+2024/09/18 21:21:30 Received message: {"type":"env_info"}
+2024/09/18 21:21:30 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:21:30 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:21:36 WebSocket connection for ChatGPT closed by 127.0.0.1:57437 with code 1001: 
+2024/09/18 21:21:36 ChatGPT WebSocket closed for 127.0.0.1:57437: websocket: close 1001 (going away)
+2024/09/18 21:21:36 Received request: GET /ws/codeSocket from 127.0.0.1:57443
+2024/09/18 21:21:36 Received message: {"type":"env_info"}
+2024/09/18 21:21:36 Received request: GET /ws/aiSocket from 127.0.0.1:57444
+2024/09/18 21:21:36 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57444
+2024/09/18 21:21:36 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:21:36 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:21:36 WebSocket connection for ChatGPT established with 127.0.0.1:57444
+2024/09/18 21:21:45 Received request: GET /ws/aiSocket from 127.0.0.1:57452
+2024/09/18 21:21:45 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57452
+2024/09/18 21:21:45 WebSocket connection for ChatGPT established with 127.0.0.1:57452
+2024/09/18 21:21:45 Received request: GET /ws/codeSocket from 127.0.0.1:57453
+2024/09/18 21:21:45 Received message: {"type":"env_info"}
+2024/09/18 21:21:45 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:21:45 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:21:50 WebSocket connection for ChatGPT closed by 127.0.0.1:57452 with code 1001: 
+2024/09/18 21:21:50 ChatGPT WebSocket closed for 127.0.0.1:57452: websocket: close 1001 (going away)
+2024/09/18 21:21:50 Received request: GET /ws/codeSocket from 127.0.0.1:57457
+2024/09/18 21:21:50 Received message: {"type":"env_info"}
+2024/09/18 21:21:50 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:21:50 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:21:50 Received request: GET /ws/aiSocket from 127.0.0.1:57458
+2024/09/18 21:21:50 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57458
+2024/09/18 21:21:50 WebSocket connection for ChatGPT established with 127.0.0.1:57458
+2024/09/18 21:22:05 Received message: ping
+2024/09/18 21:22:05 Received pong from ChatGPT client: 127.0.0.1:57458
+2024/09/18 21:22:20 Received pong from ChatGPT client: 127.0.0.1:57458
+2024/09/18 21:22:21 Received message: ping
+2024/09/18 21:22:21 Error: websocket: close 1005 (no status)
+2024/09/18 21:22:26 Received request: GET /ws/codeSocket from 127.0.0.1:57471
+2024/09/18 21:22:26 Received message: {"type":"env_info"}
+2024/09/18 21:22:26 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:22:26 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:22:30 Error sending ping to 127.0.0.1:57452: write tcp 127.0.0.1:8080->127.0.0.1:57452: write: broken pipe
+2024/09/18 21:22:35 Received pong from ChatGPT client: 127.0.0.1:57458
+2024/09/18 21:22:41 Received message: ping
+2024/09/18 21:22:41 Error: websocket: close 1005 (no status)
+2024/09/18 21:22:46 Received request: GET /ws/codeSocket from 127.0.0.1:57474
+2024/09/18 21:22:46 Received message: {"type":"env_info"}
+2024/09/18 21:22:46 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:22:46 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:22:50 Received pong from ChatGPT client: 127.0.0.1:57458
+2024/09/18 21:23:01 Received message: ping
+2024/09/18 21:23:01 Error: websocket: close 1005 (no status)
+2024/09/18 21:23:05 Received pong from ChatGPT client: 127.0.0.1:57458
+2024/09/18 21:23:06 Received request: GET /ws/codeSocket from 127.0.0.1:57476
+2024/09/18 21:23:06 Received message: {"type":"env_info"}
+2024/09/18 21:23:06 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:23:06 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:23:20 Received pong from ChatGPT client: 127.0.0.1:57458
+2024/09/18 21:23:21 Received message: ping
+2024/09/18 21:23:21 Error: websocket: close 1005 (no status)
+2024/09/18 21:23:26 Received request: GET /ws/codeSocket from 127.0.0.1:57480
+2024/09/18 21:23:26 Received message: {"type":"env_info"}
+2024/09/18 21:23:26 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:23:26 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:23:35 Received pong from ChatGPT client: 127.0.0.1:57458
+2024/09/18 21:23:40 WebSocket connection for ChatGPT closed by 127.0.0.1:57458 with code 1001: 
+2024/09/18 21:23:40 ChatGPT WebSocket closed for 127.0.0.1:57458: websocket: close 1001 (going away)
+2024/09/18 21:23:40 Received request: GET /ws/codeSocket from 127.0.0.1:57485
+2024/09/18 21:23:40 Received request: GET /ws/aiSocket from 127.0.0.1:57486
+2024/09/18 21:23:40 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57486
+2024/09/18 21:23:40 WebSocket connection for ChatGPT established with 127.0.0.1:57486
+2024/09/18 21:23:40 Received message: {"type":"env_info"}
+2024/09/18 21:23:40 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:23:40 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:23:43 WebSocket connection for ChatGPT closed by 127.0.0.1:57486 with code 1001: 
+2024/09/18 21:23:43 ChatGPT WebSocket closed for 127.0.0.1:57486: websocket: close 1001 (going away)
+2024/09/18 21:23:46 Received request: GET /ws/codeSocket from 127.0.0.1:57497
+2024/09/18 21:23:46 Received request: GET /ws/aiSocket from 127.0.0.1:57498
+2024/09/18 21:23:46 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57498
+2024/09/18 21:23:46 WebSocket connection for ChatGPT established with 127.0.0.1:57498
+2024/09/18 21:23:46 Received message: {"type":"env_info"}
+2024/09/18 21:23:46 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:23:46 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:23:54 Received request: GET /ws/codeSocket from 127.0.0.1:57504
+2024/09/18 21:23:54 Received request: GET /ws/aiSocket from 127.0.0.1:57505
+2024/09/18 21:23:54 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57505
+2024/09/18 21:23:54 WebSocket connection for ChatGPT established with 127.0.0.1:57505
+2024/09/18 21:23:54 Received message: {"type":"env_info"}
+2024/09/18 21:23:54 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:23:54 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:24:09 Received pong from ChatGPT client: 127.0.0.1:57505
+2024/09/18 21:24:09 Received message: ping
+2024/09/18 21:24:20 Received request: POST /ws/deploySocket from 127.0.0.1:57507
+2024/09/18 21:24:24 Error: websocket: close 1005 (no status)
+2024/09/18 21:24:24 WebSocket connection for ChatGPT closed by 127.0.0.1:57505 with code 1005: 
+2024/09/18 21:24:24 ChatGPT WebSocket read error for 127.0.0.1:57505: websocket: close 1005 (no status)
+2024/09/18 21:25:09 Error sending ping to 127.0.0.1:57505: write tcp 127.0.0.1:8080->127.0.0.1:57505: write: broken pipe
+2024/09/18 21:26:10 Received request: GET /ws/codeSocket from 127.0.0.1:57547
+2024/09/18 21:26:10 Received request: GET /ws/aiSocket from 127.0.0.1:57548
+2024/09/18 21:26:10 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57548
+2024/09/18 21:26:10 WebSocket connection for ChatGPT established with 127.0.0.1:57548
+2024/09/18 21:26:10 Received message: {"type":"env_info"}
+2024/09/18 21:26:10 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:26:10 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:26:25 Received pong from ChatGPT client: 127.0.0.1:57548
+2024/09/18 21:26:25 Received message: ping
+2024/09/18 21:26:40 Received pong from ChatGPT client: 127.0.0.1:57548
+2024/09/18 21:26:40 Received message: ping
+2024/09/18 21:26:40 Error: websocket: close 1005 (no status)
+2024/09/18 21:26:45 Received request: GET /ws/codeSocket from 127.0.0.1:57549
+2024/09/18 21:26:45 Received message: {"type":"env_info"}
+2024/09/18 21:26:45 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:26:45 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:26:55 Received pong from ChatGPT client: 127.0.0.1:57548
+2024/09/18 21:27:00 Received message: ping
+2024/09/18 21:27:00 Error: websocket: close 1005 (no status)
+2024/09/18 21:27:05 Received request: GET /ws/codeSocket from 127.0.0.1:57550
+2024/09/18 21:27:05 Received message: {"type":"env_info"}
+2024/09/18 21:27:05 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:27:05 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:27:10 Received pong from ChatGPT client: 127.0.0.1:57548
+2024/09/18 21:27:20 Received message: ping
+2024/09/18 21:27:20 Error: websocket: close 1005 (no status)
+2024/09/18 21:27:25 Received pong from ChatGPT client: 127.0.0.1:57548
+2024/09/18 21:27:25 Received request: GET /ws/codeSocket from 127.0.0.1:57552
+2024/09/18 21:27:25 Received message: {"type":"env_info"}
+2024/09/18 21:27:25 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:27:25 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:27:29 WebSocket connection for ChatGPT closed by 127.0.0.1:57548 with code 1001: 
+2024/09/18 21:27:29 ChatGPT WebSocket closed for 127.0.0.1:57548: websocket: close 1001 (going away)
+2024/09/18 21:27:29 Received request: GET /ws/codeSocket from 127.0.0.1:57556
+2024/09/18 21:27:29 Received request: GET /ws/aiSocket from 127.0.0.1:57557
+2024/09/18 21:27:29 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57557
+2024/09/18 21:27:29 WebSocket connection for ChatGPT established with 127.0.0.1:57557
+2024/09/18 21:27:29 Received message: {"type":"env_info"}
+2024/09/18 21:27:29 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:27:29 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:27:39 WebSocket connection for ChatGPT closed by 127.0.0.1:57557 with code 1001: 
+2024/09/18 21:27:39 ChatGPT WebSocket closed for 127.0.0.1:57557: websocket: close 1001 (going away)
+2024/09/18 21:27:39 Received request: GET /ws/codeSocket from 127.0.0.1:57566
+2024/09/18 21:27:39 Received request: GET /ws/aiSocket from 127.0.0.1:57567
+2024/09/18 21:27:39 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57567
+2024/09/18 21:27:39 WebSocket connection for ChatGPT established with 127.0.0.1:57567
+2024/09/18 21:27:39 Received message: {"type":"env_info"}
+2024/09/18 21:27:39 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:27:39 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:27:53 Received request: GET /ws/codeSocket from 127.0.0.1:57570
+2024/09/18 21:27:53 Received request: GET /ws/aiSocket from 127.0.0.1:57571
+2024/09/18 21:27:53 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57571
+2024/09/18 21:27:53 WebSocket connection for ChatGPT established with 127.0.0.1:57571
+2024/09/18 21:27:53 Received message: {"type":"env_info"}
+2024/09/18 21:27:53 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:27:53 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:27:57 WebSocket connection for ChatGPT closed by 127.0.0.1:57571 with code 1001: 
+2024/09/18 21:27:57 ChatGPT WebSocket closed for 127.0.0.1:57571: websocket: close 1001 (going away)
+2024/09/18 21:27:57 Received request: GET /ws/codeSocket from 127.0.0.1:57575
+2024/09/18 21:27:57 Received request: GET /ws/aiSocket from 127.0.0.1:57576
+2024/09/18 21:27:57 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57576
+2024/09/18 21:27:57 WebSocket connection for ChatGPT established with 127.0.0.1:57576
+2024/09/18 21:27:57 Received message: {"type":"env_info"}
+2024/09/18 21:27:57 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:27:57 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:28:12 Received pong from ChatGPT client: 127.0.0.1:57576
+2024/09/18 21:28:12 Received message: ping
+2024/09/18 21:28:23 Received request: GET /ws/aiSocket from 127.0.0.1:57584
+2024/09/18 21:28:23 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57584
+2024/09/18 21:28:23 WebSocket connection for ChatGPT established with 127.0.0.1:57584
+2024/09/18 21:28:23 Received request: GET /ws/codeSocket from 127.0.0.1:57585
+2024/09/18 21:28:23 Received message: {"type":"env_info"}
+2024/09/18 21:28:23 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:28:23 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:28:26 WebSocket connection for ChatGPT closed by 127.0.0.1:57584 with code 1001: 
+2024/09/18 21:28:26 ChatGPT WebSocket closed for 127.0.0.1:57584: websocket: close 1001 (going away)
+2024/09/18 21:28:26 Received request: GET /ws/codeSocket from 127.0.0.1:57589
+2024/09/18 21:28:26 Received request: GET /ws/aiSocket from 127.0.0.1:57590
+2024/09/18 21:28:26 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57590
+2024/09/18 21:28:26 WebSocket connection for ChatGPT established with 127.0.0.1:57590
+2024/09/18 21:28:26 Received message: {"type":"env_info"}
+2024/09/18 21:28:26 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:28:26 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:28:29 WebSocket connection for ChatGPT closed by 127.0.0.1:57590 with code 1001: 
+2024/09/18 21:28:29 ChatGPT WebSocket closed for 127.0.0.1:57590: websocket: close 1001 (going away)
+2024/09/18 21:28:29 Received request: GET /ws/codeSocket from 127.0.0.1:57592
+2024/09/18 21:28:29 Received request: GET /ws/aiSocket from 127.0.0.1:57593
+2024/09/18 21:28:29 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57593
+2024/09/18 21:28:29 WebSocket connection for ChatGPT established with 127.0.0.1:57593
+2024/09/18 21:28:29 Received message: {"type":"env_info"}
+2024/09/18 21:28:29 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:28:29 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:28:44 Received pong from ChatGPT client: 127.0.0.1:57593
+2024/09/18 21:28:44 Received message: ping
+2024/09/18 21:28:59 Received pong from ChatGPT client: 127.0.0.1:57593
+2024/09/18 21:28:59 Received message: ping
+2024/09/18 21:29:00 Error: websocket: close 1005 (no status)
+2024/09/18 21:29:05 Received request: GET /ws/codeSocket from 127.0.0.1:57595
+2024/09/18 21:29:05 Received message: {"type":"env_info"}
+2024/09/18 21:29:05 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:29:05 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:29:08 Error sending ping to 127.0.0.1:57584: write tcp 127.0.0.1:8080->127.0.0.1:57584: write: broken pipe
+2024/09/18 21:29:11 Error sending ping to 127.0.0.1:57590: write tcp 127.0.0.1:8080->127.0.0.1:57590: write: broken pipe
+2024/09/18 21:29:14 Received pong from ChatGPT client: 127.0.0.1:57593
+2024/09/18 21:29:15 WebSocket connection for ChatGPT closed by 127.0.0.1:57593 with code 1001: 
+2024/09/18 21:29:15 ChatGPT WebSocket closed for 127.0.0.1:57593: websocket: close 1001 (going away)
+2024/09/18 21:29:15 Received request: GET /ws/codeSocket from 127.0.0.1:57599
+2024/09/18 21:29:15 Received request: GET /ws/aiSocket from 127.0.0.1:57600
+2024/09/18 21:29:15 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57600
+2024/09/18 21:29:15 WebSocket connection for ChatGPT established with 127.0.0.1:57600
+2024/09/18 21:29:15 Received message: {"type":"env_info"}
+2024/09/18 21:29:15 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:29:15 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:29:30 Received pong from ChatGPT client: 127.0.0.1:57600
+2024/09/18 21:29:30 Received message: ping
+2024/09/18 21:29:33 WebSocket connection for ChatGPT closed by 127.0.0.1:57600 with code 1001: 
+2024/09/18 21:29:33 ChatGPT WebSocket closed for 127.0.0.1:57600: websocket: close 1001 (going away)
+2024/09/18 21:29:34 Received request: GET /ws/codeSocket from 127.0.0.1:57604
+2024/09/18 21:29:34 Received message: {"type":"env_info"}
+2024/09/18 21:29:34 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:29:34 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:29:34 Received request: GET /ws/aiSocket from 127.0.0.1:57605
+2024/09/18 21:29:34 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57605
+2024/09/18 21:29:34 WebSocket connection for ChatGPT established with 127.0.0.1:57605
+2024/09/18 21:29:35 WebSocket connection for ChatGPT closed by 127.0.0.1:57605 with code 1001: 
+2024/09/18 21:29:35 ChatGPT WebSocket closed for 127.0.0.1:57605: websocket: close 1001 (going away)
+2024/09/18 21:29:36 Received request: GET /ws/codeSocket from 127.0.0.1:57607
+2024/09/18 21:29:36 Received request: GET /ws/aiSocket from 127.0.0.1:57608
+2024/09/18 21:29:36 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57608
+2024/09/18 21:29:36 WebSocket connection for ChatGPT established with 127.0.0.1:57608
+2024/09/18 21:29:36 Received message: {"type":"env_info"}
+2024/09/18 21:29:36 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:29:36 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:29:51 Received pong from ChatGPT client: 127.0.0.1:57608
+2024/09/18 21:29:51 Received message: ping
+2024/09/18 21:29:59 Error sending ping to 127.0.0.1:57593: write tcp 127.0.0.1:8080->127.0.0.1:57593: write: broken pipe
+2024/09/18 21:30:01 Received request: POST /ws/deploySocket from 127.0.0.1:57610
+2024/09/18 21:30:05 Error: websocket: close 1005 (no status)
+2024/09/18 21:30:05 WebSocket connection for ChatGPT closed by 127.0.0.1:57608 with code 1005: 
+2024/09/18 21:30:05 ChatGPT WebSocket read error for 127.0.0.1:57608: websocket: close 1005 (no status)
+2024/09/18 21:30:15 Error sending ping to 127.0.0.1:57600: write tcp 127.0.0.1:8080->127.0.0.1:57600: write: broken pipe
+2024/09/18 21:30:19 Error sending ping to 127.0.0.1:57605: write tcp 127.0.0.1:8080->127.0.0.1:57605: write: broken pipe
+2024/09/18 21:30:23 Received request: GET /ws/codeSocket from 127.0.0.1:57626
+2024/09/18 21:30:23 Received request: GET /ws/aiSocket from 127.0.0.1:57627
+2024/09/18 21:30:23 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57627
+2024/09/18 21:30:23 WebSocket connection for ChatGPT established with 127.0.0.1:57627
+2024/09/18 21:30:23 Received message: {"type":"env_info"}
+2024/09/18 21:30:23 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:30:23 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:30:31 WebSocket connection for ChatGPT closed by 127.0.0.1:57627 with code 1001: 
+2024/09/18 21:30:31 ChatGPT WebSocket closed for 127.0.0.1:57627: websocket: close 1001 (going away)
+2024/09/18 21:30:31 Received request: GET /ws/codeSocket from 127.0.0.1:57631
+2024/09/18 21:30:31 Received request: GET /ws/aiSocket from 127.0.0.1:57632
+2024/09/18 21:30:31 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57632
+2024/09/18 21:30:31 WebSocket connection for ChatGPT established with 127.0.0.1:57632
+2024/09/18 21:30:31 Received message: {"type":"env_info"}
+2024/09/18 21:30:31 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:30:31 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:30:41 WebSocket connection for ChatGPT closed by 127.0.0.1:57632 with code 1001: 
+2024/09/18 21:30:41 ChatGPT WebSocket closed for 127.0.0.1:57632: websocket: close 1001 (going away)
+2024/09/18 21:30:41 Received request: GET /ws/codeSocket from 127.0.0.1:57637
+2024/09/18 21:30:41 Received request: GET /ws/aiSocket from 127.0.0.1:57638
+2024/09/18 21:30:41 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57638
+2024/09/18 21:30:41 WebSocket connection for ChatGPT established with 127.0.0.1:57638
+2024/09/18 21:30:41 Received message: {"type":"env_info"}
+2024/09/18 21:30:41 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:30:41 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:30:51 Error sending ping to 127.0.0.1:57608: write tcp 127.0.0.1:8080->127.0.0.1:57608: write: broken pipe
+2024/09/18 21:30:56 Received pong from ChatGPT client: 127.0.0.1:57638
+2024/09/18 21:30:57 Received message: ping
+2024/09/18 21:31:08 Error sending ping to 127.0.0.1:57627: write tcp 127.0.0.1:8080->127.0.0.1:57627: write: broken pipe
+2024/09/18 21:31:11 Received pong from ChatGPT client: 127.0.0.1:57638
+2024/09/18 21:31:12 Received message: ping
+2024/09/18 21:31:12 Error: websocket: close 1005 (no status)
+2024/09/18 21:31:17 Received request: GET /ws/codeSocket from 127.0.0.1:57657
+2024/09/18 21:31:17 Received message: {"type":"env_info"}
+2024/09/18 21:31:17 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:31:17 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:31:25 WebSocket connection for ChatGPT closed by 127.0.0.1:57638 with code 1001: 
+2024/09/18 21:31:25 ChatGPT WebSocket closed for 127.0.0.1:57638: websocket: close 1001 (going away)
+2024/09/18 21:31:25 Received request: GET /ws/codeSocket from 127.0.0.1:57661
+2024/09/18 21:31:25 Received request: GET /ws/aiSocket from 127.0.0.1:57662
+2024/09/18 21:31:25 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57662
+2024/09/18 21:31:25 WebSocket connection for ChatGPT established with 127.0.0.1:57662
+2024/09/18 21:31:25 Received message: {"type":"env_info"}
+2024/09/18 21:31:25 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:31:25 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:31:31 Error sending ping to 127.0.0.1:57632: write tcp 127.0.0.1:8080->127.0.0.1:57632: write: broken pipe
+2024/09/18 21:31:40 Received pong from ChatGPT client: 127.0.0.1:57662
+2024/09/18 21:31:41 Received message: ping
+2024/09/18 21:31:55 Received pong from ChatGPT client: 127.0.0.1:57662
+2024/09/18 21:31:56 Received message: ping
+2024/09/18 21:31:56 Error: websocket: close 1005 (no status)
+2024/09/18 21:32:00 Received request: GET /ws/codeSocket from 127.0.0.1:57672
+2024/09/18 21:32:00 Received request: GET /ws/aiSocket from 127.0.0.1:57673
+2024/09/18 21:32:00 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57673
+2024/09/18 21:32:00 WebSocket connection for ChatGPT established with 127.0.0.1:57673
+2024/09/18 21:32:00 Received message: {"type":"env_info"}
+2024/09/18 21:32:00 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:32:00 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:32:14 Received message: def samples(iteration, total, length=40):
+    percent = (iteration / total) * 100
+    filled_length = int(length * iteration // total)
+    bar = '#' * filled_length + '-' * (length - filled_length)
+    print(f'\r[{bar}] {percent:.2f}% Complete', end='')
+
+# Example usage
+total = 100
+for i in range(total + 1):
+    samples(i, total)
+    # Simulate work being done
+    for _ in range(1000000):
+        pass
+2024/09/18 21:32:14 Writing code to file /var/folders/cv/lyq7thfd5vq3gsdqhrns_qdr0000gn/T/python_exec_4107179869/code_1726720334296820000.py: def samples(iteration, total, length=40):
+    percent = (iteration / total) * 100
+    filled_length = int(length * iteration // total)
+    bar = '#' * filled_length + '-' * (length - filled_length)
+    print(f'\r[{bar}] {percent:.2f}% Complete', end='')
+
+# Example usage
+total = 100
+for i in range(total + 1):
+    samples(i, total)
+    # Simulate work being done
+    for _ in range(1000000):
+        pass
+2024/09/18 21:32:14 Running Python code
+2024/09/18 21:32:15 Received pong from ChatGPT client: 127.0.0.1:57673
+2024/09/18 21:32:15 Received message: ping
+2024/09/18 21:32:16 Python output: [----------------------------------------] 0.00% Complete[----------------------------------------] 1.00% Complete[----------------------------------------] 2.00% Complete[#---------------------------------------] 3.00% Complete[#---------------------------------------] 4.00% Complete[##--------------------------------------] 5.00% Complete[##--------------------------------------] 6.00% Complete[##--------------------------------------] 7.00% Complete[###-------------------------------------] 8.00% Complete[###-------------------------------------] 9.00% Complete[####------------------------------------] 10.00% Complete[####------------------------------------] 11.00% Complete[####------------------------------------] 12.00% Complete[#####-----------------------------------] 13.00% Complete[#####-----------------------------------] 14.00% Complete[######----------------------------------] 15.00% Complete[######----------------------------------] 16.00% Complete[######----------------------------------] 17.00% Complete[#######---------------------------------] 18.00% Complete[#######---------------------------------] 19.00% Complete[########--------------------------------] 20.00% Complete[########--------------------------------] 21.00% Complete[########--------------------------------] 22.00% Complete[#########-------------------------------] 23.00% Complete[#########-------------------------------] 24.00% Complete[##########------------------------------] 25.00% Complete[##########------------------------------] 26.00% Complete[##########------------------------------] 27.00% Complete[###########-----------------------------] 28.00% Complete[###########-----------------------------] 29.00% Complete[############----------------------------] 30.00% Complete[############----------------------------] 31.00% Complete[############----------------------------] 32.00% Complete[#############---------------------------] 33.00% Complete[#############---------------------------] 34.00% Complete[##############--------------------------] 35.00% Complete[##############--------------------------] 36.00% Complete[##############--------------------------] 37.00% Complete[###############-------------------------] 38.00% Complete[###############-------------------------] 39.00% Complete[################------------------------] 40.00% Complete[################------------------------] 41.00% Complete[################------------------------] 42.00% Complete[#################-----------------------] 43.00% Complete[#################-----------------------] 44.00% Complete[##################----------------------] 45.00% Complete[##################----------------------] 46.00% Complete[##################----------------------] 47.00% Complete[###################---------------------] 48.00% Complete[###################---------------------] 49.00% Complete[####################--------------------] 50.00% Complete[####################--------------------] 51.00% Complete[####################--------------------] 52.00% Complete[#####################-------------------] 53.00% Complete[#####################-------------------] 54.00% Complete[######################------------------] 55.00% Complete[######################------------------] 56.00% Complete[######################------------------] 57.00% Complete[#######################-----------------] 58.00% Complete[#######################-----------------] 59.00% Complete[########################----------------] 60.00% Complete[########################----------------] 61.00% Complete[########################----------------] 62.00% Complete[#########################---------------] 63.00% Complete[#########################---------------] 64.00% Complete[##########################--------------] 65.00% Complete[##########################--------------] 66.00% Complete[##########################--------------] 67.00% Complete[###########################-------------] 68.00% Complete[###########################-------------] 69.00% Complete[############################------------] 70.00% Complete[############################------------] 71.00% Complete[############################------------] 72.00% Complete[#############################-----------] 73.00% Complete[#############################-----------] 74.00% Complete[##############################----------] 75.00% Complete[##############################----------] 76.00% Complete[##############################----------] 77.00% Complete[###############################---------] 78.00% Complete[###############################---------] 79.00% Complete[################################--------] 80.00% Complete[################################--------] 81.00% Complete[################################--------] 82.00% Complete[#################################-------] 83.00% Complete[#################################-------] 84.00% Complete[##################################------] 85.00% Complete[##################################------] 86.00% Complete[##################################------] 87.00% Complete[###################################-----] 88.00% Complete[###################################-----] 89.00% Complete[####################################----] 90.00% Complete[####################################----] 91.00% Complete[####################################----] 92.00% Complete[#####################################---] 93.00% Complete[#####################################---] 94.00% Complete[######################################--] 95.00% Complete[######################################--] 96.00% Complete[######################################--] 97.00% Complete[#######################################-] 98.00% Complete[#######################################-] 99.00% Complete[########################################] 100.00% Complete
+2024/09/18 21:32:16 Sending output: {"type":"python_output","content":"[----------------------------------------] 0.00% Complete\r[----------------------------------------] 1.00% Complete\r[----------------------------------------] 2.00% Complete\r[#---------------------------------------] 3.00% Complete\r[#---------------------------------------] 4.00% Complete\r[##--------------------------------------] 5.00% Complete\r[##--------------------------------------] 6.00% Complete\r[##--------------------------------------] 7.00% Complete\r[###-------------------------------------] 8.00% Complete\r[###-------------------------------------] 9.00% Complete\r[####------------------------------------] 10.00% Complete\r[####------------------------------------] 11.00% Complete\r[####------------------------------------] 12.00% Complete\r[#####-----------------------------------] 13.00% Complete\r[#####-----------------------------------] 14.00% Complete\r[######----------------------------------] 15.00% Complete\r[######----------------------------------] 16.00% Complete\r[######----------------------------------] 17.00% Complete\r[#######---------------------------------] 18.00% Complete\r[#######---------------------------------] 19.00% Complete\r[########--------------------------------] 20.00% Complete\r[########--------------------------------] 21.00% Complete\r[########--------------------------------] 22.00% Complete\r[#########-------------------------------] 23.00% Complete\r[#########-------------------------------] 24.00% Complete\r[##########------------------------------] 25.00% Complete\r[##########------------------------------] 26.00% Complete\r[##########------------------------------] 27.00% Complete\r[###########-----------------------------] 28.00% Complete\r[###########-----------------------------] 29.00% Complete\r[############----------------------------] 30.00% Complete\r[############----------------------------] 31.00% Complete\r[############----------------------------] 32.00% Complete\r[#############---------------------------] 33.00% Complete\r[#############---------------------------] 34.00% Complete\r[##############--------------------------] 35.00% Complete\r[##############--------------------------] 36.00% Complete\r[##############--------------------------] 37.00% Complete\r[###############-------------------------] 38.00% Complete\r[###############-------------------------] 39.00% Complete\r[################------------------------] 40.00% Complete\r[################------------------------] 41.00% Complete\r[################------------------------] 42.00% Complete\r[#################-----------------------] 43.00% Complete\r[#################-----------------------] 44.00% Complete\r[##################----------------------] 45.00% Complete\r[##################----------------------] 46.00% Complete\r[##################----------------------] 47.00% Complete\r[###################---------------------] 48.00% Complete\r[###################---------------------] 49.00% Complete\r[####################--------------------] 50.00% Complete\r[####################--------------------] 51.00% Complete\r[####################--------------------] 52.00% Complete\r[#####################-------------------] 53.00% Complete\r[#####################-------------------] 54.00% Complete\r[######################------------------] 55.00% Complete\r[######################------------------] 56.00% Complete\r[######################------------------] 57.00% Complete\r[#######################-----------------] 58.00% Complete\r[#######################-----------------] 59.00% Complete\r[########################----------------] 60.00% Complete\r[########################----------------] 61.00% Complete\r[########################----------------] 62.00% Complete\r[#########################---------------] 63.00% Complete\r[#########################---------------] 64.00% Complete\r[##########################--------------] 65.00% Complete\r[##########################--------------] 66.00% Complete\r[##########################--------------] 67.00% Complete\r[###########################-------------] 68.00% Complete\r[###########################-------------] 69.00% Complete\r[############################------------] 70.00% Complete\r[############################------------] 71.00% Complete\r[############################------------] 72.00% Complete\r[#############################-----------] 73.00% Complete\r[#############################-----------] 74.00% Complete\r[##############################----------] 75.00% Complete\r[##############################----------] 76.00% Complete\r[##############################----------] 77.00% Complete\r[###############################---------] 78.00% Complete\r[###############################---------] 79.00% Complete\r[################################--------] 80.00% Complete\r[################################--------] 81.00% Complete\r[################################--------] 82.00% Complete\r[#################################-------] 83.00% Complete\r[#################################-------] 84.00% Complete\r[##################################------] 85.00% Complete\r[##################################------] 86.00% Complete\r[##################################------] 87.00% Complete\r[###################################-----] 88.00% Complete\r[###################################-----] 89.00% Complete\r[####################################----] 90.00% Complete\r[####################################----] 91.00% Complete\r[####################################----] 92.00% Complete\r[#####################################---] 93.00% Complete\r[#####################################---] 94.00% Complete\r[######################################--] 95.00% Complete\r[######################################--] 96.00% Complete\r[######################################--] 97.00% Complete\r[#######################################-] 98.00% Complete\r[#######################################-] 99.00% Complete\r[########################################] 100.00% Complete"}
+2024/09/18 21:32:16 Done with Python code execution
+2024/09/18 21:32:18 WebSocket connection for ChatGPT closed by 127.0.0.1:57673 with code 1001: 
+2024/09/18 21:32:18 ChatGPT WebSocket closed for 127.0.0.1:57673: websocket: close 1001 (going away)
+2024/09/18 21:32:18 Received request: GET /ws/codeSocket from 127.0.0.1:57678
+2024/09/18 21:32:18 Received request: GET /ws/aiSocket from 127.0.0.1:57679
+2024/09/18 21:32:18 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57679
+2024/09/18 21:32:18 WebSocket connection for ChatGPT established with 127.0.0.1:57679
+2024/09/18 21:32:18 Received message: {"type":"env_info"}
+2024/09/18 21:32:18 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:32:18 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:32:19 Received message: def samples(iteration, total, length=40):
+    percent = (iteration / total) * 100
+    filled_length = int(length * iteration // total)
+    bar = '#' * filled_length + '-' * (length - filled_length)
+    print(f'\r[{bar}] {percent:.2f}% Complete', end='')
+
+# Example usage
+total = 100
+for i in range(total + 1):
+    samples(i, total)
+    # Simulate work being done
+    for _ in range(1000000):
+        pass
+2024/09/18 21:32:19 Writing code to file /var/folders/cv/lyq7thfd5vq3gsdqhrns_qdr0000gn/T/python_exec_4234976402/code_1726720339251843000.py: def samples(iteration, total, length=40):
+    percent = (iteration / total) * 100
+    filled_length = int(length * iteration // total)
+    bar = '#' * filled_length + '-' * (length - filled_length)
+    print(f'\r[{bar}] {percent:.2f}% Complete', end='')
+
+# Example usage
+total = 100
+for i in range(total + 1):
+    samples(i, total)
+    # Simulate work being done
+    for _ in range(1000000):
+        pass
+2024/09/18 21:32:19 Running Python code
+2024/09/18 21:32:21 Python output: [----------------------------------------] 0.00% Complete[----------------------------------------] 1.00% Complete[----------------------------------------] 2.00% Complete[#---------------------------------------] 3.00% Complete[#---------------------------------------] 4.00% Complete[##--------------------------------------] 5.00% Complete[##--------------------------------------] 6.00% Complete[##--------------------------------------] 7.00% Complete[###-------------------------------------] 8.00% Complete[###-------------------------------------] 9.00% Complete[####------------------------------------] 10.00% Complete[####------------------------------------] 11.00% Complete[####------------------------------------] 12.00% Complete[#####-----------------------------------] 13.00% Complete[#####-----------------------------------] 14.00% Complete[######----------------------------------] 15.00% Complete[######----------------------------------] 16.00% Complete[######----------------------------------] 17.00% Complete[#######---------------------------------] 18.00% Complete[#######---------------------------------] 19.00% Complete[########--------------------------------] 20.00% Complete[########--------------------------------] 21.00% Complete[########--------------------------------] 22.00% Complete[#########-------------------------------] 23.00% Complete[#########-------------------------------] 24.00% Complete[##########------------------------------] 25.00% Complete[##########------------------------------] 26.00% Complete[##########------------------------------] 27.00% Complete[###########-----------------------------] 28.00% Complete[###########-----------------------------] 29.00% Complete[############----------------------------] 30.00% Complete[############----------------------------] 31.00% Complete[############----------------------------] 32.00% Complete[#############---------------------------] 33.00% Complete[#############---------------------------] 34.00% Complete[##############--------------------------] 35.00% Complete[##############--------------------------] 36.00% Complete[##############--------------------------] 37.00% Complete[###############-------------------------] 38.00% Complete[###############-------------------------] 39.00% Complete[################------------------------] 40.00% Complete[################------------------------] 41.00% Complete[################------------------------] 42.00% Complete[#################-----------------------] 43.00% Complete[#################-----------------------] 44.00% Complete[##################----------------------] 45.00% Complete[##################----------------------] 46.00% Complete[##################----------------------] 47.00% Complete[###################---------------------] 48.00% Complete[###################---------------------] 49.00% Complete[####################--------------------] 50.00% Complete[####################--------------------] 51.00% Complete[####################--------------------] 52.00% Complete[#####################-------------------] 53.00% Complete[#####################-------------------] 54.00% Complete[######################------------------] 55.00% Complete[######################------------------] 56.00% Complete[######################------------------] 57.00% Complete[#######################-----------------] 58.00% Complete[#######################-----------------] 59.00% Complete[########################----------------] 60.00% Complete[########################----------------] 61.00% Complete[########################----------------] 62.00% Complete[#########################---------------] 63.00% Complete[#########################---------------] 64.00% Complete[##########################--------------] 65.00% Complete[##########################--------------] 66.00% Complete[##########################--------------] 67.00% Complete[###########################-------------] 68.00% Complete[###########################-------------] 69.00% Complete[############################------------] 70.00% Complete[############################------------] 71.00% Complete[############################------------] 72.00% Complete[#############################-----------] 73.00% Complete[#############################-----------] 74.00% Complete[##############################----------] 75.00% Complete[##############################----------] 76.00% Complete[##############################----------] 77.00% Complete[###############################---------] 78.00% Complete[###############################---------] 79.00% Complete[################################--------] 80.00% Complete[################################--------] 81.00% Complete[################################--------] 82.00% Complete[#################################-------] 83.00% Complete[#################################-------] 84.00% Complete[##################################------] 85.00% Complete[##################################------] 86.00% Complete[##################################------] 87.00% Complete[###################################-----] 88.00% Complete[###################################-----] 89.00% Complete[####################################----] 90.00% Complete[####################################----] 91.00% Complete[####################################----] 92.00% Complete[#####################################---] 93.00% Complete[#####################################---] 94.00% Complete[######################################--] 95.00% Complete[######################################--] 96.00% Complete[######################################--] 97.00% Complete[#######################################-] 98.00% Complete[#######################################-] 99.00% Complete[########################################] 100.00% Complete
+2024/09/18 21:32:21 Sending output: {"type":"python_output","content":"[----------------------------------------] 0.00% Complete\r[----------------------------------------] 1.00% Complete\r[----------------------------------------] 2.00% Complete\r[#---------------------------------------] 3.00% Complete\r[#---------------------------------------] 4.00% Complete\r[##--------------------------------------] 5.00% Complete\r[##--------------------------------------] 6.00% Complete\r[##--------------------------------------] 7.00% Complete\r[###-------------------------------------] 8.00% Complete\r[###-------------------------------------] 9.00% Complete\r[####------------------------------------] 10.00% Complete\r[####------------------------------------] 11.00% Complete\r[####------------------------------------] 12.00% Complete\r[#####-----------------------------------] 13.00% Complete\r[#####-----------------------------------] 14.00% Complete\r[######----------------------------------] 15.00% Complete\r[######----------------------------------] 16.00% Complete\r[######----------------------------------] 17.00% Complete\r[#######---------------------------------] 18.00% Complete\r[#######---------------------------------] 19.00% Complete\r[########--------------------------------] 20.00% Complete\r[########--------------------------------] 21.00% Complete\r[########--------------------------------] 22.00% Complete\r[#########-------------------------------] 23.00% Complete\r[#########-------------------------------] 24.00% Complete\r[##########------------------------------] 25.00% Complete\r[##########------------------------------] 26.00% Complete\r[##########------------------------------] 27.00% Complete\r[###########-----------------------------] 28.00% Complete\r[###########-----------------------------] 29.00% Complete\r[############----------------------------] 30.00% Complete\r[############----------------------------] 31.00% Complete\r[############----------------------------] 32.00% Complete\r[#############---------------------------] 33.00% Complete\r[#############---------------------------] 34.00% Complete\r[##############--------------------------] 35.00% Complete\r[##############--------------------------] 36.00% Complete\r[##############--------------------------] 37.00% Complete\r[###############-------------------------] 38.00% Complete\r[###############-------------------------] 39.00% Complete\r[################------------------------] 40.00% Complete\r[################------------------------] 41.00% Complete\r[################------------------------] 42.00% Complete\r[#################-----------------------] 43.00% Complete\r[#################-----------------------] 44.00% Complete\r[##################----------------------] 45.00% Complete\r[##################----------------------] 46.00% Complete\r[##################----------------------] 47.00% Complete\r[###################---------------------] 48.00% Complete\r[###################---------------------] 49.00% Complete\r[####################--------------------] 50.00% Complete\r[####################--------------------] 51.00% Complete\r[####################--------------------] 52.00% Complete\r[#####################-------------------] 53.00% Complete\r[#####################-------------------] 54.00% Complete\r[######################------------------] 55.00% Complete\r[######################------------------] 56.00% Complete\r[######################------------------] 57.00% Complete\r[#######################-----------------] 58.00% Complete\r[#######################-----------------] 59.00% Complete\r[########################----------------] 60.00% Complete\r[########################----------------] 61.00% Complete\r[########################----------------] 62.00% Complete\r[#########################---------------] 63.00% Complete\r[#########################---------------] 64.00% Complete\r[##########################--------------] 65.00% Complete\r[##########################--------------] 66.00% Complete\r[##########################--------------] 67.00% Complete\r[###########################-------------] 68.00% Complete\r[###########################-------------] 69.00% Complete\r[############################------------] 70.00% Complete\r[############################------------] 71.00% Complete\r[############################------------] 72.00% Complete\r[#############################-----------] 73.00% Complete\r[#############################-----------] 74.00% Complete\r[##############################----------] 75.00% Complete\r[##############################----------] 76.00% Complete\r[##############################----------] 77.00% Complete\r[###############################---------] 78.00% Complete\r[###############################---------] 79.00% Complete\r[################################--------] 80.00% Complete\r[################################--------] 81.00% Complete\r[################################--------] 82.00% Complete\r[#################################-------] 83.00% Complete\r[#################################-------] 84.00% Complete\r[##################################------] 85.00% Complete\r[##################################------] 86.00% Complete\r[##################################------] 87.00% Complete\r[###################################-----] 88.00% Complete\r[###################################-----] 89.00% Complete\r[####################################----] 90.00% Complete\r[####################################----] 91.00% Complete\r[####################################----] 92.00% Complete\r[#####################################---] 93.00% Complete\r[#####################################---] 94.00% Complete\r[######################################--] 95.00% Complete\r[######################################--] 96.00% Complete\r[######################################--] 97.00% Complete\r[#######################################-] 98.00% Complete\r[#######################################-] 99.00% Complete\r[########################################] 100.00% Complete"}
+2024/09/18 21:32:21 Done with Python code execution
+2024/09/18 21:32:26 Received request: GET /ws/codeSocket from 127.0.0.1:57689
+2024/09/18 21:32:26 Received request: GET /ws/aiSocket from 127.0.0.1:57690
+2024/09/18 21:32:26 Attempting to upgrade connection to WebSocket for ChatGPT: 127.0.0.1:57690
+2024/09/18 21:32:26 WebSocket connection for ChatGPT established with 127.0.0.1:57690
+2024/09/18 21:32:26 Received message: {"type":"env_info"}
+2024/09/18 21:32:26 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:32:26 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:32:28 Received message: def samples(iteration, total, length=40):
+    percent = (iteration / total) * 100
+    filled_length = int(length * iteration // total)
+    bar = '#' * filled_length + '-' * (length - filled_length)
+    print(f'\r[{bar}] {percent:.2f}% Complete', end='')
+
+# Example usage
+total = 100
+for i in range(total + 1):
+    samples(i, total)
+    # Simulate work being done
+    for _ in range(1000000):
+        pass
+2024/09/18 21:32:28 Writing code to file /var/folders/cv/lyq7thfd5vq3gsdqhrns_qdr0000gn/T/python_exec_493474019/code_1726720348215082000.py: def samples(iteration, total, length=40):
+    percent = (iteration / total) * 100
+    filled_length = int(length * iteration // total)
+    bar = '#' * filled_length + '-' * (length - filled_length)
+    print(f'\r[{bar}] {percent:.2f}% Complete', end='')
+
+# Example usage
+total = 100
+for i in range(total + 1):
+    samples(i, total)
+    # Simulate work being done
+    for _ in range(1000000):
+        pass
+2024/09/18 21:32:28 Running Python code
+2024/09/18 21:32:29 Python output: [----------------------------------------] 0.00% Complete[----------------------------------------] 1.00% Complete[----------------------------------------] 2.00% Complete[#---------------------------------------] 3.00% Complete[#---------------------------------------] 4.00% Complete[##--------------------------------------] 5.00% Complete[##--------------------------------------] 6.00% Complete[##--------------------------------------] 7.00% Complete[###-------------------------------------] 8.00% Complete[###-------------------------------------] 9.00% Complete[####------------------------------------] 10.00% Complete[####------------------------------------] 11.00% Complete[####------------------------------------] 12.00% Complete[#####-----------------------------------] 13.00% Complete[#####-----------------------------------] 14.00% Complete[######----------------------------------] 15.00% Complete[######----------------------------------] 16.00% Complete[######----------------------------------] 17.00% Complete[#######---------------------------------] 18.00% Complete[#######---------------------------------] 19.00% Complete[########--------------------------------] 20.00% Complete[########--------------------------------] 21.00% Complete[########--------------------------------] 22.00% Complete[#########-------------------------------] 23.00% Complete[#########-------------------------------] 24.00% Complete[##########------------------------------] 25.00% Complete[##########------------------------------] 26.00% Complete[##########------------------------------] 27.00% Complete[###########-----------------------------] 28.00% Complete[###########-----------------------------] 29.00% Complete[############----------------------------] 30.00% Complete[############----------------------------] 31.00% Complete[############----------------------------] 32.00% Complete[#############---------------------------] 33.00% Complete[#############---------------------------] 34.00% Complete[##############--------------------------] 35.00% Complete[##############--------------------------] 36.00% Complete[##############--------------------------] 37.00% Complete[###############-------------------------] 38.00% Complete[###############-------------------------] 39.00% Complete[################------------------------] 40.00% Complete[################------------------------] 41.00% Complete[################------------------------] 42.00% Complete[#################-----------------------] 43.00% Complete[#################-----------------------] 44.00% Complete[##################----------------------] 45.00% Complete[##################----------------------] 46.00% Complete[##################----------------------] 47.00% Complete[###################---------------------] 48.00% Complete[###################---------------------] 49.00% Complete[####################--------------------] 50.00% Complete[####################--------------------] 51.00% Complete[####################--------------------] 52.00% Complete[#####################-------------------] 53.00% Complete[#####################-------------------] 54.00% Complete[######################------------------] 55.00% Complete[######################------------------] 56.00% Complete[######################------------------] 57.00% Complete[#######################-----------------] 58.00% Complete[#######################-----------------] 59.00% Complete[########################----------------] 60.00% Complete[########################----------------] 61.00% Complete[########################----------------] 62.00% Complete[#########################---------------] 63.00% Complete[#########################---------------] 64.00% Complete[##########################--------------] 65.00% Complete[##########################--------------] 66.00% Complete[##########################--------------] 67.00% Complete[###########################-------------] 68.00% Complete[###########################-------------] 69.00% Complete[############################------------] 70.00% Complete[############################------------] 71.00% Complete[############################------------] 72.00% Complete[#############################-----------] 73.00% Complete[#############################-----------] 74.00% Complete[##############################----------] 75.00% Complete[##############################----------] 76.00% Complete[##############################----------] 77.00% Complete[###############################---------] 78.00% Complete[###############################---------] 79.00% Complete[################################--------] 80.00% Complete[################################--------] 81.00% Complete[################################--------] 82.00% Complete[#################################-------] 83.00% Complete[#################################-------] 84.00% Complete[##################################------] 85.00% Complete[##################################------] 86.00% Complete[##################################------] 87.00% Complete[###################################-----] 88.00% Complete[###################################-----] 89.00% Complete[####################################----] 90.00% Complete[####################################----] 91.00% Complete[####################################----] 92.00% Complete[#####################################---] 93.00% Complete[#####################################---] 94.00% Complete[######################################--] 95.00% Complete[######################################--] 96.00% Complete[######################################--] 97.00% Complete[#######################################-] 98.00% Complete[#######################################-] 99.00% Complete[########################################] 100.00% Complete
+2024/09/18 21:32:29 Sending output: {"type":"python_output","content":"[----------------------------------------] 0.00% Complete\r[----------------------------------------] 1.00% Complete\r[----------------------------------------] 2.00% Complete\r[#---------------------------------------] 3.00% Complete\r[#---------------------------------------] 4.00% Complete\r[##--------------------------------------] 5.00% Complete\r[##--------------------------------------] 6.00% Complete\r[##--------------------------------------] 7.00% Complete\r[###-------------------------------------] 8.00% Complete\r[###-------------------------------------] 9.00% Complete\r[####------------------------------------] 10.00% Complete\r[####------------------------------------] 11.00% Complete\r[####------------------------------------] 12.00% Complete\r[#####-----------------------------------] 13.00% Complete\r[#####-----------------------------------] 14.00% Complete\r[######----------------------------------] 15.00% Complete\r[######----------------------------------] 16.00% Complete\r[######----------------------------------] 17.00% Complete\r[#######---------------------------------] 18.00% Complete\r[#######---------------------------------] 19.00% Complete\r[########--------------------------------] 20.00% Complete\r[########--------------------------------] 21.00% Complete\r[########--------------------------------] 22.00% Complete\r[#########-------------------------------] 23.00% Complete\r[#########-------------------------------] 24.00% Complete\r[##########------------------------------] 25.00% Complete\r[##########------------------------------] 26.00% Complete\r[##########------------------------------] 27.00% Complete\r[###########-----------------------------] 28.00% Complete\r[###########-----------------------------] 29.00% Complete\r[############----------------------------] 30.00% Complete\r[############----------------------------] 31.00% Complete\r[############----------------------------] 32.00% Complete\r[#############---------------------------] 33.00% Complete\r[#############---------------------------] 34.00% Complete\r[##############--------------------------] 35.00% Complete\r[##############--------------------------] 36.00% Complete\r[##############--------------------------] 37.00% Complete\r[###############-------------------------] 38.00% Complete\r[###############-------------------------] 39.00% Complete\r[################------------------------] 40.00% Complete\r[################------------------------] 41.00% Complete\r[################------------------------] 42.00% Complete\r[#################-----------------------] 43.00% Complete\r[#################-----------------------] 44.00% Complete\r[##################----------------------] 45.00% Complete\r[##################----------------------] 46.00% Complete\r[##################----------------------] 47.00% Complete\r[###################---------------------] 48.00% Complete\r[###################---------------------] 49.00% Complete\r[####################--------------------] 50.00% Complete\r[####################--------------------] 51.00% Complete\r[####################--------------------] 52.00% Complete\r[#####################-------------------] 53.00% Complete\r[#####################-------------------] 54.00% Complete\r[######################------------------] 55.00% Complete\r[######################------------------] 56.00% Complete\r[######################------------------] 57.00% Complete\r[#######################-----------------] 58.00% Complete\r[#######################-----------------] 59.00% Complete\r[########################----------------] 60.00% Complete\r[########################----------------] 61.00% Complete\r[########################----------------] 62.00% Complete\r[#########################---------------] 63.00% Complete\r[#########################---------------] 64.00% Complete\r[##########################--------------] 65.00% Complete\r[##########################--------------] 66.00% Complete\r[##########################--------------] 67.00% Complete\r[###########################-------------] 68.00% Complete\r[###########################-------------] 69.00% Complete\r[############################------------] 70.00% Complete\r[############################------------] 71.00% Complete\r[############################------------] 72.00% Complete\r[#############################-----------] 73.00% Complete\r[#############################-----------] 74.00% Complete\r[##############################----------] 75.00% Complete\r[##############################----------] 76.00% Complete\r[##############################----------] 77.00% Complete\r[###############################---------] 78.00% Complete\r[###############################---------] 79.00% Complete\r[################################--------] 80.00% Complete\r[################################--------] 81.00% Complete\r[################################--------] 82.00% Complete\r[#################################-------] 83.00% Complete\r[#################################-------] 84.00% Complete\r[##################################------] 85.00% Complete\r[##################################------] 86.00% Complete\r[##################################------] 87.00% Complete\r[###################################-----] 88.00% Complete\r[###################################-----] 89.00% Complete\r[####################################----] 90.00% Complete\r[####################################----] 91.00% Complete\r[####################################----] 92.00% Complete\r[#####################################---] 93.00% Complete\r[#####################################---] 94.00% Complete\r[######################################--] 95.00% Complete\r[######################################--] 96.00% Complete\r[######################################--] 97.00% Complete\r[#######################################-] 98.00% Complete\r[#######################################-] 99.00% Complete\r[########################################] 100.00% Complete"}
+2024/09/18 21:32:29 Done with Python code execution
+2024/09/18 21:32:41 Received pong from ChatGPT client: 127.0.0.1:57690
+2024/09/18 21:32:42 Received message: ping
+2024/09/18 21:32:56 Received pong from ChatGPT client: 127.0.0.1:57690
+2024/09/18 21:32:57 Received message: ping
+2024/09/18 21:32:57 Error: websocket: close 1005 (no status)
+2024/09/18 21:33:02 Received request: GET /ws/codeSocket from 127.0.0.1:57696
+2024/09/18 21:33:02 Received message: {"type":"env_info"}
+2024/09/18 21:33:02 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:33:02 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:33:03 Received message: {"type":"shell","content":"pwd"}
+2024/09/18 21:33:03 Executing shell command: pwd
+2024/09/18 21:33:03 Shell command output: /Users/emadsiddiq/Projects/pysync
+2024/09/18 21:33:03 Sending output: {"type":"shell_output","content":"/Users/emadsiddiq/Projects/pysync"}
+2024/09/18 21:33:04 Received message: {"type":"shell","content":"ls"}
+2024/09/18 21:33:04 Executing shell command: ls
+2024/09/18 21:33:04 Shell command output: README.md
+backend
+code.py
+dist
+frontend
+hello_world_what_a_life
+scripts
+server.log
+2024/09/18 21:33:04 Sending output: {"type":"shell_output","content":"README.md\nbackend\ncode.py\ndist\nfrontend\nhello_world_what_a_life\nscripts\nserver.log"}
+2024/09/18 21:33:11 Received pong from ChatGPT client: 127.0.0.1:57690
+2024/09/18 21:33:17 Received message: ping
+2024/09/18 21:33:17 Error: websocket: close 1005 (no status)
+2024/09/18 21:33:20 Received request: POST /ws/deploySocket from 127.0.0.1:57697
+2024/09/18 21:33:22 Received request: GET /ws/codeSocket from 127.0.0.1:57700
+2024/09/18 21:33:22 Received message: {"type":"env_info"}
+2024/09/18 21:33:22 Sending environment info: {"pythonPath":"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3","os":"macOS","username":"emadsiddiq","hostname":"Emads-MacBook.lan"}
+2024/09/18 21:33:22 Sending output: {"type":"env_info","content":"{\"pythonPath\":\"/Users/emadsiddiq/.pyenv/versions/3.9.19/bin/python3\",\"os\":\"macOS\",\"username\":\"emadsiddiq\",\"hostname\":\"Emads-MacBook.lan\"}"}
+2024/09/18 21:33:26 Received pong from ChatGPT client: 127.0.0.1:57690
+2024/09/18 21:33:30 WebSocket connection for ChatGPT closed by 127.0.0.1:57690 with code 1005: 
+2024/09/18 21:33:30 ChatGPT WebSocket read error for 127.0.0.1:57690: websocket: close 1005 (no status)
+2024/09/18 21:33:30 Error: websocket: close 1005 (no status)
+2024/09/18 21:34:11 Error sending ping to 127.0.0.1:57690: write tcp 127.0.0.1:8080->127.0.0.1:57690: write: broken pipe
+2024/09/18 21:37:00 Received request: POST /ws/deploySocket from 127.0.0.1:57767

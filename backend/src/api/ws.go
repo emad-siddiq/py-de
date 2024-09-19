@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -31,7 +32,6 @@ const (
 	pingPeriod     = (pongWait * 9) / 10
 	maxMessageSize = 512 * 1024
 	execTimeout    = 30 * time.Second
-	condaEnvName   = "pysync_env"
 )
 
 type Client struct {
@@ -275,8 +275,40 @@ func executeShellCommand(command string, out chan<- []byte) {
 }
 
 func sendEnvironmentInfo(out chan<- []byte) {
-	info := fmt.Sprintf("Conda Environment: %s\nPython Path: %s", condaEnvName, getPythonPath())
-	sendOutput(out, "env_info", info)
+	currentUser, err := user.Current()
+	if err != nil {
+		log.Printf("Error getting current user: %v", err)
+		currentUser = &user.User{Username: "unknown"}
+	}
+
+	osName := runtime.GOOS
+	if osName == "darwin" {
+		osName = "macOS"
+	}
+
+	hostname := getHostname()
+
+	info := struct {
+		PythonPath string `json:"pythonPath"`
+		OS         string `json:"os"`
+		Username   string `json:"username"`
+		Hostname   string `json:"hostname"`
+	}{
+		PythonPath: getPythonPath(),
+		OS:         osName,
+		Username:   currentUser.Username,
+		Hostname:   hostname,
+	}
+
+	jsonInfo, err := json.Marshal(info)
+	if err != nil {
+		log.Printf("Error marshaling environment info: %v", err)
+		sendOutput(out, "env_info", "Error getting environment info")
+		return
+	}
+
+	log.Printf("Sending environment info: %s", string(jsonInfo))
+	sendOutput(out, "env_info", string(jsonInfo))
 }
 
 func sendOutput(out chan<- []byte, outputType string, content string) {
@@ -288,4 +320,13 @@ func sendOutput(out chan<- []byte, outputType string, content string) {
 	}
 	log.Printf("Sending output: %s", string(jsonOutput))
 	out <- jsonOutput
+}
+
+func getHostname() string {
+	hostname, err := os.Hostname()
+	if err != nil {
+		log.Printf("Error getting hostname: %v", err)
+		return "unknown"
+	}
+	return hostname
 }

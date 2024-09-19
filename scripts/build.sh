@@ -86,48 +86,35 @@ npm install
 npm run build
 cd ../../../../ || exit
 
-# Determine the local processor architecture
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    ARCH=$(uname -m)
-    if [[ "$ARCH" == "arm64" ]]; then
-        GOARCH="arm64"
-        SUFFIX="_mac_arm64"
-    elif [[ "$ARCH" == "x86_64" ]]; then
-        GOARCH="amd64"
-        SUFFIX="_mac_amd64"
-    else
-        echo "Unsupported Mac architecture: $ARCH"
-        exit 1
-    fi
-elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    ARCH=$(uname -m)
-    if [[ "$ARCH" == "aarch64" ]]; then
-        GOARCH="arm64"
-        SUFFIX="_ubuntu_aarch64"
-    elif [[ "$ARCH" == "x86_64" ]]; then
-        GOARCH="amd64"
-        SUFFIX="_ubuntu_amd64"
-    else
-        echo "Unsupported Linux architecture: $ARCH"
-        exit 1
-    fi
-else
-    echo "Unsupported operating system: $OSTYPE"
-    exit 1
-fi
+# Build for macOS Darwin M1 and Ubuntu aarch64
+GOOS="darwin"
+GOARCH="arm64"
+SUFFIX="_mac_m1"
 
-# Change to backend
 cd backend/src || exit
 echo $(pwd)
 
-# Build for backend project
-echo "Building backend project..."
-GOOS=$([[ "$OSTYPE" == "darwin"* ]] && echo "darwin" || echo "linux") GOARCH=$GOARCH go build -o "../../$OUTPUT_DIR/$BACKEND_BINARY$SUFFIX"
+# Build backend project for macOS Darwin M1
+echo "Building backend project for macOS M1..."
+GOOS=$GOOS GOARCH=$GOARCH go build -o "../../$OUTPUT_DIR/$BACKEND_BINARY$SUFFIX"
 
 cd ../../frontend/src || exit
 
-# Build for frontend project
-echo "Building frontend project..."
-GOOS=$([[ "$OSTYPE" == "darwin"* ]] && echo "darwin" || echo "linux") GOARCH=$GOARCH go build -o "../../$OUTPUT_DIR/$FRONTEND_BINARY$SUFFIX"
+# Build frontend project for macOS Darwin M1
+echo "Building frontend project for macOS M1..."
+GOOS=$GOOS GOARCH=$GOARCH go build -o "../../$OUTPUT_DIR/$FRONTEND_BINARY$SUFFIX"
 
-echo "Build completed. Binaries are located in $OUTPUT_DIR."
+# Build backend and frontend project for Ubuntu aarch64
+GOOS="linux"
+GOARCH="arm64"
+SUFFIX="_ubuntu_aarch64"
+
+cd ../../backend/src || exit
+echo "Building backend project for Ubuntu aarch64..."
+GOOS=$GOOS GOARCH=$GOARCH go build -o "../../$OUTPUT_DIR/$BACKEND_BINARY$SUFFIX"
+
+cd ../../frontend/src || exit
+echo "Building frontend project for Ubuntu aarch64..."
+GOOS=$GOOS GOARCH=$GOARCH go build -o "../../$OUTPUT_DIR/$FRONTEND_BINARY$SUFFIX"
+
+echo "Build completed. Binaries for macOS M1 and Ubuntu aarch64 are located in $OUTPUT_DIR."
