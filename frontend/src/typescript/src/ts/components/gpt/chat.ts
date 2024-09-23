@@ -20,23 +20,109 @@ class Chat {
         document.body.appendChild(this.div);
         document.body.appendChild(this.createChatWindow());
         this.addEventListeners();
+        this.addStyles();
         ObjectManager.getInstance().subscribeToSocket("aiSocket", this.updateSocket.bind(this));
-
     }
 
     private updateSocket(newSocket: WebSocket) {
         this.socket = newSocket;
         console.log(`CodeCell ${this.id} updated with new WebSocket`);
     }
-    
 
-    static displayMessage(message: string, type: 'normal' | 'error' = 'normal'): void {
+    private addStyles() {
+        const style = document.createElement('style');
+        style.textContent = `
+            .message-container {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+            .message {
+                max-width: 70%;
+                padding: 10px;
+                border-radius: 10px;
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+                line-height: 1.4;
+            }
+            .user-message {
+                align-self: flex-end;
+                background-color: #dcf8c6;
+                color: black;
+            }
+            .ai-message {
+                align-self: flex-start;
+                background-color: #e6e6e6;
+                color: black;
+            }
+            .error-message {
+                align-self: center;
+                background-color: #ff4d4d;
+                color: white;
+            }
+            .message-time {
+                font-size: 12px;
+                color: #888;
+                margin-top: 5px;
+            }
+            .markdown-block {
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .chat-title {
+                background-color: #f0f0f0;
+                padding: 10px;
+                text-align: center;
+                font-weight: bold;
+                border-bottom: 1px solid #ccc;
+            }
+            .input-container {
+                display: flex;
+                flex-direction: column;
+                padding: 10px;
+                background-color: #f0f0f0;
+                border-top: 1px solid #ccc;
+            }
+            .chat-input-area {
+                width: 100%;
+                height: 80px;
+                padding: 8px;
+                border-radius: 10px;
+                border: 1px solid #ccc;
+                resize: none;
+                font-size: 14px;
+                line-height: 20px;
+                margin-bottom: 10px;
+            }
+            .send-button {
+                align-self: flex-start;
+                padding: 8px 20px;
+                border-radius: 20px;
+                border: none;
+                background-color: #007bff;
+                color: white;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            .send-button:hover {
+                background-color: #0056b3;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    static displayMessage(message: string, type: 'user' | 'ai' | 'error' = 'user'): void {
         const chatMessageContainer = document.getElementById("message-container");
 
         if (!chatMessageContainer) {
             console.error("Chat message container not found.");
             return;
         }
+
+        const messageElement = document.createElement('div');
+        messageElement.className = `message ${type}-message`;
 
         // Split the message by newline characters
         const lines = message.split('\n');
@@ -52,7 +138,7 @@ class Chat {
                     codeElement.className = 'markdown-block';
                     codeElement.textContent = codeBlockContent;
                     Chat.applyMarkdownStyles(codeElement);
-                    chatMessageContainer.appendChild(codeElement);
+                    messageElement.appendChild(codeElement);
                     insideCodeBlock = false;
                     codeBlockContent = '';
                 } else {
@@ -64,35 +150,38 @@ class Chat {
                 codeBlockContent += line + '\n';
             } else {
                 // Handle normal text lines
-                const messageElement = document.createElement('p');
-                messageElement.textContent = line;
-                if (type === 'error') {
-                    messageElement.style.color = 'red';
-                }
-                chatMessageContainer.appendChild(messageElement);
+                const textElement = document.createElement('p');
+                textElement.textContent = line;
+                messageElement.appendChild(textElement);
             }
         });
+
+        const timeElement = document.createElement('div');
+        timeElement.className = 'message-time';
+        timeElement.textContent = new Date().toLocaleTimeString();
+        messageElement.appendChild(timeElement);
+
+        chatMessageContainer.appendChild(messageElement);
 
         // Scroll to the bottom of the chat container
         chatMessageContainer.scrollTop = chatMessageContainer.scrollHeight;
     }
 
-    // Helper function to apply styles to markdown code blocks
     static applyMarkdownStyles(element: HTMLDivElement): void {
-        element.style.backgroundColor = '#2d2d2d'; // Dark background for code block
-        element.style.color = '#f8f8f2';           // Light text color
+        element.style.backgroundColor = '#2d2d2d';
+        element.style.color = '#f8f8f2';
         element.style.padding = '10px';
         element.style.borderRadius = '5px';
         element.style.marginTop = '10px';
         element.style.fontFamily = 'monospace';
-        element.style.whiteSpace = 'pre-wrap';     // Preserve whitespace
-        element.style.overflowX = 'auto';          // Horizontal scrolling for long lines
+        element.style.whiteSpace = 'pre-wrap';
+        element.style.overflowX = 'auto';
     }
 
     createDiv() {
         let div = document.createElement("div");
-        div.setAttribute("id", this.id);
-        div.setAttribute("class", this.id);
+        div.id = this.id;
+        div.className = this.id;
         div.style.boxSizing = "border-box";
         div.style.position = "sticky";
         div.style.top = "90vh";
@@ -108,8 +197,8 @@ class Chat {
 
     addChatGPTIcon() {
         let div = document.createElement("div");
-        div.setAttribute("id", this.id);
-        div.setAttribute("class", this.id);
+        div.id = this.id;
+        div.className = this.id;
         var image = new Image();
         image.src = "./../img/svg/chatgpt.svg";
         image.style.width = "5vh";
@@ -142,7 +231,8 @@ class Chat {
 
         this.sendButton.addEventListener('click', () => this.sendMessage());
         this.chatInputArea.addEventListener('keypress', (event: KeyboardEvent) => {
-            if (event.shiftKey && event.key === 'Enter') {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
                 this.sendMessage();
             }
         });
@@ -150,8 +240,8 @@ class Chat {
 
     createChatWindow() {
         let div = document.createElement("div");
-        div.setAttribute("id", this.id + "chat-window");
-        div.setAttribute("class", this.id + "chat-window");
+        div.id = this.id + "chat-window";
+        div.className = this.id + "chat-window";
         div.style.position = "fixed";
         div.style.top = "8vh";
         div.style.left = "50vw";
@@ -159,38 +249,59 @@ class Chat {
         div.style.height = "91vh";
         div.style.display = "none";
         div.style.zIndex = "3";
-        div.style.backgroundColor = "black";
+        div.style.backgroundColor = "white";
         div.style.boxShadow = "0px 2px 15px 0px rgba(0, 0, 0, .4)";
+        
+        const titleDiv = document.createElement("div");
+        titleDiv.className = "chat-title";
+        titleDiv.textContent = "ChatGPT";
+        titleDiv.style.fontFamily = "Palatino";
+        titleDiv.style.color = "gray";
+        titleDiv.style.fontSize = "3vh";
+
+        div.appendChild(titleDiv);
+        
         div.appendChild(this.createChatApp());
         return div;
     }
 
     createChatApp() {
         this.chatContainer = document.createElement('div');
-        this.applyChatContainerStyles(this.chatContainer);
+        this.chatContainer.style.width = '100%';
+        this.chatContainer.style.height = 'calc(100% - 40px)'; // Adjust for title height
+        this.chatContainer.style.display = 'flex';
+        this.chatContainer.style.flexDirection = 'column';
+        this.chatContainer.style.backgroundColor = '#f9f9f9';
+        this.chatContainer.style.fontFamily = 'Arial, sans-serif';
 
         this.messagesContainer = document.createElement('div');
-        this.messagesContainer.setAttribute("id", "message-container");
-        this.messagesContainer.setAttribute("class", "message-container");
-
-        this.applyMessagesContainerStyles(this.messagesContainer);
+        this.messagesContainer.id = "message-container";
+        this.messagesContainer.className = "message-container";
+        this.messagesContainer.style.flex = '1';
+        this.messagesContainer.style.overflowY = 'auto';
         this.chatContainer.appendChild(this.messagesContainer);
 
+        const inputContainer = document.createElement('div');
+        inputContainer.className = 'input-container';
+
         this.chatInputArea = document.createElement('textarea');
+        this.chatInputArea.className = 'chat-input-area';
         this.chatInputArea.placeholder = 'Type a message...';
-        this.applyChatInputAreaStyles(this.chatInputArea);
-        this.chatContainer.appendChild(this.chatInputArea);
+        inputContainer.appendChild(this.chatInputArea);
 
         this.sendButton = document.createElement('button');
+        this.sendButton.className = 'send-button';
         this.sendButton.textContent = 'Send';
-        this.applySendButtonStyles(this.sendButton);
-        this.chatContainer.appendChild(this.sendButton);
+        inputContainer.appendChild(this.sendButton);
+
+        this.chatContainer.appendChild(inputContainer);
         return this.chatContainer;
     }
 
     maximizeChatWindow() {
         let div = document.getElementById(this.id + "chat-window");
         div.style.display = "flex";
+        div.style.flexDirection = "column";
     }
 
     minimizeChatWindow() {
@@ -203,71 +314,10 @@ class Chat {
         console.log("Sending message through websocket to chatgpt", message);
 
         if (message !== '') {
-            const messageElement = document.createElement('div');
-            messageElement.textContent = message;
-            this.messagesContainer.appendChild(messageElement);
+            Chat.displayMessage(message, 'user');
             this.chatInputArea.value = '';
-            this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
             this.socket.send(message);
         }
-    }
-
-    private applyChatContainerStyles(element: HTMLDivElement): void {
-        element.style.width = '47vw';
-        element.style.height = '70vh';
-        element.style.margin = '0 auto';
-        element.style.border = '1.5px solid #ccc';
-        element.style.borderRadius = '5px';
-        element.style.marginTop = '2vh';
-        element.style.paddingBottom = '1vh';
-        element.style.backgroundColor = '#f9f9f9';
-        element.style.fontFamily = 'Arial, sans-serif';
-    }
-
-    private applyMessagesContainerStyles(element: HTMLDivElement): void {
-        element.style.height = '65vh';
-        element.style.overflowY = 'auto';
-        element.style.marginBottom = '10px';
-        element.style.padding = '1px';
-    }
-
-    private applyChatInputAreaStyles(element: HTMLTextAreaElement): void {
-        element.style.height = '10vh';
-        element.style.marginTop = '6vh';
-        element.style.width = '100%';
-        element.style.padding = '8px';
-        element.style.borderRadius = '3px';
-        element.style.border = '1.5px solid #ccc';
-        element.style.boxSizing = 'border-box';
-        element.style.fontSize = '16px';
-        element.style.lineHeight = 'normal';
-        element.style.overflow = 'hidden';
-        element.style.verticalAlign = 'top';
-        element.style.resize = 'none';
-    }
-
-    private applySendButtonStyles(element: HTMLButtonElement): void {
-        element.style.padding = '8px';
-        element.style.borderRadius = '3px';
-        element.style.border = '1px solid #ccc';
-        element.style.backgroundColor = '#007bff';
-        element.style.color = 'white';
-        element.style.cursor = 'pointer';
-        element.style.marginTop = '1vh';
-        element.style.width = '5vw';
-        element.style.height = '4vh';
-        element.style.fontSize = '18px';
-        element.style.display = 'flex';
-        element.style.justifyContent = 'center';
-        element.style.alignItems = 'center';
-
-        element.addEventListener('mouseenter', () => {
-            element.style.backgroundColor = '#0056b3';
-        });
-
-        element.addEventListener('mouseleave', () => {
-            element.style.backgroundColor = '#007bff';
-        });
     }
 }
 

@@ -68,7 +68,7 @@ class WebSocketChatGPT {
 
     private onMessage(event: MessageEvent): void {
         console.log('Received message:', event.data);
-        Chat.displayMessage(event.data);
+        Chat.displayMessage(event.data, 'ai');
     }
 
     private onError(event: Event): void {
