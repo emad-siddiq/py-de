@@ -55,7 +55,9 @@ To run frontend to debug:
 
 ```
 npm install -g http-server
-cd frontend/src/typescript/src
+cd frontend/src/typescript
+npm run build
+cd dist
 http-server
 ```
 

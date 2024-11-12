@@ -71,12 +71,10 @@ class AWSForm {
             return field;
         };
 
-        const accessKeyInput = createTextField("accessKeyID", "Access Key ID");
-        const secretKeyInput = createTextField("secretAccessKey", "Secret Access Key", "password");
-        const instanceIdInput = createTextField("instanceID", "Instance ID");
-        const regionInput = createTextField("region", "AWS Region");
         const sshUserInput = createTextField("sshUser", "SSH User");
         const sshKeyPathInput = createTextField("sshKeyPath", "SSH Key Path");
+        const sshHostName = createTextField("sshHostName", "SSH Host Name");
+
 
         const submitButton = document.createElement("md-filled-button") as HTMLElement & {
             type: string;
@@ -86,12 +84,9 @@ class AWSForm {
         submitButton.style.width = "100%";
 
         form.appendChild(title);
-        form.appendChild(accessKeyInput);
-        form.appendChild(secretKeyInput);
-        form.appendChild(instanceIdInput);
-        form.appendChild(regionInput);
         form.appendChild(sshUserInput);
         form.appendChild(sshKeyPathInput);
+        form.appendChild(sshHostName);
         form.appendChild(submitButton);
 
         return form;
@@ -145,12 +140,10 @@ class AWSForm {
 
         const formData = new FormData(this.form);
         const credentials = {
-            accessKeyID: formData.get("accessKeyID") as string,
-            secretAccessKey: formData.get("secretAccessKey") as string,
-            instanceID: formData.get("instanceID") as string,
-            region: formData.get("region") as string,
             sshUser: formData.get("sshUser") as string,
             sshKeyPath: formData.get("sshKeyPath") as string,
+            sshHostName: formData.get("sshHostName") as string,
+
         };
 
         fetch(`${localWebSocketURL}/${deploySocket}`, {

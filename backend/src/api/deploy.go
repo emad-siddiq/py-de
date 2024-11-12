@@ -1,10 +1,10 @@
 package api
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -12,11 +12,44 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/credentials"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"emad/pysync/api/ssh"
+
 	"github.com/gorilla/websocket"
 )
+
+// Logger handles logging operations
+type Logger struct {
+	writer io.Writer
+	log    *log.Logger
+}
+
+// NewLogger creates a new Logger instance
+func NewLogger(w io.Writer) *Logger {
+	return &Logger{
+		writer: w,
+		log:    log.New(w, "", log.LstdFlags),
+	}
+}
+
+// Log logs a message
+func (l *Logger) Log(message string) {
+	l.log.Println(message)
+}
+
+// Logf logs a formatted message
+func (l *Logger) Logf(format string, v ...interface{}) {
+	l.log.Printf(format, v...)
+}
+
+// handleError logs the error and sends an error response
+func handleError(w http.ResponseWriter, message string, err error, statusCode int, logger *Logger) {
+	errMsg := message
+	if err != nil {
+		errMsg = fmt.Sprintf("%s: %v", message, err)
+	}
+	logger.Log(errMsg)
+	http.Error(w, errMsg, statusCode)
+}
 
 func DeployHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -25,12 +58,9 @@ func DeployHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var requestBody struct {
-		InstanceID      string `json:"instanceID"`
-		AccessKeyID     string `json:"accessKeyID"`
-		SecretAccessKey string `json:"secretAccessKey"`
-		Region          string `json:"region"`
-		SSHUser         string `json:"sshUser"`
-		SSHKeyPath      string `json:"sshKeyPath"`
+		Hostname   string `json:"sshHostName"` // Changed from InstanceIP to Hostname
+		SSHUser    string `json:"sshUser"`
+		SSHKeyPath string `json:"sshKeyPath"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
@@ -41,39 +71,20 @@ func DeployHandler(w http.ResponseWriter, r *http.Request) {
 	logger := NewLogger(os.Stdout)
 	logger.Log("Starting deployment process...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-	defer cancel()
+	hostname := requestBody.Hostname
+	if hostname == "" {
+		handleError(w, "Hostname is required", nil, http.StatusBadRequest, logger)
+		return
+	}
+	logger.Logf("Target Hostname: %s", hostname)
 
-	cfg, err := config.LoadDefaultConfig(ctx,
-		config.WithRegion(requestBody.Region),
-		config.WithCredentialsProvider(
-			credentials.NewStaticCredentialsProvider(requestBody.AccessKeyID, requestBody.SecretAccessKey, ""),
-		))
+	// Create SSH executor
+	executor, err := ssh.NewSSHExecutor(hostname, requestBody.SSHUser, requestBody.SSHKeyPath)
 	if err != nil {
-		handleError(w, "Unable to load AWS config", err, http.StatusInternalServerError, logger)
+		handleError(w, "Failed to create SSH connection", err, http.StatusInternalServerError, logger)
 		return
 	}
-	logger.Log("AWS config loaded successfully.")
-
-	svc := ec2.NewFromConfig(cfg)
-
-	describeInstancesInput := &ec2.DescribeInstancesInput{
-		InstanceIds: []string{requestBody.InstanceID},
-	}
-	describeInstancesOutput, err := svc.DescribeInstances(ctx, describeInstancesInput)
-	if err != nil {
-		handleError(w, "Unable to describe instance", err, http.StatusInternalServerError, logger)
-		return
-	}
-
-	if len(describeInstancesOutput.Reservations) == 0 || len(describeInstancesOutput.Reservations[0].Instances) == 0 {
-		handleError(w, "Instance not found", nil, http.StatusNotFound, logger)
-		return
-	}
-
-	instance := describeInstancesOutput.Reservations[0].Instances[0]
-	instanceIP := *instance.PublicIpAddress
-	logger.Logf("Instance IP: %s", instanceIP)
+	defer executor.Close()
 
 	execPath, err := os.Executable()
 	if err != nil {
@@ -96,17 +107,20 @@ func DeployHandler(w http.ResponseWriter, r *http.Request) {
 		fi
 	`, remoteBinaryPath)
 
-	output, err := runSSHCommand(ctx, requestBody.SSHKeyPath, requestBody.SSHUser, instanceIP, checkAndCopyBinary, logger)
+	output, err := executor.ExecuteCommand(checkAndCopyBinary)
 	if err != nil {
 		logger.Log("Copying backend binary to the instance...")
-		if err := runSCPCommand(ctx, requestBody.SSHKeyPath, backendUbuntuBinaryPath, requestBody.SSHUser, instanceIP, remoteBinaryPath, logger); err != nil {
+		// Note: For now we'll use system SCP command for file transfer
+		scpCmd := exec.Command("scp", "-o", "StrictHostKeyChecking=no", "-i", requestBody.SSHKeyPath,
+			backendUbuntuBinaryPath, fmt.Sprintf("%s@%s:%s", requestBody.SSHUser, hostname, remoteBinaryPath))
+		if err := scpCmd.Run(); err != nil {
 			handleError(w, "Error copying backend binary", err, http.StatusInternalServerError, logger)
 			return
 		}
 		logger.Log("Backend binary copied successfully.")
 
 		chmodCmd := fmt.Sprintf("chmod +x %s", remoteBinaryPath)
-		if _, err := runSSHCommand(ctx, requestBody.SSHKeyPath, requestBody.SSHUser, instanceIP, chmodCmd, logger); err != nil {
+		if _, err := executor.ExecuteCommand(chmodCmd); err != nil {
 			handleError(w, "Error making backend binary executable", err, http.StatusInternalServerError, logger)
 			return
 		}
@@ -124,7 +138,7 @@ func DeployHandler(w http.ResponseWriter, r *http.Request) {
 		fi
 	`, remoteBinaryPath, remoteBinaryPath, remoteBinaryPath)
 
-	output, err = runSSHCommand(ctx, requestBody.SSHKeyPath, requestBody.SSHUser, instanceIP, checkAndStartProcess, logger)
+	output, err = executor.ExecuteCommand(checkAndStartProcess)
 	if err != nil {
 		handleError(w, "Error checking/starting backend process", err, http.StatusInternalServerError, logger)
 		return
@@ -138,7 +152,7 @@ func DeployHandler(w http.ResponseWriter, r *http.Request) {
 	for i := 0; i < maxRetries; i++ {
 		livenessCmd := `netstat -tlnp | grep -q ':8080' && echo "Process is listening on port 8080" || echo "Process is not listening on port 8080"`
 
-		output, err := runSSHCommand(ctx, requestBody.SSHKeyPath, requestBody.SSHUser, instanceIP, livenessCmd, logger)
+		output, err := executor.ExecuteCommand(livenessCmd)
 		if err != nil {
 			logger.Logf("Error checking process status: %v", err)
 			if i == maxRetries-1 {
@@ -151,7 +165,7 @@ func DeployHandler(w http.ResponseWriter, r *http.Request) {
 				logger.Log("Backend service is running and listening on port 8080")
 
 				// Perform WebSocket connection test
-				wsURL := fmt.Sprintf("ws://%s:8080/ws/testSocket", instanceIP)
+				wsURL := fmt.Sprintf("ws://%s:8080/ws/testSocket", hostname)
 				if err := testWebSocketConnection(wsURL, logger); err != nil {
 					logger.Logf("WebSocket connection test failed: %v", err)
 					handleError(w, "WebSocket connection test failed", err, http.StatusInternalServerError, logger)
@@ -172,8 +186,8 @@ func DeployHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := map[string]string{
-		"publicIP":  instanceIP,
-		"wsBaseURL": fmt.Sprintf("ws://%s:8080/ws", instanceIP),
+		"hostname":  hostname,
+		"wsBaseURL": fmt.Sprintf("ws://%s:8080/ws", hostname),
 		"success":   "true",
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -197,76 +211,6 @@ func testWebSocketConnection(url string, logger *Logger) error {
 	}
 	defer conn.Close()
 
-	logger.Logf("WebSocket connection established. Response status: %s", resp.Status)
-
-	// Send a test message
-	testMessage := "Hello, WebSocket!"
-	logger.Logf("Sending test message: %s", testMessage)
-	if err := conn.WriteMessage(websocket.TextMessage, []byte(testMessage)); err != nil {
-		return fmt.Errorf("failed to send test message: %v", err)
-	}
-
-	// Read response
-	logger.Log("Waiting for response...")
-	_, message, err := conn.ReadMessage()
-	if err != nil {
-		return fmt.Errorf("failed to read response: %v", err)
-	}
-	logger.Logf("Received response: %s", string(message))
-
+	logger.Log("WebSocket connection established successfully")
 	return nil
-}
-
-func runSSHCommand(ctx context.Context, sshKeyPath, sshUser, instanceIP, command string, logger *Logger) (string, error) {
-	sshCmd := fmt.Sprintf("ssh -o StrictHostKeyChecking=no -i %s %s@%s '%s'", sshKeyPath, sshUser, instanceIP, command)
-	cmd := exec.CommandContext(ctx, "sh", "-c", sshCmd)
-
-	output, err := cmd.CombinedOutput()
-	logger.Logf("SSH Command output: %s", string(output))
-
-	if err != nil {
-		if exitError, ok := err.(*exec.ExitError); ok {
-			logger.Logf("SSH Command exit status: %d", exitError.ExitCode())
-		}
-		return string(output), fmt.Errorf("SSH command failed: %v", err)
-	}
-
-	return string(output), nil
-}
-
-func runSCPCommand(ctx context.Context, sshKeyPath, source, sshUser, instanceIP, destination string, logger *Logger) error {
-	scpCmd := fmt.Sprintf("scp -o StrictHostKeyChecking=no -i %s %s %s@%s:%s", sshKeyPath, source, sshUser, instanceIP, destination)
-	return runCommand(ctx, "sh", []string{"-c", scpCmd}, logger)
-}
-
-func runCommand(ctx context.Context, name string, args []string, logger *Logger) error {
-	cmd := exec.CommandContext(ctx, name, args...)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		logger.Logf("Command failed: %v, output: %s", err, string(output))
-		return fmt.Errorf("command failed: %v", err)
-	}
-	logger.Logf("Command output: %s", string(output))
-	return nil
-}
-
-func handleError(w http.ResponseWriter, message string, err error, statusCode int, logger *Logger) {
-	logger.Logf("%s: %v", message, err)
-	http.Error(w, fmt.Sprintf("%s: %v", message, err), statusCode)
-}
-
-type Logger struct {
-	w io.Writer
-}
-
-func NewLogger(w io.Writer) *Logger {
-	return &Logger{w: w}
-}
-
-func (l *Logger) Log(message string) {
-	fmt.Fprintf(l.w, "%s: %s\n", time.Now().Format(time.RFC3339), message)
-}
-
-func (l *Logger) Logf(format string, v ...interface{}) {
-	l.Log(fmt.Sprintf(format, v...))
 }

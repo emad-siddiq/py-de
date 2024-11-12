@@ -4,17 +4,27 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   mode: 'development',
-  entry: './src/ts/jupyter.ts',
+  entry: './src/ts/py-de.ts',
   output: {
-    filename: 'jupyter.js',
+    filename: 'py-de.js',
     path: path.resolve(__dirname, 'dist/js'),
-    publicPath: '/js/',
+    publicPath: '/',
   },
   module: {
     rules: [
       {
         test: /\.tsx?$/,
-        use: 'ts-loader',
+        use: [
+          {
+            loader: 'ts-loader',
+            options: {
+              transpileOnly: false,
+              compilerOptions: {
+                sourceMap: true,
+              },
+            },
+          },
+        ],
         exclude: /node_modules/,
       },
       {
@@ -28,6 +38,7 @@ module.exports = {
                 auto: true,
                 localIdentName: '[name]__[local]--[hash:base64:5]',
               },
+              sourceMap: true,
             },
           },
         ],
@@ -40,7 +51,7 @@ module.exports = {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: '../css/[name].css',
+      filename: 'css/[name].css',
     }),
     new CopyWebpackPlugin({
       patterns: [
@@ -66,11 +77,22 @@ module.exports = {
     compress: true,
     port: 8081,
     hot: true,
+    historyApiFallback: true,
+    devMiddleware: {
+      writeToDisk: true, // This will write files to disk, making them available for debugging
+    },
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
+    extensions: ['.tsx', '.ts', '.js', '.jsx'],
+    modules: [path.resolve(__dirname, 'src'), 'node_modules'],
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
   },
-  experiments: {
-    outputModule: true,
+  devtool: 'source-map', // Best option for production debugging
+  watch: false, // Enable watching
+  watchOptions: {
+    ignored: /node_modules/,
+    poll: 1000, // Check for changes every second
   },
 };

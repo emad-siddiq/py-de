@@ -19,7 +19,7 @@ func main() {
 
 		// Default to serving index.html for root path
 		if r.URL.Path == "/" {
-			path = "typescript/dist/html/jupyter.html"
+			path = "typescript/dist/html/py-de.html"
 		} else {
 			// Determine the correct path for js, img, and css, and default to html for everything else
 			if strings.HasPrefix(r.URL.Path, "/js/") {
@@ -57,10 +57,10 @@ func main() {
 	})
 
 	// Log a minimal server start message
-	log.Println("Server running on :8081")
+	log.Println("Server running on :3000")
 
 	// Start the server
-	err := http.ListenAndServe(":8081", nil)
+	err := http.ListenAndServe(":3000", nil)
 	if err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
