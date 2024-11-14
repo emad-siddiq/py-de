@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"emad/pysync/api/ssh"
@@ -23,6 +22,40 @@ type Logger struct {
 	log    *log.Logger
 }
 
+// DeployRequest represents the deployment request body
+type DeployRequest struct {
+	Hostname   string `json:"sshHostName"`
+	SSHUser    string `json:"sshUser"`
+	SSHKeyPath string `json:"sshKeyPath"`
+}
+
+// DeployResponse represents the deployment response
+type DeployResponse struct {
+	Hostname  string `json:"hostname"`
+	WSBaseURL string `json:"wsBaseURL"`
+	Success   string `json:"success"`
+}
+
+// Config represents deployment configuration
+type Config struct {
+	MaxRetries     int
+	RetryInterval  time.Duration
+	WSTimeout      time.Duration
+	ListenPort     string
+	BinaryFileName string
+}
+
+// NewConfig creates a default configuration
+func NewConfig() *Config {
+	return &Config{
+		MaxRetries:     6,
+		RetryInterval:  5 * time.Second,
+		WSTimeout:      10 * time.Second,
+		ListenPort:     "8080",
+		BinaryFileName: "backend_ubuntu_aarch64",
+	}
+}
+
 // NewLogger creates a new Logger instance
 func NewLogger(w io.Writer) *Logger {
 	return &Logger{
@@ -31,12 +64,10 @@ func NewLogger(w io.Writer) *Logger {
 	}
 }
 
-// Log logs a message
 func (l *Logger) Log(message string) {
 	l.log.Println(message)
 }
 
-// Logf logs a formatted message
 func (l *Logger) Logf(format string, v ...interface{}) {
 	l.log.Printf(format, v...)
 }
@@ -57,149 +88,128 @@ func DeployHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var requestBody struct {
-		Hostname   string `json:"sshHostName"` // Changed from InstanceIP to Hostname
-		SSHUser    string `json:"sshUser"`
-		SSHKeyPath string `json:"sshKeyPath"`
-	}
-
-	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		return
-	}
-
 	logger := NewLogger(os.Stdout)
 	logger.Log("Starting deployment process...")
 
-	hostname := requestBody.Hostname
-	if hostname == "" {
+	request, err := parseDeployRequest(r)
+	if err != nil {
+		handleError(w, "Invalid request body", err, http.StatusBadRequest, logger)
+		return
+	}
+
+	if request.Hostname == "" {
 		handleError(w, "Hostname is required", nil, http.StatusBadRequest, logger)
 		return
 	}
-	logger.Logf("Target Hostname: %s", hostname)
+	logger.Logf("Target Hostname: %s", request.Hostname)
 
-	// Create SSH executor
-	executor, err := ssh.NewSSHExecutor(hostname, requestBody.SSHUser, requestBody.SSHKeyPath)
-	if err != nil {
-		handleError(w, "Failed to create SSH connection", err, http.StatusInternalServerError, logger)
+	config := NewConfig()
+	if err := handleDeploy(request, config, logger); err != nil {
+		handleError(w, "Deployment failed", err, http.StatusInternalServerError, logger)
 		return
 	}
-	defer executor.Close()
 
-	execPath, err := os.Executable()
-	if err != nil {
-		handleError(w, "Unable to determine executable path", err, http.StatusInternalServerError, logger)
-		return
-	}
-	execDir := filepath.Dir(execPath)
-
-	backendUbuntuBinaryPath := filepath.Join(execDir, "backend_ubuntu_aarch64")
-	remoteBinaryPath := fmt.Sprintf("/home/%s/backend_ubuntu_aarch64", requestBody.SSHUser)
-
-	// Check if binary exists and copy only if necessary
-	checkAndCopyBinary := fmt.Sprintf(`
-		if [ ! -f %s ]; then
-			echo "Binary not found, copying..."
-			exit 1
-		else
-			echo "Binary already exists"
-			exit 0
-		fi
-	`, remoteBinaryPath)
-
-	output, err := executor.ExecuteCommand(checkAndCopyBinary)
-	if err != nil {
-		logger.Log("Copying backend binary to the instance...")
-		// Note: For now we'll use system SCP command for file transfer
-		scpCmd := exec.Command("scp", "-o", "StrictHostKeyChecking=no", "-i", requestBody.SSHKeyPath,
-			backendUbuntuBinaryPath, fmt.Sprintf("%s@%s:%s", requestBody.SSHUser, hostname, remoteBinaryPath))
-		if err := scpCmd.Run(); err != nil {
-			handleError(w, "Error copying backend binary", err, http.StatusInternalServerError, logger)
-			return
-		}
-		logger.Log("Backend binary copied successfully.")
-
-		chmodCmd := fmt.Sprintf("chmod +x %s", remoteBinaryPath)
-		if _, err := executor.ExecuteCommand(chmodCmd); err != nil {
-			handleError(w, "Error making backend binary executable", err, http.StatusInternalServerError, logger)
-			return
-		}
-	} else {
-		logger.Log(output)
+	response := DeployResponse{
+		Hostname:  request.Hostname,
+		WSBaseURL: fmt.Sprintf("ws://%s:%s/ws", request.Hostname, config.ListenPort),
+		Success:   "true",
 	}
 
-	// Check if the process is already running, if not, start it
-	checkAndStartProcess := fmt.Sprintf(`
-		if pgrep -f %s > /dev/null; then
-			echo "Process is already running"
-		else
-			echo "Starting the process"
-			nohup %s > %s.log 2>&1 & echo $!
-		fi
-	`, remoteBinaryPath, remoteBinaryPath, remoteBinaryPath)
-
-	output, err = executor.ExecuteCommand(checkAndStartProcess)
-	if err != nil {
-		handleError(w, "Error checking/starting backend process", err, http.StatusInternalServerError, logger)
-		return
-	}
-	logger.Log(output)
-
-	// Wait for the process to start listening
-	maxRetries := 6
-	retryInterval := 5 * time.Second
-
-	for i := 0; i < maxRetries; i++ {
-		livenessCmd := `netstat -tlnp | grep -q ':8080' && echo "Process is listening on port 8080" || echo "Process is not listening on port 8080"`
-
-		output, err := executor.ExecuteCommand(livenessCmd)
-		if err != nil {
-			logger.Logf("Error checking process status: %v", err)
-			if i == maxRetries-1 {
-				handleError(w, "Failed to check process status after maximum retries", err, http.StatusInternalServerError, logger)
-				return
-			}
-		} else {
-			logger.Log(output)
-			if strings.Contains(output, "Process is listening on port 8080") {
-				logger.Log("Backend service is running and listening on port 8080")
-
-				// Perform WebSocket connection test
-				wsURL := fmt.Sprintf("ws://%s:8080/ws/testSocket", hostname)
-				if err := testWebSocketConnection(wsURL, logger); err != nil {
-					logger.Logf("WebSocket connection test failed: %v", err)
-					handleError(w, "WebSocket connection test failed", err, http.StatusInternalServerError, logger)
-					return
-				}
-				logger.Log("WebSocket connection test passed successfully")
-				break
-			}
-		}
-
-		if i == maxRetries-1 {
-			handleError(w, "Backend service is not listening on port 8080 after maximum retries", nil, http.StatusInternalServerError, logger)
-			return
-		}
-
-		logger.Logf("Backend service not yet listening. Retrying in %v...", retryInterval)
-		time.Sleep(retryInterval)
-	}
-
-	response := map[string]string{
-		"hostname":  hostname,
-		"wsBaseURL": fmt.Sprintf("ws://%s:8080/ws", hostname),
-		"success":   "true",
-	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 	logger.Log("Deployment completed successfully.")
 }
 
-func testWebSocketConnection(url string, logger *Logger) error {
+func parseDeployRequest(r *http.Request) (*DeployRequest, error) {
+	var request DeployRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		return nil, err
+	}
+	return &request, nil
+}
+
+func handleDeploy(request *DeployRequest, config *Config, logger *Logger) error {
+	executor, err := ssh.NewSSHExecutor(request.Hostname, request.SSHUser, request.SSHKeyPath)
+	if err != nil {
+		return fmt.Errorf("failed to create SSH connection: %w", err)
+	}
+	defer executor.Close()
+
+	if err := copyBinaryIfNeeded(executor, request, config, logger); err != nil {
+		return err
+	}
+
+	if err := startAndVerifyProcess(executor, request, config, logger); err != nil {
+		return fmt.Errorf("failed to start and verify process: %w", err)
+	}
+
+	wsURL := fmt.Sprintf("ws://%s:%s/ws/testSocket", request.Hostname, config.ListenPort)
+	if err := testWebSocketConnection(wsURL, config.WSTimeout, logger); err != nil {
+		return fmt.Errorf("WebSocket connection test failed: %w", err)
+	}
+
+	return nil
+}
+
+func copyBinaryIfNeeded(executor *ssh.SSHExecutor, request *DeployRequest, config *Config, logger *Logger) error {
+	execPath, err := os.Executable()
+	if err != nil {
+		return fmt.Errorf("unable to determine executable path: %w", err)
+	}
+
+	execDir := filepath.Dir(execPath)
+	backendBinaryPath := filepath.Join(execDir, config.BinaryFileName)
+	remoteBinaryPath := fmt.Sprintf("/home/%s/%s", request.SSHUser, config.BinaryFileName)
+
+	// Delete existing binary
+	deleteCmd := fmt.Sprintf("rm -f %s", remoteBinaryPath)
+	if _, err := executor.ExecuteCommand(deleteCmd); err != nil {
+		return fmt.Errorf("error deleting existing binary: %w", err)
+	}
+
+	// Copy new binary
+	logger.Log("Copying backend binary to the instance...")
+	scpCmd := exec.Command("scp",
+		"-o", "StrictHostKeyChecking=no",
+		"-i", request.SSHKeyPath,
+		backendBinaryPath,
+		fmt.Sprintf("%s@%s:%s", request.SSHUser, request.Hostname, remoteBinaryPath))
+
+	if output, err := scpCmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("error copying backend binary: %w, output: %s", err, string(output))
+	}
+
+	// Make executable
+	if _, err := executor.ExecuteCommand(fmt.Sprintf("chmod +x %s", remoteBinaryPath)); err != nil {
+		return fmt.Errorf("error making backend binary executable: %w", err)
+	}
+
+	logger.Log("Backend binary copied and made executable successfully.")
+	return nil
+}
+
+func startAndVerifyProcess(executor *ssh.SSHExecutor, request *DeployRequest, config *Config, logger *Logger) error {
+	// Kill any process running on port 8080
+	killCmd := "pkill -f :\\8080 || true"
+	if _, err := executor.ExecuteCommand(killCmd); err != nil {
+		logger.Logf("Warning: error killing existing process on port 8080: %v", err)
+	}
+
+	// Start the binary
+	startCmd := fmt.Sprintf("cd /home/%s && nohup ./%s > /dev/null 2>&1 &", request.SSHUser, config.BinaryFileName)
+	if _, err := executor.ExecuteCommand(startCmd); err != nil {
+		return fmt.Errorf("error starting process: %w", err)
+	}
+
+	logger.Log("Process is running and listening on port")
+	return nil
+}
+
+func testWebSocketConnection(url string, timeout time.Duration, logger *Logger) error {
 	logger.Logf("Attempting to connect to WebSocket test endpoint at %s", url)
 
 	dialer := websocket.Dialer{
-		HandshakeTimeout: 10 * time.Second,
+		HandshakeTimeout: timeout,
 	}
 
 	conn, resp, err := dialer.Dial(url, nil)
@@ -207,7 +217,7 @@ func testWebSocketConnection(url string, logger *Logger) error {
 		if resp != nil {
 			logger.Logf("WebSocket handshake failed. Status code: %d", resp.StatusCode)
 		}
-		return fmt.Errorf("failed to connect to WebSocket: %v", err)
+		return fmt.Errorf("failed to connect to WebSocket: %w", err)
 	}
 	defer conn.Close()
 
