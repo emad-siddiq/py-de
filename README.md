@@ -5,6 +5,10 @@
 φ  works by running a notebook on your local machine and connecting it to any backend compute using websockets.
 
 φ offers complete integration with state of the art LLMs to enhance the developer experience.
+<img width="1726" alt="Screenshot 2025-01-28 at 3 30 54 PM" src="https://github.com/user-attachments/assets/266fee5c-5413-49be-9078-0a2ff8a04a69" />
+<img width="1724" alt="Screenshot 2025-01-28 at 3 30 19 PM" src="https://github.com/user-attachments/assets/3671f459-a872-45d4-a118-64789e933ae4" />
+
+
 
 
 1. Run the application by running the Go binary. 
